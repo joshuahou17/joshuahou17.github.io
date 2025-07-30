@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar Peek - Smart Calendar Integration for Chrome</title>
-    <meta name="description" content="Calendar Peek seamlessly integrates your Google Calendar into Chrome, providing smart scheduling insights and productivity tools.">
+    <title>Calendar Peek - Export Available Dates to Email</title>
+    <meta name="description" content="Instantly export your available calendar dates to email with Calendar Peek. Clean, simple, powerful.">
     
     <!-- Google OAuth Compliance -->
     <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
     <meta name="google-signin-scope" content="https://www.googleapis.com/auth/calendar.readonly">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="Calendar Peek - Smart Calendar Integration">
-    <meta property="og:description" content="Seamlessly integrate your Google Calendar into Chrome with smart scheduling insights.">
+    <meta property="og:title" content="Calendar Peek - Export Available Dates to Email">
+    <meta property="og:description" content="Instantly export your available calendar dates to email.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://joshhou.com/calendar-peek">
     <meta property="og:image" content="https://joshhou.com/calendar-peek/assets/calendar-peek-logo.svg">
@@ -29,6 +29,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Background Gradient -->
+    <div class="background-gradient"></div>
+    
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -37,16 +40,10 @@
                 <span class="logo-text">Calendar Peek</span>
             </div>
             <div class="nav-links">
-                <a href="#features">Features</a>
                 <a href="#how-it-works">How it Works</a>
-                <a href="#privacy">Privacy</a>
-                <a href="#install" class="cta-button">Install Extension</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="#install" class="cta-button">Install</a>
             </div>
-            <button class="mobile-menu-toggle" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </nav>
 
@@ -55,109 +52,33 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    Your Calendar, <span class="gradient-text">Smarter</span>
+                    Export Available Dates<br>
+                    <span class="gradient-text">to Email</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Seamlessly integrate your Google Calendar into Chrome. Get smart scheduling insights, 
-                    quick event creation, and productivity tools that work where you work.
+                    One click. Your available calendar dates instantly formatted and sent to your email. 
+                    Perfect for scheduling meetings, planning events, or sharing availability.
                 </p>
                 <div class="hero-actions">
                     <a href="#install" class="primary-button">
-                        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                        Install for Chrome
+                        Install Extension
                     </a>
-                    <a href="#demo" class="secondary-button">Watch Demo</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number">10K+</span>
-                        <span class="stat-label">Active Users</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">4.8★</span>
-                        <span class="stat-label">Chrome Store Rating</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">100%</span>
-                        <span class="stat-label">Privacy Focused</span>
-                    </div>
                 </div>
             </div>
             <div class="hero-visual">
-                <img src="assets/screenshots/hero-mockup.png" alt="Calendar Peek in action" class="hero-image">
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Why Calendar Peek?</h2>
-                <p>Built for modern productivity with privacy at its core</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                        </svg>
+                <div class="demo-card">
+                    <div class="demo-header">
+                        <div class="demo-dot"></div>
+                        <div class="demo-dot"></div>
+                        <div class="demo-dot"></div>
                     </div>
-                    <h3>Smart Integration</h3>
-                    <p>View your calendar events directly in Chrome without switching tabs. 
-                    Get contextual insights based on your browsing patterns.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
+                    <div class="demo-content">
+                        <div class="demo-line"></div>
+                        <div class="demo-line short"></div>
+                        <div class="demo-line"></div>
+                        <div class="demo-line short"></div>
+                        <div class="demo-line"></div>
                     </div>
-                    <h3>Quick Actions</h3>
-                    <p>Create events, set reminders, and manage your schedule with just a few clicks. 
-                    No need to navigate away from your current work.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
-                        </svg>
-                    </div>
-                    <h3>Privacy First</h3>
-                    <p>Your calendar data never leaves your device. We use Google's secure OAuth 
-                    and process everything locally for maximum privacy.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.5 2.54l2.6 1.53c.56-1.24.9-2.62.9-4.07 0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V2.05c-5.06.5-9 4.76-9 9.95 0 5.52 4.47 10 9.99 10 3.31 0 6.24-1.61 8.06-4.09l-2.6-1.53C16.17 17.98 14.21 19 12 19z"/>
-                        </svg>
-                    </div>
-                    <h3>Smart Notifications</h3>
-                    <p>Get intelligent reminders that adapt to your work patterns. 
-                    Never miss important meetings or deadlines again.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                    </div>
-                    <h3>Beautiful Design</h3>
-                    <p>Clean, modern interface that feels native to Chrome. 
-                    Minimalist design that doesn't distract from your work.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                    </div>
-                    <h3>Offline Ready</h3>
-                    <p>Access your calendar even when you're offline. 
-                    All your data is cached locally for reliable access.</p>
                 </div>
             </div>
         </div>
@@ -166,30 +87,26 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
         <div class="container">
-            <div class="section-header">
-                <h2>How It Works</h2>
-                <p>Get started in minutes with secure Google OAuth integration</p>
-            </div>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>Install the Extension</h3>
-                        <p>Add Calendar Peek to Chrome from the Chrome Web Store with one click</p>
+                        <h3>Select Dates</h3>
+                        <p>Choose the date range you want to check for availability</p>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h3>Connect Your Calendar</h3>
-                        <p>Securely authorize access to your Google Calendar using OAuth 2.0</p>
+                        <h3>Click Export</h3>
+                        <p>One click exports your available dates to email</p>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>Start Using</h3>
-                        <p>View your calendar, create events, and get smart insights directly in Chrome</p>
+                        <h3>Share</h3>
+                        <p>Forward the email or copy the formatted dates</p>
                     </div>
                 </div>
             </div>
@@ -200,16 +117,12 @@
     <section id="install" class="install">
         <div class="container">
             <div class="install-content">
-                <h2>Ready to Get Started?</h2>
-                <p>Join thousands of users who have transformed their productivity with Calendar Peek</p>
+                <h2>Ready to Export?</h2>
                 <a href="https://chrome.google.com/webstore/detail/calendar-peek/YOUR_EXTENSION_ID" 
                    class="primary-button large" target="_blank" rel="noopener">
-                    <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
                     Install Calendar Peek
                 </a>
-                <p class="install-note">Free • No credit card required • 30-second setup</p>
+                <p class="install-note">Free • 30-second setup</p>
             </div>
         </div>
     </section>
@@ -223,34 +136,24 @@
                         <img src="assets/calendar-peek-logo.svg" alt="Calendar Peek" class="logo">
                         <span class="logo-text">Calendar Peek</span>
                     </div>
-                    <p>Smart calendar integration for modern productivity</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Product</h4>
-                    <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#how-it-works">How it Works</a></li>
-                        <li><a href="#install">Install</a></li>
-                    </ul>
+                    <p>Export available dates to email</p>
                 </div>
                 <div class="footer-section">
                     <h4>Legal</h4>
                     <ul>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="privacy.html">Privacy</a></li>
+                        <li><a href="terms.html">Terms</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
-                        <li><a href="mailto:support@joshhou.com">Contact Us</a></li>
-                        <li><a href="https://github.com/joshhou/calendar-peek" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="mailto:support@joshhou.com">Contact</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Calendar Peek. All rights reserved.</p>
-                <p>Made with ❤️ for productivity</p>
+                <p>&copy; 2024 Calendar Peek</p>
             </div>
         </div>
     </footer>

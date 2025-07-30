@@ -1,15 +1,15 @@
 # Calendar Peek Landing Site
 
-A modern, production-ready landing page for the Calendar Peek Chrome extension, featuring Apple-like minimalism and Google OAuth compliance.
+An ultra-minimalistic, production-ready landing page for the Calendar Peek Chrome extension. Features a stunning animated gradient background and laser-focused messaging on the core value proposition: **exporting available calendar dates to email**.
 
 ## 🚀 Features
 
-- **Modern Design**: Clean, Apple-inspired minimalist design
+- **Ultra-Minimalistic Design**: Clean, edgy design with animated gradient background
+- **Laser-Focused Messaging**: Immediately communicates the core value proposition
 - **Google OAuth Ready**: Compliant with 2025 Google OAuth requirements
 - **Fully Responsive**: Optimized for all devices and screen sizes
-- **Accessibility**: WCAG 2.1 AA compliant with keyboard navigation
-- **Performance**: Optimized for fast loading and smooth animations
-- **SEO Ready**: Proper meta tags, Open Graph, and structured data
+- **Performance Optimized**: Fast loading with minimal JavaScript
+- **SEO Ready**: Proper meta tags and structured data
 
 ## 📁 Project Structure
 
@@ -19,9 +19,9 @@ calendar-peek/
 ├── privacy.html            # Privacy policy (OAuth compliant)
 ├── terms.html              # Terms of service
 ├── css/
-│   └── styles.css          # Modern Apple-like styling
+│   └── styles.css          # Ultra-minimalistic styling
 ├── js/
-│   └── main.js             # Interactive functionality
+│   └── main.js             # Essential functionality
 ├── assets/
 │   ├── calendar-peek-logo.svg    # Brand logo
 │   └── screenshots/
@@ -31,18 +31,18 @@ calendar-peek/
 
 ## 🎨 Design Features
 
+- **Animated Gradient Background**: Stunning multi-color gradient that shifts continuously
+- **Glass Morphism**: Translucent elements with backdrop blur effects
 - **Typography**: Inter font family for modern readability
-- **Color Scheme**: Apple-inspired blue gradient (#007AFF to #5856D6)
-- **Animations**: Smooth scroll animations and hover effects
-- **Layout**: CSS Grid and Flexbox for responsive design
-- **Shadows**: Subtle depth with layered shadow system
+- **Color Scheme**: White text on dark gradient with gold accents
+- **Minimal Content**: Focused on the single core feature
 
 ## 🔧 Technical Features
 
 - **Vanilla JavaScript**: No dependencies, fast loading
 - **CSS Custom Properties**: Easy theming and maintenance
 - **Intersection Observer**: Performance-optimized animations
-- **Service Worker Ready**: PWA capabilities included
+- **Debounced Scroll Events**: Smooth performance
 - **Analytics Ready**: Google Analytics integration prepared
 
 ## 📱 Responsive Breakpoints
@@ -126,7 +126,7 @@ calendar-peek/
 - [ ] **Performance** (Lighthouse score > 90)
 - [ ] **SEO** (meta tags, structured data)
 - [ ] **Links and navigation** (all internal/external links work)
-- [ ] **Forms and interactions** (if any)
+- [ ] **Gradient animation** (smooth on all devices)
 - [ ] **Print styles** (print-friendly layout)
 
 ## 🚀 Deployment
@@ -186,4 +186,4 @@ This landing site is created for Calendar Peek extension. All rights reserved.
 
 ---
 
-**Made with ❤️ for productivity** 
+**Made with ❤️ for simplicity** 
