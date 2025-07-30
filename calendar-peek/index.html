@@ -26,11 +26,18 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Background Gradient -->
+    <!-- Background Elements -->
     <div class="background-gradient"></div>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
     
     <!-- Navigation -->
     <nav class="navbar">
@@ -52,33 +59,15 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    Export Available Dates<br>
-                    <span class="gradient-text">to Email</span>
+                    Calendar<br>
+                    <span class="gradient-text">Peek</span>
                 </h1>
                 <p class="hero-subtitle">
-                    One click. Your available calendar dates instantly formatted and sent to your email. 
-                    Perfect for scheduling meetings, planning events, or sharing availability.
+                    Export your available calendar dates to email with one click
                 </p>
-                <div class="hero-actions">
-                    <a href="#install" class="primary-button">
-                        Install Extension
-                    </a>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="demo-card">
-                    <div class="demo-header">
-                        <div class="demo-dot"></div>
-                        <div class="demo-dot"></div>
-                        <div class="demo-dot"></div>
-                    </div>
-                    <div class="demo-content">
-                        <div class="demo-line"></div>
-                        <div class="demo-line short"></div>
-                        <div class="demo-line"></div>
-                        <div class="demo-line short"></div>
-                        <div class="demo-line"></div>
-                    </div>
+                <div class="scroll-indicator">
+                    <div class="scroll-arrow"></div>
+                    <span>Scroll to explore</span>
                 </div>
             </div>
         </div>
@@ -87,27 +76,58 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
         <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Simple. Powerful. Instant.</p>
+            </div>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>Select Dates</h3>
-                        <p>Choose the date range you want to check for availability</p>
+                        <h3>Select Your Dates</h3>
+                        <p>Choose the date range you want to check for availability in your Google Calendar</p>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
                         <h3>Click Export</h3>
-                        <p>One click exports your available dates to email</p>
+                        <p>One click instantly formats and sends your available dates to your email</p>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>Share</h3>
-                        <p>Forward the email or copy the formatted dates</p>
+                        <h3>Share & Schedule</h3>
+                        <p>Forward the email or copy the formatted dates to share with others</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Calendar Peek?</h2>
+                <p>Built for the modern professional</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Export available dates in seconds, not minutes</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>Your calendar data never leaves your device</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Perfect Format</h3>
+                    <p>Clean, professional formatting ready to share</p>
                 </div>
             </div>
         </div>
@@ -118,11 +138,12 @@
         <div class="container">
             <div class="install-content">
                 <h2>Ready to Export?</h2>
+                <p>Join thousands of professionals who save time with Calendar Peek</p>
                 <a href="https://chrome.google.com/webstore/detail/calendar-peek/YOUR_EXTENSION_ID" 
                    class="primary-button large" target="_blank" rel="noopener">
                     Install Calendar Peek
                 </a>
-                <p class="install-note">Free • 30-second setup</p>
+                <p class="install-note">Free • 30-second setup • No credit card required</p>
             </div>
         </div>
     </section>
