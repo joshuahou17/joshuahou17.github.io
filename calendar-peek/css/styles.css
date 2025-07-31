@@ -180,6 +180,12 @@ a:hover {
     justify-content: center;
     align-items: center;
     padding: var(--spacing-4) 0;
+    transform: translateY(-100%);
+    transition: transform var(--transition-normal);
+}
+
+.centered-nav.visible {
+    transform: translateY(0);
 }
 
 .nav-links {
