@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split – Effortless Receipt Splitting by Joshua Hou</title>
+    <meta name="description" content="Lightning-fast receipt splitting app. From group brunch to late-night pizza, Split makes paying your share painless.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Split – Effortless Receipt Splitting">
+    <meta property="og:description" content="Lightning-fast receipt splitting app. Snap, assign, get paid.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://joshhou.com/split">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sky-blue: #8AD8FF;
+            --coral: #FF9580;
+            --lime: #A5F27C;
+            --lavender: #D4A5FF;
+            --peach: #FFB5A7;
+            --mint: #98D8C8;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #EEEEEE;
+            --gray-300: #E0E0E0;
+            --gray-400: #BDBDBD;
+            --gray-500: #9E9E9E;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
+            
+            --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            --font-size-6xl: 3.75rem;
+            --font-size-7xl: 4.5rem;
+            --font-size-8xl: 6rem;
+            --font-size-9xl: 8rem;
+            
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+            --spacing-24: 6rem;
+            --spacing-32: 8rem;
+            --spacing-40: 10rem;
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Background Gradient */
+        .hero-gradient {
+            background: linear-gradient(135deg, 
+                var(--sky-blue) 0%, 
+                var(--coral) 25%, 
+                var(--lime) 50%, 
+                var(--lavender) 75%, 
+                var(--peach) 100%);
+            opacity: 0.1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: var(--spacing-4);
+        }
+
+        h1 { font-size: var(--font-size-8xl); }
+        h2 { font-size: var(--font-size-5xl); }
+        h3 { font-size: var(--font-size-xl); }
+
+        p {
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-700);
+            font-weight: 300;
+        }
+
+        /* Links */
+        a {
+            color: var(--coral);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--coral);
+            opacity: 0.8;
+        }
+
+        /* Buttons */
+        .primary-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-4) var(--spacing-8);
+            background: linear-gradient(135deg, var(--coral), var(--peach));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .primary-button.large {
+            padding: var(--spacing-5) var(--spacing-10);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            transition: all var(--transition-normal);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4) var(--spacing-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-8);
+        }
+
+        .nav-links a {
+            color: var(--gray-700);
+            font-weight: 400;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            color: var(--coral);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: var(--spacing-40) 0 var(--spacing-32);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-8);
+        }
+
+        .hero-title {
+            font-size: var(--font-size-8xl);
+            font-weight: 700;
+            line-height: 0.9;
+            margin-bottom: var(--spacing-6);
+            color: var(--black);
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+            font-weight: 300;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .section-header h2 {
+            font-size: var(--font-size-5xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-4);
+            color: var(--black);
+        }
+
+        .section-header p {
+            font-size: var(--font-size-lg);
+            color: var(--gray-600);
+            font-weight: 300;
+        }
+
+        /* Flow Section */
+        .flow {
+            padding: var(--spacing-32) 0;
+            background: var(--gray-50);
+        }
+
+        .flow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-12);
+        }
+
+        .flow-step {
+            text-align: center;
+            padding: var(--spacing-8);
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .flow-step:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .flow-icon {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .flow-step h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+            color: var(--black);
+        }
+
+        .flow-step p {
+            color: var(--gray-600);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--spacing-32) 0;
+            background: var(--white);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-8);
+        }
+
+        .feature-card {
+            padding: var(--spacing-8);
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--gray-100);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--coral);
+        }
+
+        .feature-icon {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .feature-card h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-3);
+            color: var(--black);
+        }
+
+        .feature-card p {
+            color: var(--gray-600);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Screenshots Section */
+        .screenshots {
+            padding: var(--spacing-32) 0;
+            background: var(--gray-50);
+        }
+
+        .carousel {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-8);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-placeholder {
+            color: var(--gray-500);
+            font-size: var(--font-size-lg);
+            font-weight: 300;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: var(--spacing-32) 0;
+            background: var(--white);
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: var(--spacing-4);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            background: var(--gray-50);
+            padding: var(--spacing-6);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--black);
+            transition: background-color var(--transition-fast);
+        }
+
+        .faq-question:hover {
+            background: var(--gray-100);
+        }
+
+        .faq-answer {
+            padding: var(--spacing-6);
+            color: var(--gray-600);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* Install Section */
+        .install {
+            padding: var(--spacing-32) 0;
+            background: linear-gradient(135deg, var(--sky-blue), var(--coral));
+            text-align: center;
+        }
+
+        .install-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .install-content h2 {
+            font-size: var(--font-size-5xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-4);
+            color: var(--white);
+        }
+
+        .install-content p {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-8);
+            color: var(--white);
+            font-weight: 300;
+        }
+
+        .install-note {
+            font-size: var(--font-size-sm);
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: var(--spacing-4);
+            font-weight: 300;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-16) 0 var(--spacing-8);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-12);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .footer-section h4 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-4);
+            color: var(--white);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: var(--spacing-2);
+        }
+
+        .footer-section ul li a {
+            color: rgba(255, 255, 255, 0.7);
+            transition: color var(--transition-fast);
+            font-weight: 300;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: var(--spacing-8);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: var(--font-size-sm);
+            font-weight: 300;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: var(--font-size-6xl);
+            }
+            
+            .hero-subtitle {
+                font-size: var(--font-size-lg);
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .flow-steps {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 var(--spacing-4);
+            }
+            
+            .hero {
+                padding: var(--spacing-24) 0 var(--spacing-16);
+            }
+            
+            .hero-title {
+                font-size: var(--font-size-5xl);
+            }
+            
+            .install-content h2 {
+                font-size: var(--font-size-4xl);
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--coral);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Gradient -->
+    <div class="hero-gradient"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                🍕 Split
+            </div>
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#download">Download</a>
+                <a href="https://github.com/joshuahou17/split" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Split the bill.<br>Share the fun.</h1>
+                <p class="hero-subtitle">
+                    From group brunch to late-night pizza, Split makes paying your share painless.
+                </p>
+                <a href="#download" class="primary-button large">
+                    Download on TestFlight
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Receipt-to-Split Flow -->
+    <section id="about" class="flow">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Three simple steps to split any bill</p>
+            </div>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-icon">📸</div>
+                    <h3>Snap</h3>
+                    <p>Take a photo of your receipt and let our AI do the work</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">👥</div>
+                    <h3>Assign</h3>
+                    <p>Tap to assign items to friends with one-tap simplicity</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon">💳</div>
+                    <h3>Get Paid</h3>
+                    <p>Send payment links that work with Venmo, Apple Pay, and more</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Split?</h2>
+                <p>Built for real-world group dining</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Auto-OCR Receipts</h3>
+                    <p>Our AI reads receipts instantly, no manual typing required</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>One-Tap Assignment</h3>
+                    <p>Assign items to friends with a single tap, lightning fast</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧮</div>
+                    <h3>Smart Tax & Tip</h3>
+                    <p>Automatically calculates tax, tip, and splits everything fairly</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Universal Pay Links</h3>
+                    <p>Works with Venmo, Apple Pay, Cash App, and more</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Payment Tracking</h3>
+                    <p>Track who's paid and send friendly reminders</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Privacy-First</h3>
+                    <p>All processing happens on your device, your data stays private</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Carousel -->
+    <section class="screenshots">
+        <div class="container">
+            <div class="section-header">
+                <h2>See Split in Action</h2>
+                <p>Watch how easy receipt splitting can be</p>
+            </div>
+            <div class="carousel" id="carousel">
+                <!-- TODO: Insert animated GIF or PNG sequence here -->
+                <div class="carousel-placeholder">
+                    📱 Screenshots coming soon!<br>
+                    <small>Insert animated demo GIF or screenshot carousel here</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+                <p>Everything you need to know about Split</p>
+            </div>
+            <div class="faq-grid">
+                <details class="faq-item">
+                    <summary class="faq-question">How accurate is the receipt scanning?</summary>
+                    <div class="faq-answer">
+                        Our AI is trained on millions of receipts and achieves 95%+ accuracy. For any items it misses, you can easily add them manually.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question">What payment methods are supported?</summary>
+                    <div class="faq-answer">
+                        Split works with Venmo, Apple Pay, Cash App, PayPal, and most major payment platforms. We'll generate the right link for each person.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question">Is my data private?</summary>
+                    <div class="faq-answer">
+                        Yes! All receipt processing happens on your device. We never see your receipts or personal information.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question">Can I split bills with people who don't have the app?</summary>
+                    <div class="faq-answer">
+                        Absolutely! They'll receive a payment link that works with their preferred payment method, no app required.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary class="faq-question">When will Split be available?</summary>
+                    <div class="faq-answer">
+                        Split is currently in beta testing. Join our TestFlight to try it early and help us make it perfect!
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Install Section -->
+    <section id="download" class="install">
+        <div class="container">
+            <div class="install-content">
+                <h2>Ready to Split?</h2>
+                <p>Join thousands of friends who never fight about bills again</p>
+                <a href="https://testflight.apple.com/join/YOUR_INVITE_CODE" 
+                   class="primary-button large" target="_blank" rel="noopener">
+                    Download on TestFlight
+                </a>
+                <p class="install-note">Free • iOS 15+ • No credit card required</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Split</h4>
+                    <p>Making group dining painless, one receipt at a time.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="https://github.com/joshuahou17/split">GitHub</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:support@joshhou.com">Contact</a></li>
+                        <li><a href="https://twitter.com/macrohou">Twitter</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Joshua Hou</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Split Landing Site JavaScript
+        console.log('🍕 Split loaded successfully!');
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const details = this.parentElement;
+                const isOpen = details.hasAttribute('open');
+                
+                // Close all other FAQ items
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.removeAttribute('open');
+                });
+                
+                // Open this item if it wasn't open
+                if (!isOpen) {
+                    details.setAttribute('open', '');
+                }
+            });
+        });
+
+        // Welcome message
+        console.log('🚀 Ready to split some bills!');
+    </script>
+</body>
+</html> 
