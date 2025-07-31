@@ -827,7 +827,8 @@
 
         // FAQ accordion functionality
         document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', function() {
+            question.addEventListener('click', function(e) {
+                e.preventDefault();
                 const details = this.parentElement;
                 const isOpen = details.hasAttribute('open');
                 
