@@ -424,6 +424,7 @@
             border: 1px solid var(--gray-200);
             border-radius: var(--radius-lg);
             overflow: hidden;
+            transition: all var(--transition-normal);
         }
 
         .faq-question {
@@ -433,6 +434,7 @@
             font-weight: 600;
             color: var(--black);
             transition: background-color var(--transition-fast);
+            user-select: none;
         }
 
         .faq-question:hover {
@@ -444,6 +446,7 @@
             color: var(--gray-600);
             line-height: 1.6;
             font-weight: 300;
+            transition: all var(--transition-normal);
         }
 
         /* Install Section */
@@ -826,20 +829,24 @@
         });
 
         // FAQ accordion functionality
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', function(e) {
+        document.querySelectorAll('.faq-item').forEach(item => {
+            const summary = item.querySelector('.faq-question');
+            
+            summary.addEventListener('click', function(e) {
                 e.preventDefault();
-                const details = this.parentElement;
-                const isOpen = details.hasAttribute('open');
                 
                 // Close all other FAQ items
-                document.querySelectorAll('.faq-item').forEach(item => {
-                    item.removeAttribute('open');
+                document.querySelectorAll('.faq-item').forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.removeAttribute('open');
+                    }
                 });
                 
-                // Open this item if it wasn't open
-                if (!isOpen) {
-                    details.setAttribute('open', '');
+                // Toggle current item
+                if (item.hasAttribute('open')) {
+                    item.removeAttribute('open');
+                } else {
+                    item.setAttribute('open', '');
                 }
             });
         });
