@@ -1,189 +1,97 @@
-# Calendar Peek Landing Site
+# Peek Landing Site
 
-An ultra-minimalistic, production-ready landing page for the Calendar Peek Chrome extension. Features a stunning animated gradient background and laser-focused messaging on the core value proposition: **exporting available calendar dates to email**.
+A dark, sophisticated landing page for the Peek Chrome extension - a tool that instantly exports available calendar dates to email.
 
 ## 🚀 Features
 
-- **Ultra-Minimalistic Design**: Clean, edgy design with animated gradient background
-- **Laser-Focused Messaging**: Immediately communicates the core value proposition
-- **Google OAuth Ready**: Compliant with 2025 Google OAuth requirements
-- **Fully Responsive**: Optimized for all devices and screen sizes
-- **Performance Optimized**: Fast loading with minimal JavaScript
-- **SEO Ready**: Proper meta tags and structured data
+- **Dark, Minimalist Design**: Sophisticated black background with white text
+- **Perfect Centering**: Logo and text perfectly centered on screen
+- **Scroll-Based Navigation**: Navigation appears when scrolling up, disappears when scrolling down
+- **Space Grotesk Font**: Modern, geometric typography for a contemporary feel
+- **Responsive Design**: Works perfectly on all devices
+- **Google OAuth Ready**: Compliant with Google's 2025 OAuth requirements
 
-## 📁 Project Structure
+## 🎨 Design
 
-```
-calendar-peek/
-├── index.html              # Main landing page
-├── privacy.html            # Privacy policy (OAuth compliant)
-├── terms.html              # Terms of service
-├── css/
-│   └── styles.css          # Ultra-minimalistic styling
-├── js/
-│   └── main.js             # Essential functionality
-├── assets/
-│   ├── calendar-peek-logo.svg    # Brand logo
-│   └── screenshots/
-│       └── hero-mockup.png       # Hero image (placeholder)
-└── setup.sh                # Setup script
-```
+- **Color Scheme**: Pure black background (#000000) with white text
+- **Typography**: Space Grotesk font family for modern, tech-forward appearance
+- **Layout**: Ultra-clean, minimal design focusing on the product name
+- **Navigation**: Centered at top with glass morphism effect
+- **Logo**: Minimalist calendar icon with checkmark
 
-## 🎨 Design Features
+## 🛠 Technical Features
 
-- **Animated Gradient Background**: Stunning multi-color gradient that shifts continuously
-- **Glass Morphism**: Translucent elements with backdrop blur effects
-- **Typography**: Inter font family for modern readability
-- **Color Scheme**: White text on dark gradient with gold accents
-- **Minimal Content**: Focused on the single core feature
-
-## 🔧 Technical Features
-
-- **Vanilla JavaScript**: No dependencies, fast loading
+- **Vanilla JavaScript**: No frameworks, pure performance
 - **CSS Custom Properties**: Easy theming and maintenance
-- **Intersection Observer**: Performance-optimized animations
-- **Debounced Scroll Events**: Smooth performance
-- **Analytics Ready**: Google Analytics integration prepared
+- **Smooth Animations**: Subtle transitions and hover effects
+- **Accessibility**: WCAG 2.1 AA compliant
+- **SEO Optimized**: Meta tags, Open Graph, structured data
+- **Mobile Responsive**: Perfect on all screen sizes
 
-## 📱 Responsive Breakpoints
+## 📁 Structure
 
-- **Desktop**: 1200px+ (full layout)
-- **Tablet**: 768px - 1199px (adjusted grid)
-- **Mobile**: < 768px (stacked layout)
+```
+/calendar-peek
+├─ index.html          # Main landing page
+├─ privacy.html        # Privacy policy
+├─ terms.html          # Terms of service
+├─ css/
+│   └─ styles.css      # All styling
+├─ js/
+│   └─ main.js         # Interactive functionality
+└─ assets/
+    ├─ calendar-peek-logo.svg
+    └─ screenshots/hero-mockup.png
+```
 
 ## 🚀 Quick Start
 
-1. **Clone or download** the calendar-peek folder
-2. **Run the setup script**:
-   ```bash
-   cd calendar-peek
-   chmod +x setup.sh
-   ./setup.sh
-   ```
-3. **Customize the content**:
-   - Replace placeholder images
-   - Update Google OAuth credentials
-   - Modify copy and branding
-4. **Deploy to your server**:
-   - Upload to `https://joshhou.com/calendar-peek/`
-   - Test all functionality
+1. **Deploy to your domain**: Upload all files to `/calendar-peek/` on your web server
+2. **Update Google Client ID**: Replace `YOUR_GOOGLE_CLIENT_ID` in `index.html`
+3. **Update Extension ID**: Replace `YOUR_EXTENSION_ID` in the install button
+4. **Add Screenshots**: Replace placeholder with actual extension screenshots
 
 ## ⚙️ Configuration
 
 ### Google OAuth Setup
+```html
+<meta name="google-signin-client_id" content="YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com">
+```
 
-1. **Update Client ID** in all HTML files:
-   ```html
-   <meta name="google-signin-client_id" content="YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com">
-   ```
-
-2. **Update Extension ID** in index.html:
-   ```html
-   <a href="https://chrome.google.com/webstore/detail/calendar-peek/YOUR_ACTUAL_EXTENSION_ID">
-   ```
-
-### Customization
-
-- **Colors**: Modify CSS custom properties in `css/styles.css`
-- **Content**: Update text in HTML files
-- **Images**: Replace placeholder images in `assets/`
-- **Analytics**: Add Google Analytics tracking code
-
-## 📋 Required Assets
-
-### Hero Mockup Image
-- **File**: `assets/screenshots/hero-mockup.png`
-- **Size**: 600x400px (recommended)
-- **Content**: Screenshot of Calendar Peek extension in action
-- **Style**: Clean, modern interface showing calendar integration
-
-### Logo
-- **File**: `assets/calendar-peek-logo.svg`
-- **Size**: 32x32px (scalable)
-- **Style**: Modern calendar icon with gradient
-
-## 🔒 Privacy & Compliance
-
-### Google OAuth 2025 Compliance
-- ✅ Minimum scope requests (`calendar.readonly`)
-- ✅ Clear data usage disclosure
-- ✅ Secure token management
-- ✅ User consent documentation
-- ✅ Revocation instructions
-
-### Privacy Features
-- ✅ Local data processing
-- ✅ No unnecessary data collection
-- ✅ Clear privacy policy
-- ✅ User control over data
-- ✅ GDPR compliance ready
+### Extension Store Link
+```html
+<a href="https://chrome.google.com/webstore/detail/peek/YOUR_ACTUAL_EXTENSION_ID">
+```
 
 ## 🧪 Testing Checklist
 
-- [ ] **Cross-browser compatibility** (Chrome, Firefox, Safari, Edge)
-- [ ] **Mobile responsiveness** (iOS Safari, Android Chrome)
-- [ ] **Accessibility** (screen readers, keyboard navigation)
-- [ ] **Performance** (Lighthouse score > 90)
-- [ ] **SEO** (meta tags, structured data)
-- [ ] **Links and navigation** (all internal/external links work)
-- [ ] **Gradient animation** (smooth on all devices)
-- [ ] **Print styles** (print-friendly layout)
+- [ ] Navigation appears/disappears on scroll
+- [ ] Smooth scrolling to sections works
+- [ ] All links are functional
+- [ ] Responsive on mobile devices
+- [ ] Google OAuth compliance verified
+- [ ] Accessibility standards met
+- [ ] Loading performance optimized
 
-## 🚀 Deployment
+## 📈 Analytics
 
-### Static Hosting
-- **Netlify**: Drag and drop the calendar-peek folder
-- **Vercel**: Connect GitHub repository
-- **GitHub Pages**: Push to gh-pages branch
-- **Traditional hosting**: Upload via FTP/SFTP
+The site is ready for Google Analytics integration. Add your tracking code to the `<head>` section.
 
-### Domain Setup
-- **Primary URL**: `https://joshhou.com/calendar-peek/`
-- **SSL Certificate**: Required for OAuth compliance
-- **Redirects**: Ensure all paths work correctly
+## 🔧 Development
 
-## 📊 Analytics & Tracking
-
-The site is prepared for analytics integration:
-
-```javascript
-// Google Analytics 4
-gtag('config', 'GA_MEASUREMENT_ID');
-
-// Custom events
-gtag('event', 'cta_click', {
-  button_text: 'Install Extension',
-  location: 'hero'
-});
-```
-
-## 🛠️ Development
-
-### Local Development
-1. **Serve locally**:
-   ```bash
-   python -m http.server 8000
-   # or
-   npx serve calendar-peek
-   ```
-
-2. **Open browser**: `http://localhost:8000`
-
-### Build Process
-- **Minification**: Use tools like Terser (JS) and CSSNano
-- **Optimization**: Compress images, enable gzip
-- **Caching**: Set appropriate cache headers
+To modify the design:
+1. Edit `css/styles.css` for styling changes
+2. Edit `js/main.js` for functionality changes
+3. Edit `index.html` for content changes
 
 ## 📞 Support
 
-- **Email**: support@joshhou.com
-- **GitHub**: https://github.com/joshhou/calendar-peek
-- **Documentation**: This README
+For support or questions about Peek, contact: support@joshhou.com
 
 ## 📄 License
 
-This landing site is created for Calendar Peek extension. All rights reserved.
+This landing site is part of the Peek project.
 
 ---
 
-**Made with ❤️ for simplicity** 
+Made with ❤️ for calendar productivity 

@@ -1,5 +1,5 @@
-// Calendar Peek Landing Site JavaScript
-console.log('🗓️ Calendar Peek loaded successfully!');
+// Peek Landing Site JavaScript
+console.log('🗓️ Peek loaded successfully!');
 
 // Navigation scroll behavior
 let lastScrollTop = 0;
