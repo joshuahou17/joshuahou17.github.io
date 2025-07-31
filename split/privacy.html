@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Split</title>
+    <meta name="description" content="Privacy Policy for Split - Your data stays private and secure.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sky-blue: #8AD8FF;
+            --coral: #FF9580;
+            --lime: #A5F27C;
+            --lavender: #D4A5FF;
+            --peach: #FFB5A7;
+            --mint: #98D8C8;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #EEEEEE;
+            --gray-300: #E0E0E0;
+            --gray-400: #BDBDBD;
+            --gray-500: #9E9E9E;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
+            
+            --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+            --spacing-24: 6rem;
+            --spacing-32: 8rem;
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Background Gradient */
+        .hero-gradient {
+            background: linear-gradient(135deg, 
+                var(--sky-blue) 0%, 
+                var(--coral) 25%, 
+                var(--lime) 50%, 
+                var(--lavender) 75%, 
+                var(--peach) 100%);
+            opacity: 0.1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: var(--spacing-4);
+        }
+
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-2xl); }
+        h3 { font-size: var(--font-size-xl); }
+
+        p {
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-700);
+            font-weight: 300;
+        }
+
+        /* Links */
+        a {
+            color: var(--coral);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--coral);
+            opacity: 0.8;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            transition: all var(--transition-normal);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4) var(--spacing-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-8);
+        }
+
+        .nav-links a {
+            color: var(--gray-700);
+            font-weight: 400;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            color: var(--coral);
+        }
+
+        /* Content */
+        .content {
+            padding: var(--spacing-32) 0 var(--spacing-16);
+            margin-top: 80px;
+        }
+
+        .legal-content {
+            background: var(--white);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+        }
+
+        .legal-content h2 {
+            color: var(--black);
+            margin-top: var(--spacing-8);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .legal-content p {
+            color: var(--gray-700);
+            line-height: 1.7;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content ul {
+            margin-left: var(--spacing-6);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content li {
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-2);
+            line-height: 1.6;
+        }
+
+        .legal-content strong {
+            color: var(--black);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-8) 0;
+            margin-top: var(--spacing-16);
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .container {
+                padding: 0 var(--spacing-4);
+            }
+            
+            .content {
+                padding: var(--spacing-24) 0 var(--spacing-12);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: var(--font-size-3xl); }
+            h2 { font-size: var(--font-size-xl); }
+            
+            .legal-content {
+                padding: var(--spacing-6);
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--coral);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Gradient -->
+    <div class="hero-gradient"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                🍕 Split
+            </div>
+            <div class="nav-links">
+                <a href="/split/">Back to Split</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="container">
+            <div class="legal-content">
+                <h1>Privacy Policy</h1>
+                <p><strong>Last updated:</strong> January 2025</p>
+                
+                <h2>Introduction</h2>
+                <p>At Split, we believe your privacy is fundamental. This Privacy Policy explains how we handle your information when you use our receipt splitting app. We're committed to transparency and protecting your data.</p>
+                
+                <h2>Information We Don't Collect</h2>
+                <p>This is the most important section: <strong>We don't collect, store, or process your personal information.</strong></p>
+                <ul>
+                    <li><strong>Receipt Photos:</strong> All receipt processing happens on your device using on-device AI. Your photos never leave your phone.</li>
+                    <li><strong>Personal Information:</strong> We don't collect names, email addresses, phone numbers, or any personal identifiers.</li>
+                    <li><strong>Payment Information:</strong> We don't handle payments directly. All payments go through your preferred payment platforms (Venmo, Apple Pay, etc.).</li>
+                    <li><strong>Location Data:</strong> We don't track your location or collect GPS data.</li>
+                    <li><strong>Usage Analytics:</strong> We don't track how you use the app or collect analytics data.</li>
+                </ul>
+                
+                <h2>How Split Works</h2>
+                <p>Split processes everything locally on your device:</p>
+                <ul>
+                    <li><strong>Receipt Scanning:</strong> Our AI runs entirely on your phone to read receipt text and extract items.</li>
+                    <li><strong>Bill Splitting:</strong> All calculations happen on your device - no server processing required.</li>
+                    <li><strong>Payment Links:</strong> We generate payment links that connect directly to payment platforms, bypassing our servers entirely.</li>
+                </ul>
+                
+                <h2>Third-Party Services</h2>
+                <p>Split integrates with payment platforms, but we don't control their privacy practices:</p>
+                <ul>
+                    <li><strong>Payment Platforms:</strong> When you use Venmo, Apple Pay, Cash App, or other payment services, their privacy policies apply.</li>
+                    <li><strong>App Store:</strong> Apple's App Store may collect basic usage data according to their privacy policy.</li>
+                </ul>
+                
+                <h2>Data Security</h2>
+                <p>Since we don't collect your data, there's nothing to secure on our end. However, we implement best practices:</p>
+                <ul>
+                    <li><strong>On-Device Processing:</strong> All sensitive operations happen locally on your device.</li>
+                    <li><strong>No Data Transmission:</strong> Your receipt photos and personal information never leave your phone.</li>
+                    <li><strong>Secure Payment Links:</strong> Payment links use industry-standard encryption.</li>
+                </ul>
+                
+                <h2>Children's Privacy</h2>
+                <p>Split is not intended for children under 13. We don't knowingly collect information from children under 13. If you're a parent and believe your child has provided us with information, please contact us.</p>
+                
+                <h2>Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time. We'll notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.</p>
+                
+                <h2>Contact Us</h2>
+                <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+                <p><strong>Email:</strong> <a href="mailto:support@joshhou.com">support@joshhou.com</a></p>
+                
+                <h2>Your Rights</h2>
+                <p>Since we don't collect your personal information, there's no data to access, modify, or delete. Your data stays on your device, under your control.</p>
+                
+                <p><strong>Remember:</strong> Your privacy is our priority. We built Split to be private by design - your data never leaves your device.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Joshua Hou. Split - Making group dining painless, one receipt at a time.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Split</title>
+    <meta name="description" content="Terms of Service for Split - Simple, fair terms for our users.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sky-blue: #8AD8FF;
+            --coral: #FF9580;
+            --lime: #A5F27C;
+            --lavender: #D4A5FF;
+            --peach: #FFB5A7;
+            --mint: #98D8C8;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #EEEEEE;
+            --gray-300: #E0E0E0;
+            --gray-400: #BDBDBD;
+            --gray-500: #9E9E9E;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
+            
+            --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+            --spacing-24: 6rem;
+            --spacing-32: 8rem;
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Background Gradient */
+        .hero-gradient {
+            background: linear-gradient(135deg, 
+                var(--sky-blue) 0%, 
+                var(--coral) 25%, 
+                var(--lime) 50%, 
+                var(--lavender) 75%, 
+                var(--peach) 100%);
+            opacity: 0.1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: var(--spacing-4);
+        }
+
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-2xl); }
+        h3 { font-size: var(--font-size-xl); }
+
+        p {
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-700);
+            font-weight: 300;
+        }
+
+        /* Links */
+        a {
+            color: var(--coral);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--coral);
+            opacity: 0.8;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            transition: all var(--transition-normal);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4) var(--spacing-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-8);
+        }
+
+        .nav-links a {
+            color: var(--gray-700);
+            font-weight: 400;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            color: var(--coral);
+        }
+
+        /* Content */
+        .content {
+            padding: var(--spacing-32) 0 var(--spacing-16);
+            margin-top: 80px;
+        }
+
+        .legal-content {
+            background: var(--white);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+        }
+
+        .legal-content h2 {
+            color: var(--black);
+            margin-top: var(--spacing-8);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .legal-content p {
+            color: var(--gray-700);
+            line-height: 1.7;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content ul {
+            margin-left: var(--spacing-6);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .legal-content li {
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-2);
+            line-height: 1.6;
+        }
+
+        .legal-content strong {
+            color: var(--black);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-8) 0;
+            margin-top: var(--spacing-16);
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .container {
+                padding: 0 var(--spacing-4);
+            }
+            
+            .content {
+                padding: var(--spacing-24) 0 var(--spacing-12);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: var(--font-size-3xl); }
+            h2 { font-size: var(--font-size-xl); }
+            
+            .legal-content {
+                padding: var(--spacing-6);
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--coral);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Gradient -->
+    <div class="hero-gradient"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                🍕 Split
+            </div>
+            <div class="nav-links">
+                <a href="/split/">Back to Split</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="container">
+            <div class="legal-content">
+                <h1>Terms of Service</h1>
+                <p><strong>Last updated:</strong> January 2025</p>
+                
+                <h2>Introduction</h2>
+                <p>Welcome to Split! These Terms of Service ("Terms") govern your use of our receipt splitting app. By using Split, you agree to these terms. If you don't agree, please don't use the app.</p>
+                
+                <h2>What Split Does</h2>
+                <p>Split is a mobile app that helps you split restaurant bills and other expenses with friends. It uses on-device AI to read receipts and generate payment links for various payment platforms.</p>
+                
+                <h2>Your Responsibilities</h2>
+                <p>When using Split, you agree to:</p>
+                <ul>
+                    <li><strong>Use the app responsibly:</strong> Only split legitimate expenses with people you know and trust.</li>
+                    <li><strong>Respect others:</strong> Don't use Split to harass, scam, or defraud anyone.</li>
+                    <li><strong>Follow laws:</strong> Comply with all applicable laws and regulations in your jurisdiction.</li>
+                    <li><strong>Pay your share:</strong> Honor your payment obligations when you receive payment requests.</li>
+                    <li><strong>Keep it legal:</strong> Don't use Split for illegal activities or transactions.</li>
+                </ul>
+                
+                <h2>What We Don't Do</h2>
+                <p>It's important to understand what Split doesn't do:</p>
+                <ul>
+                    <li><strong>We don't process payments:</strong> All payments go through third-party platforms like Venmo, Apple Pay, etc.</li>
+                    <li><strong>We don't guarantee payments:</strong> We can't force anyone to pay their share.</li>
+                    <li><strong>We don't mediate disputes:</strong> We don't get involved in payment disputes between users.</li>
+                    <li><strong>We don't store your data:</strong> All processing happens on your device.</li>
+                </ul>
+                
+                <h2>Payment Platforms</h2>
+                <p>Split integrates with payment platforms, but we don't control them:</p>
+                <ul>
+                    <li><strong>Third-party terms:</strong> When you use payment platforms, their terms of service apply.</li>
+                    <li><strong>Payment disputes:</strong> Disputes with payment platforms should be resolved with them directly.</li>
+                    <li><strong>Fees:</strong> Payment platforms may charge fees that we don't control.</li>
+                </ul>
+                
+                <h2>Intellectual Property</h2>
+                <p>Split and its content are owned by Joshua Hou. You can use the app as intended, but you can't:</p>
+                <ul>
+                    <li>Copy, modify, or distribute the app without permission</li>
+                    <li>Reverse engineer or attempt to extract source code</li>
+                    <li>Use our trademarks or branding without permission</li>
+                </ul>
+                
+                <h2>Disclaimers</h2>
+                <p>Split is provided "as is" without warranties:</p>
+                <ul>
+                    <li><strong>No guarantees:</strong> We don't guarantee the app will work perfectly or be error-free.</li>
+                    <li><strong>Accuracy:</strong> While our AI is accurate, receipt scanning isn't perfect.</li>
+                    <li><strong>Availability:</strong> The app may be unavailable due to maintenance or technical issues.</li>
+                    <li><strong>Third-party services:</strong> We don't control payment platforms or their reliability.</li>
+                </ul>
+                
+                <h2>Limitation of Liability</h2>
+                <p>To the extent permitted by law, Joshua Hou won't be liable for:</p>
+                <ul>
+                    <li>Indirect, incidental, or consequential damages</li>
+                    <li>Lost profits, data, or business opportunities</li>
+                    <li>Damages from payment disputes or fraud</li>
+                    <li>Issues with third-party payment platforms</li>
+                </ul>
+                
+                <h2>Privacy</h2>
+                <p>Your privacy is important to us. Please read our <a href="/split/privacy.html">Privacy Policy</a> to understand how we handle your information.</p>
+                
+                <h2>Changes to Terms</h2>
+                <p>We may update these terms from time to time. We'll notify you of significant changes by posting the new terms on this page and updating the "Last updated" date.</p>
+                
+                <h2>Termination</h2>
+                <p>You can stop using Split at any time. We may also terminate or suspend access to the app if you violate these terms.</p>
+                
+                <h2>Governing Law</h2>
+                <p>These terms are governed by the laws of the United States. Any disputes will be resolved in the courts of the United States.</p>
+                
+                <h2>Contact Us</h2>
+                <p>If you have questions about these terms, please contact us at:</p>
+                <p><strong>Email:</strong> <a href="mailto:support@joshhou.com">support@joshhou.com</a></p>
+                
+                <h2>Severability</h2>
+                <p>If any part of these terms is found to be unenforceable, the rest of the terms will remain in effect.</p>
+                
+                <p><strong>Thank you for using Split!</strong> We hope it makes splitting bills with friends a little easier.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Joshua Hou. Split - Making group dining painless, one receipt at a time.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
