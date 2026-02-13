@@ -150,6 +150,9 @@ def generate_post_html(digest_data, date_obj):
             quiet_message="",
             top_story_title=top_story["title"],
             top_story=top_story,
+            funding_rounds=digest_data.get("funding_rounds", []),
+            product_launches=digest_data.get("product_launches", []),
+            stealth_launches=digest_data.get("stealth_launches", []),
             sections=sections,
         )
 
@@ -182,6 +185,9 @@ def update_index(digest_data, date_obj):
             quiet_day=False,
             quiet_message="",
             top_story=digest_data["top_story"],
+            funding_rounds=digest_data.get("funding_rounds", []),
+            product_launches=digest_data.get("product_launches", []),
+            stealth_launches=digest_data.get("stealth_launches", []),
             sections=digest_data.get("sections", []),
         )
 
@@ -281,6 +287,16 @@ def send_resend_email(digest_data, date_obj):
         for article in top.get("articles", []):
             body += f'<p><a href="{article["url"]}">{article["title"]}</a> ({article["source"]})</p>\n'
         body += "<hr>\n"
+
+        # Bullet list sections
+        for label, key in [("💰 New Funding Rounds", "funding_rounds"), ("🚀 New Product Launches", "product_launches"), ("👀 Out of Stealth", "stealth_launches")]:
+            items = digest_data.get(key, [])
+            if items:
+                body += f"<h3>{label}</h3>\n<ul>\n"
+                for item in items:
+                    body += f'<li><a href="{item["url"]}">{item["text"]}</a></li>\n'
+                body += "</ul>\n"
+
         for section in digest_data.get("sections", []):
             body += f'<h3>{section["title"]}</h3>\n<p>{section["summary"]}</p>\n'
             for article in section.get("articles", []):

@@ -54,23 +54,45 @@ RSS_FEEDS = [
 ]
 
 # GPT-4o system prompt for curation
-SYSTEM_PROMPT = """You are a concise, opinionated tech news curator writing a daily briefing for a smart audience interested in AI and startups.
+SYSTEM_PROMPT = """You are a concise, opinionated tech news curator writing a daily briefing for someone in finance who cares deeply about the AI and startup ecosystem.
+
+PRIORITIES (in order of importance):
+- New funding rounds (who raised, how much, from whom, at what valuation if known)
+- New product launches and major feature releases
+- Companies coming out of stealth
+- Key opinion leader takes and hot takes (Sam Altman, Paul Graham, etc.)
+- Major partnerships, acquisitions, and hires
+- Policy and regulation that affects startups or AI
+
+DEPRIORITIZE: Generic opinion pieces, listicles, tutorials, rehashes of old news.
 
 Given a list of today's articles (title, source, summary), produce a structured daily digest:
 
-1. Pick the 8-12 most significant and interesting stories. Prioritize genuinely new developments over opinion pieces or rehashes.
-2. Identify the single biggest story of the day and label it "Top Story".
-3. Group the remaining stories into 3-5 thematic sections. Good section names: "AI Models & Research", "Funding & Deals", "Product Launches", "Policy & Regulation", "Industry Moves", "Open Source", "Worth Watching".
-4. For each section, write a 2-3 sentence summary that captures the key developments. Be direct and informative — no filler.
-5. For the Top Story, write a 3-4 sentence summary explaining why it matters.
+1. Identify the single biggest story of the day as "Top Story". Write a 3-4 sentence summary explaining why it matters.
+
+2. Create THREE specific bullet-point lists. Each item should be one concise line. If there are no items for a category today, return an empty list.
+   - "funding_rounds": New funding rounds. Format each as: "Company — $Amount Series X led by Investor (brief context)"
+   - "product_launches": New product launches, features, or releases. Format each as: "Company — Product/feature name (brief context)"
+   - "stealth_launches": Companies coming out of stealth or launching for the first time. Format each as: "Company — What they do (investors/founders if notable)"
+
+3. Group any remaining notable stories into 1-3 thematic sections (e.g., "Notable Takes", "Policy & Regulation", "Industry Moves", "Worth Watching"). Write a 2-3 sentence summary per section.
 
 Output valid JSON in this exact format:
 {
   "top_story": {
-    "title": "Section title",
+    "title": "Headline",
     "summary": "3-4 sentence summary",
     "articles": [{"title": "Article title", "url": "https://...", "source": "Source name"}]
   },
+  "funding_rounds": [
+    {"text": "Company — $50M Series B led by Sequoia (building AI infrastructure for healthcare)", "url": "https://...", "source": "Source name"}
+  ],
+  "product_launches": [
+    {"text": "OpenAI — GPT-5 released with improved reasoning (available to all API tiers)", "url": "https://...", "source": "Source name"}
+  ],
+  "stealth_launches": [
+    {"text": "Acme AI — AI-powered legal assistant out of stealth (founded by ex-Google engineers, $10M seed from a16z)", "url": "https://...", "source": "Source name"}
+  ],
   "sections": [
     {
       "title": "Section title",
@@ -135,7 +157,46 @@ POST_TEMPLATE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Sections -->
+        <!-- Funding Rounds -->
+        {% if funding_rounds %}
+        <div class="digest-card">
+            <span class="digest-card-label">💰 Funding</span>
+            <h3>New Funding Rounds</h3>
+            <ul class="digest-bullet-list">
+                {% for item in funding_rounds %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Product Launches -->
+        {% if product_launches %}
+        <div class="digest-card">
+            <span class="digest-card-label">🚀 Launches</span>
+            <h3>New Product Launches</h3>
+            <ul class="digest-bullet-list">
+                {% for item in product_launches %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Stealth / New Companies -->
+        {% if stealth_launches %}
+        <div class="digest-card">
+            <span class="digest-card-label">👀 Out of Stealth</span>
+            <h3>Companies Out of Stealth</h3>
+            <ul class="digest-bullet-list">
+                {% for item in stealth_launches %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Other Sections -->
         {% for section in sections %}
         <div class="digest-card">
             <h3>{{ section.title }}</h3>
@@ -176,6 +237,42 @@ INDEX_DIGEST_TEMPLATE = """
                 {% endfor %}
             </div>
         </div>
+
+        {% if funding_rounds %}
+        <div class="digest-card">
+            <span class="digest-card-label">💰 Funding</span>
+            <h3>New Funding Rounds</h3>
+            <ul class="digest-bullet-list">
+                {% for item in funding_rounds %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if product_launches %}
+        <div class="digest-card">
+            <span class="digest-card-label">🚀 Launches</span>
+            <h3>New Product Launches</h3>
+            <ul class="digest-bullet-list">
+                {% for item in product_launches %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if stealth_launches %}
+        <div class="digest-card">
+            <span class="digest-card-label">👀 Out of Stealth</span>
+            <h3>Companies Out of Stealth</h3>
+            <ul class="digest-bullet-list">
+                {% for item in stealth_launches %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
         {% for section in sections %}
         <div class="digest-card">
