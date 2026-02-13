@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Digest – AI & Startup News | Joshua Hou</title>
+    <meta name="description" content="A daily curated briefing on what's happening in AI and startups, powered by an autonomous agent.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Daily Digest – AI & Startup News">
+    <meta property="og:description" content="A daily curated briefing on what's happening in AI and startups.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://joshhou.com/digest">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <a href="/" class="nav-back">&larr; joshhou.com</a>
+    </nav>
+
+    <main class="container">
+        <!-- Hero -->
+        <header class="hero">
+            <h1 class="hero-title">Daily Digest</h1>
+            <p class="hero-subtitle">A curated briefing on AI and startups, generated every morning by an autonomous agent.</p>
+        </header>
+
+        <!-- Latest Digest (populated by generate_digest.py) -->
+        <section id="latest-digest" class="latest-digest">
+            <div class="digest-placeholder">
+                <p>The first digest will appear here once the agent runs. Check back soon.</p>
+            </div>
+        </section>
+
+        <!-- Archive -->
+        <section class="archive-section">
+            <h2 class="archive-heading">Archive</h2>
+            <ul id="archive-list" class="archive-list">
+                <!-- Populated by generate_digest.py when it regenerates this page -->
+                <li class="archive-empty">No digests yet. The first one is on its way.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Joshua Hou. Built with an autonomous agent, GPT-4o, and RSS feeds.</p>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
