@@ -10,7 +10,7 @@
  */
 
 const SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_hl2mvfwXvLILtYRqg15v3Q_sbI2dRNG';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
 
 let supabase = null;
 let readingPlan = null;
