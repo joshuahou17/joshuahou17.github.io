@@ -51,6 +51,16 @@ function setCurrentDay(day) {
     localStorage.setItem('bible_current_day', String(day));
 }
 
+// Get the user's personal date for a given day number
+// Day 1 = the date the user clicked Start
+function getUserDateForDay(dayNumber) {
+    const startDate = localStorage.getItem('bible_start_date');
+    if (!startDate) return null;
+    const d = new Date(startDate + 'T12:00:00');
+    d.setDate(d.getDate() + (dayNumber - 1));
+    return d;
+}
+
 // Load reading plan JSON
 async function loadReadingPlan() {
     if (readingPlan) return readingPlan;
@@ -77,13 +87,10 @@ function getWeekEntries(plan, week) {
 // --- Onboarding ---
 
 async function startPlan() {
-    const plan = await loadReadingPlan();
-    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
-    const todayEntry = plan ? plan.find(e => e.date === today) : null;
-    const startDay = todayEntry ? todayEntry.day_number : 1;
-
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
     localStorage.setItem('bible_started', 'true');
-    setCurrentDay(startDay);
+    localStorage.setItem('bible_start_date', today);
+    setCurrentDay(1);
     getUserId();
     renderPersonalizedView();
 }
@@ -121,7 +128,7 @@ async function renderPersonalizedView() {
 }
 
 function renderTodayCard(entry) {
-    const dateObj = new Date(entry.date + 'T12:00:00');
+    const dateObj = getUserDateForDay(entry.day_number) || new Date();
     const dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
 
     return `
@@ -181,7 +188,7 @@ async function renderArchive(plan) {
 
     let html = '';
     for (const entry of pastDays) {
-        const dateObj = new Date(entry.date + 'T12:00:00');
+        const dateObj = getUserDateForDay(entry.day_number) || new Date(entry.date + 'T12:00:00');
         const dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
 
         html += `<li><a href="/bible/posts/${entry.date}.html">
