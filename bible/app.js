@@ -1,13 +1,14 @@
 (function() {
 'use strict';
 
-const SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
+var SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
 
-let sb = null;
-let readingPlan = null;
+var sb = null;
+var readingPlan = null;
+var passageCache = {};
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function initSupabase() {
     try {
@@ -20,7 +21,7 @@ function initSupabase() {
 }
 
 function getUserId() {
-    let userId = localStorage.getItem('bible_user_id');
+    var userId = localStorage.getItem('bible_user_id');
     if (!userId) {
         userId = crypto.randomUUID();
         localStorage.setItem('bible_user_id', userId);
@@ -40,12 +41,10 @@ function setCurrentDay(day) {
     localStorage.setItem('bible_current_day', String(day));
 }
 
-// Get the user's personal date for a given day number
-// Day 1 = the date the user clicked Start
 function getUserDateForDay(dayNumber) {
-    const startDate = localStorage.getItem('bible_start_date');
+    var startDate = localStorage.getItem('bible_start_date');
     if (!startDate) return new Date();
-    const d = new Date(startDate + 'T12:00:00');
+    var d = new Date(startDate + 'T12:00:00');
     d.setDate(d.getDate() + (dayNumber - 1));
     return d;
 }
@@ -53,7 +52,7 @@ function getUserDateForDay(dayNumber) {
 async function loadReadingPlan() {
     if (readingPlan) return readingPlan;
     try {
-        const resp = await fetch('/scripts/reading_plan.json');
+        var resp = await fetch('/scripts/reading_plan.json');
         readingPlan = await resp.json();
         return readingPlan;
     } catch (e) {
@@ -66,9 +65,7 @@ function getEntryByDay(plan, dayNumber) {
     return plan.find(function(e) { return e.day_number === dayNumber; }) || null;
 }
 
-// Get 7 consecutive days starting from the beginning of the week containing dayNumber
 function getPersonalWeekEntries(plan, dayNumber) {
-    // Find which "week" this day falls in (groups of 7)
     var weekStart = Math.floor((dayNumber - 1) / 7) * 7 + 1;
     var entries = [];
     for (var i = 0; i < 7; i++) {
@@ -78,10 +75,35 @@ function getPersonalWeekEntries(plan, dayNumber) {
     return entries;
 }
 
+// --- Bible Text Fetching ---
+
+async function fetchPassageText(passage) {
+    if (passageCache[passage]) return passageCache[passage];
+
+    // Use bible-api.com (free, no key needed, returns KJV/web)
+    try {
+        // Normalize passage for the API (e.g., "Romans 1-2" → "Romans+1-2")
+        var query = encodeURIComponent(passage);
+        var resp = await fetch('https://bible-api.com/' + query + '?translation=web');
+        if (resp.ok) {
+            var data = await resp.json();
+            if (data.text) {
+                var text = data.text.trim();
+                passageCache[passage] = text;
+                return text;
+            }
+        }
+    } catch (e) {
+        console.warn('Bible API fetch failed:', e);
+    }
+
+    return null;
+}
+
 // --- Onboarding ---
 
 async function startPlan() {
-    var today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    var today = new Date().toLocaleDateString('en-CA');
     localStorage.setItem('bible_started', 'true');
     localStorage.setItem('bible_start_date', today);
     setCurrentDay(1);
@@ -113,6 +135,9 @@ async function renderPersonalizedView() {
         weekStrip.innerHTML = renderWeekStrip(plan, entry);
     }
 
+    // Fetch and display Bible text for current day
+    loadPassageForDay(entry);
+
     await renderProgress(plan);
     await renderArchive(plan);
 }
@@ -131,13 +156,39 @@ function renderTodayCard(entry) {
             '</div>' +
             '<div class="passage-ref">' + entry.passage + '</div>' +
             '<div class="reading-card-actions">' +
-                '<a href="/bible/posts/' + entry.date + '.html" class="read-analysis-link">Read Analysis &rarr;</a>' +
                 '<label class="mark-read-label">' +
                     '<input type="checkbox" class="mark-read-checkbox" data-day-number="' + entry.day_number + '">' +
                     ' Mark as read' +
                 '</label>' +
             '</div>' +
-        '</div>';
+        '</div>' +
+        '<div id="passage-text-container" class="passage-text active" style="margin-top: var(--spacing-6);">' +
+            '<p style="color: var(--gray-400); font-style: italic;">Loading passage...</p>' +
+        '</div>' +
+        '<p class="copyright-notice" id="passage-copyright"></p>';
+}
+
+async function loadPassageForDay(entry) {
+    var container = document.getElementById('passage-text-container');
+    var copyright = document.getElementById('passage-copyright');
+    if (!container) return;
+
+    var text = await fetchPassageText(entry.passage);
+
+    if (text) {
+        // Split into paragraphs for readability
+        var paragraphs = text.split('\n').filter(function(p) { return p.trim(); });
+        var html = '';
+        for (var i = 0; i < paragraphs.length; i++) {
+            html += '<p>' + paragraphs[i] + '</p>';
+        }
+        container.innerHTML = html;
+        if (copyright) {
+            copyright.textContent = 'World English Bible (WEB) — Public Domain';
+        }
+    } else {
+        container.innerHTML = '<p style="color: var(--gray-500);"><em>Unable to load passage text. Please read ' + entry.passage + ' in your Bible.</em></p>';
+    }
 }
 
 function renderWeekStrip(plan, currentEntry) {
@@ -153,11 +204,11 @@ function renderWeekStrip(plan, currentEntry) {
         var weekdayLabel = WEEKDAYS[dateObj.getDay()];
         var cls = 'week-day-card' + (isToday ? ' today' : '');
 
-        cards += '<a href="/bible/posts/' + day.date + '.html" class="' + cls + '" data-day-number="' + day.day_number + '">' +
+        cards += '<div class="' + cls + '" data-day-number="' + day.day_number + '">' +
                 '<div class="week-day-label">' + weekdayLabel + '</div>' +
                 '<div class="week-day-passage">' + day.passage + '</div>' +
                 '<span class="genre-badge" data-genre="' + day.genre + '">' + day.genre + '</span>' +
-            '</a>';
+            '</div>';
     }
 
     return '<h2 class="week-strip-title">Week ' + personalWeek + '</h2>' +
@@ -182,13 +233,13 @@ async function renderArchive(plan) {
         var dateObj = getUserDateForDay(entry.day_number);
         var dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
 
-        html += '<li><a href="/bible/posts/' + entry.date + '.html">' +
-            '<div class="archive-item-left">' +
+        html += '<li>' +
+            '<div class="archive-item-left" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 0.5rem;">' +
                 '<span class="genre-badge" data-genre="' + entry.genre + '">' + entry.genre + '</span>' +
                 '<span class="archive-passage">Day ' + entry.day_number + ': ' + entry.passage + '</span>' +
+                '<span class="archive-date" style="margin-left: auto;">' + dateFormatted + '</span>' +
             '</div>' +
-            '<span class="archive-date">' + dateFormatted + '</span>' +
-        '</a></li>';
+        '</li>';
     }
 
     archiveList.innerHTML = html;
