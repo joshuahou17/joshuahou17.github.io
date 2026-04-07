@@ -12,14 +12,14 @@
 const SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
 
-let supabase = null;
+let sbClient = null;
 let readingPlan = null;
 
 // Initialize Supabase client
 function initSupabase() {
     try {
         if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     } catch (e) {
         console.warn('Supabase init failed:', e);
@@ -194,12 +194,12 @@ async function renderArchive(plan) {
 // --- Progress Tracking ---
 
 async function renderProgress(plan) {
-    if (!supabase) return;
+    if (!sbClient) return;
 
     const userId = getUserId();
 
     try {
-        const { data } = await supabase
+        const { data } = await sbClient
             .from('bible_reading_progress')
             .select('day_number, completed')
             .eq('user_id', userId);
@@ -232,8 +232,8 @@ async function renderProgress(plan) {
 async function toggleProgress(dayNumber, completed) {
     const userId = getUserId();
 
-    if (supabase) {
-        await supabase
+    if (sbClient) {
+        await sbClient
             .from('bible_reading_progress')
             .upsert({
                 user_id: userId,
@@ -298,8 +298,8 @@ function initSubscribeForm() {
         button.textContent = 'Subscribing...';
         button.disabled = true;
 
-        if (supabase) {
-            const { error } = await supabase
+        if (sbClient) {
+            const { error } = await sbClient
                 .from('bible_subscribers')
                 .insert({ email: email, subscribed_at: new Date().toISOString() });
 
