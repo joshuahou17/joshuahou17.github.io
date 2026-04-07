@@ -17,8 +17,12 @@ let readingPlan = null;
 
 // Initialize Supabase client
 function initSupabase() {
-    if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    try {
+        if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch (e) {
+        console.warn('Supabase init failed:', e);
     }
 }
 
@@ -323,14 +327,14 @@ function initSubscribeForm() {
 document.addEventListener('DOMContentLoaded', async () => {
     initSupabase();
 
+    const onboarding = document.getElementById('onboarding');
+
     if (hasStarted()) {
-        // Returning user — show personalized view
+        // Returning user — hide onboarding, show personalized view
+        if (onboarding) onboarding.style.display = 'none';
         await renderPersonalizedView();
     } else {
-        // New user — show onboarding
-        const onboarding = document.getElementById('onboarding');
-        if (onboarding) onboarding.style.display = 'block';
-
+        // New user — onboarding is visible by default
         const startBtn = document.getElementById('start-plan-btn');
         if (startBtn) {
             startBtn.addEventListener('click', startPlan);
