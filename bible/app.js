@@ -80,23 +80,46 @@ function getPersonalWeekEntries(plan, dayNumber) {
 async function fetchPassageText(passage) {
     if (passageCache[passage]) return passageCache[passage];
 
-    // Use bible-api.com (free, no key needed, returns KJV/web)
-    try {
-        // Normalize passage for the API (e.g., "Romans 1-2" → "Romans+1-2")
-        var query = encodeURIComponent(passage);
-        var resp = await fetch('https://bible-api.com/' + query + '?translation=web');
-        if (resp.ok) {
-            var data = await resp.json();
-            if (data.text) {
-                var text = data.text.trim();
-                passageCache[passage] = text;
-                return text;
+    // Parse passage into book + chapter range (e.g., "Romans 1-2" → ["Romans 1", "Romans 2"])
+    var match = passage.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
+    if (!match) {
+        // Whole-book reference (e.g., "Ruth", "Jude") — try chapter 1
+        try {
+            var resp = await fetch('https://bible-api.com/' + encodeURIComponent(passage + ' 1') + '?translation=web');
+            if (resp.ok) {
+                var data = await resp.json();
+                if (data.text) { passageCache[passage] = data.text.trim(); return passageCache[passage]; }
             }
-        }
-    } catch (e) {
-        console.warn('Bible API fetch failed:', e);
+        } catch (e) { /* fall through */ }
+        return null;
     }
 
+    var book = match[1];
+    var startCh = parseInt(match[2]);
+    var endCh = match[3] ? parseInt(match[3]) : startCh;
+
+    // Fetch each chapter individually and combine
+    var allText = '';
+    for (var ch = startCh; ch <= endCh; ch++) {
+        try {
+            var query = encodeURIComponent(book + ' ' + ch);
+            var resp = await fetch('https://bible-api.com/' + query + '?translation=web');
+            if (resp.ok) {
+                var data = await resp.json();
+                if (data.text) {
+                    if (allText) allText += '\n\n';
+                    allText += '— Chapter ' + ch + ' —\n\n' + data.text.trim();
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to fetch ' + book + ' ' + ch + ':', e);
+        }
+    }
+
+    if (allText) {
+        passageCache[passage] = allText;
+        return allText;
+    }
     return null;
 }
 
