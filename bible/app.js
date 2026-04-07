@@ -6,18 +6,18 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 var sb = null;
 var readingPlan = null;
-var passageCache = {};
+var nivBible = null;
 
 var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+var NIV_COPYRIGHT = 'Scripture quotations taken from The Holy Bible, New International Version\u00ae NIV\u00ae. Copyright \u00a9 1973, 1978, 1984, 2011 by Biblica, Inc.\u2122 Used by permission. All rights reserved worldwide.';
 
 function initSupabase() {
     try {
         if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
-    } catch (e) {
-        console.warn('Supabase init failed:', e);
-    }
+    } catch (e) { /* ignore */ }
 }
 
 function getUserId() {
@@ -29,17 +29,9 @@ function getUserId() {
     return userId;
 }
 
-function hasStarted() {
-    return localStorage.getItem('bible_started') === 'true';
-}
-
-function getCurrentDay() {
-    return parseInt(localStorage.getItem('bible_current_day') || '1');
-}
-
-function setCurrentDay(day) {
-    localStorage.setItem('bible_current_day', String(day));
-}
+function hasStarted() { return localStorage.getItem('bible_started') === 'true'; }
+function getCurrentDay() { return parseInt(localStorage.getItem('bible_current_day') || '1'); }
+function setCurrentDay(day) { localStorage.setItem('bible_current_day', String(day)); }
 
 function getUserDateForDay(dayNumber) {
     var startDate = localStorage.getItem('bible_start_date');
@@ -55,10 +47,16 @@ async function loadReadingPlan() {
         var resp = await fetch('/scripts/reading_plan.json');
         readingPlan = await resp.json();
         return readingPlan;
-    } catch (e) {
-        console.error('Failed to load reading plan:', e);
-        return null;
-    }
+    } catch (e) { return null; }
+}
+
+async function loadNivBible() {
+    if (nivBible) return nivBible;
+    try {
+        var resp = await fetch('/bible/niv.json');
+        nivBible = await resp.json();
+        return nivBible;
+    } catch (e) { return null; }
 }
 
 function getEntryByDay(plan, dayNumber) {
@@ -75,48 +73,43 @@ function getPersonalWeekEntries(plan, dayNumber) {
     return entries;
 }
 
-// --- Bible Text Fetching ---
+// --- Bible Text ---
 
-async function fetchPassageVerses(passage) {
-    if (passageCache[passage]) return passageCache[passage];
+function getPassageText(bible, book, chapters) {
+    if (!bible || !bible[book]) return null;
 
-    // Parse passage into book + chapter range
-    var match = passage.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
-    var book, startCh, endCh;
+    var result = [];
+    for (var i = 0; i < chapters.length; i++) {
+        var ch = String(chapters[i]);
+        var chData = bible[book][ch];
+        if (!chData) continue;
 
-    if (!match) {
-        // Whole-book reference (e.g., "Ruth", "Jude")
-        book = passage;
-        startCh = 1;
-        endCh = 1;
-    } else {
-        book = match[1];
-        startCh = parseInt(match[2]);
-        endCh = match[3] ? parseInt(match[3]) : startCh;
-    }
-
-    // Fetch each chapter and collect verses
-    var chapters = [];
-    for (var ch = startCh; ch <= endCh; ch++) {
-        try {
-            var query = encodeURIComponent(book + ' ' + ch);
-            var resp = await fetch('https://bible-api.com/' + query + '?translation=web');
-            if (resp.ok) {
-                var data = await resp.json();
-                if (data.verses && data.verses.length > 0) {
-                    chapters.push({ chapter: ch, verses: data.verses });
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to fetch ' + book + ' ' + ch + ':', e);
+        var verses = [];
+        // Sort verse numbers numerically
+        var verseNums = Object.keys(chData).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+        for (var j = 0; j < verseNums.length; j++) {
+            verses.push({ num: verseNums[j], text: chData[verseNums[j]] });
         }
+        result.push({ chapter: chapters[i], verses: verses });
     }
+    return result.length > 0 ? result : null;
+}
 
-    if (chapters.length > 0) {
-        passageCache[passage] = chapters;
-        return chapters;
+function renderPassageHtml(chaptersData, multiChapter) {
+    var html = '';
+    for (var c = 0; c < chaptersData.length; c++) {
+        var ch = chaptersData[c];
+        if (multiChapter) {
+            html += '<h3 class="chapter-heading">Chapter ' + ch.chapter + '</h3>';
+        }
+        html += '<p class="verse-block">';
+        for (var v = 0; v < ch.verses.length; v++) {
+            var verse = ch.verses[v];
+            html += '<span class="verse"><sup class="verse-num">' + verse.num + '</sup>\u00a0' + verse.text + ' </span>';
+        }
+        html += '</p>';
     }
-    return null;
+    return html;
 }
 
 // --- Onboarding ---
@@ -154,7 +147,7 @@ async function renderPersonalizedView() {
         weekStrip.innerHTML = renderWeekStrip(plan, entry);
     }
 
-    // Fetch and display Bible text for current day
+    // Load and display Bible text
     loadPassageForDay(entry);
 
     await renderProgress(plan);
@@ -181,11 +174,11 @@ function renderTodayCard(entry) {
                 '</label>' +
             '</div>' +
         '</div>' +
-        '<div id="passage-text-container" class="passage-text active" style="margin-top: var(--spacing-6);">' +
-            '<p style="color: var(--gray-400); font-style: italic;">Loading passage...</p>' +
+        '<div id="passage-text-container" class="passage-text active" style="margin-top: 1.5rem;">' +
+            '<p style="color: #BDBDBD; font-style: italic;">Loading passage...</p>' +
         '</div>' +
         '<p class="copyright-notice" id="passage-copyright"></p>' +
-        '<div id="analysis-container" class="analysis-section" style="margin-top: var(--spacing-6); display: none;">' +
+        '<div id="analysis-container" class="analysis-section" style="display: none;">' +
             '<h3>Analysis</h3>' +
             '<div id="analysis-content"></div>' +
         '</div>';
@@ -196,35 +189,18 @@ async function loadPassageForDay(entry) {
     var copyright = document.getElementById('passage-copyright');
     if (!container) return;
 
-    var chapters = await fetchPassageVerses(entry.passage);
+    var bible = await loadNivBible();
+    var chaptersData = bible ? getPassageText(bible, entry.book, entry.chapters) : null;
 
-    if (chapters && chapters.length > 0) {
-        var html = '';
-        var multiChapter = chapters.length > 1;
-
-        for (var c = 0; c < chapters.length; c++) {
-            var ch = chapters[c];
-            if (multiChapter) {
-                html += '<h3 class="chapter-heading">Chapter ' + ch.chapter + '</h3>';
-            }
-            html += '<p class="verse-block">';
-            for (var v = 0; v < ch.verses.length; v++) {
-                var verse = ch.verses[v];
-                var text = verse.text.replace(/\n/g, ' ').trim();
-                html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup> ' + text + ' </span>';
-            }
-            html += '</p>';
-        }
-
-        container.innerHTML = html;
-        if (copyright) {
-            copyright.textContent = 'World English Bible (WEB) — Public Domain';
-        }
+    if (chaptersData) {
+        var multiChapter = chaptersData.length > 1;
+        container.innerHTML = renderPassageHtml(chaptersData, multiChapter);
+        if (copyright) copyright.textContent = NIV_COPYRIGHT;
     } else {
-        container.innerHTML = '<p style="color: var(--gray-500);"><em>Unable to load passage text. Please read ' + entry.passage + ' in your Bible.</em></p>';
+        container.innerHTML = '<p style="color: #9E9E9E;"><em>Unable to load passage text. Please read ' + entry.passage + ' in your Bible.</em></p>';
     }
 
-    // Load analysis from generated post if it exists
+    // Try to load analysis from generated post
     loadAnalysisForDay(entry);
 }
 
@@ -233,7 +209,6 @@ async function loadAnalysisForDay(entry) {
     var analysisContent = document.getElementById('analysis-content');
     if (!analysisContainer || !analysisContent) return;
 
-    // Try to fetch the generated post page and extract the analysis
     try {
         var resp = await fetch('/bible/posts/' + entry.date + '.html');
         if (!resp.ok) return;
@@ -247,9 +222,7 @@ async function loadAnalysisForDay(entry) {
             analysisContent.innerHTML = analysis.innerHTML;
             analysisContainer.style.display = 'block';
         }
-    } catch (e) {
-        // No post exists yet — that's fine, just don't show analysis
-    }
+    } catch (e) { /* no post yet */ }
 }
 
 function renderWeekStrip(plan, currentEntry) {
@@ -294,68 +267,51 @@ async function renderArchive(plan) {
         var dateObj = getUserDateForDay(entry.day_number);
         var dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
 
-        html += '<li>' +
-            '<div class="archive-item-left" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 0.5rem;">' +
+        html += '<li><div class="archive-item-left" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 0.5rem;">' +
                 '<span class="genre-badge" data-genre="' + entry.genre + '">' + entry.genre + '</span>' +
                 '<span class="archive-passage">Day ' + entry.day_number + ': ' + entry.passage + '</span>' +
-                '<span class="archive-date" style="margin-left: auto;">' + dateFormatted + '</span>' +
-            '</div>' +
-        '</li>';
+                '<span class="archive-date" style="margin-left:auto;">' + dateFormatted + '</span>' +
+            '</div></li>';
     }
 
     archiveList.innerHTML = html;
 }
 
-// --- Progress Tracking ---
+// --- Progress ---
 
-async function renderProgress(plan) {
+async function renderProgress() {
     if (!sb) return;
-
     var userId = getUserId();
-
     try {
-        var result = await sb
-            .from('bible_reading_progress')
-            .select('day_number, completed')
-            .eq('user_id', userId);
-
+        var result = await sb.from('bible_reading_progress').select('day_number, completed').eq('user_id', userId);
         if (result.data) {
             var completed = {};
             result.data.forEach(function(r) { if (r.completed) completed[r.day_number] = true; });
-
             document.querySelectorAll('[data-day-number]').forEach(function(el) {
                 var dayNum = parseInt(el.dataset.dayNumber);
                 if (completed[dayNum]) {
-                    var checkbox = el.querySelector('input[type="checkbox"]');
-                    if (checkbox) checkbox.checked = true;
+                    var cb = el.querySelector('input[type="checkbox"]');
+                    if (cb) cb.checked = true;
                     el.classList.add('completed');
                 }
             });
         }
-    } catch (e) {
-        console.error('Failed to load progress:', e);
-    }
+    } catch (e) { /* ignore */ }
 
     document.querySelectorAll('.mark-read-checkbox').forEach(function(checkbox) {
         checkbox.addEventListener('change', function(e) {
-            var dayNumber = parseInt(e.target.dataset.dayNumber);
-            toggleProgress(dayNumber, e.target.checked);
+            toggleProgress(parseInt(e.target.dataset.dayNumber), e.target.checked);
         });
     });
 }
 
 async function toggleProgress(dayNumber, completed) {
     var userId = getUserId();
-
     if (sb) {
-        await sb
-            .from('bible_reading_progress')
-            .upsert({
-                user_id: userId,
-                day_number: dayNumber,
-                completed: completed,
-                completed_at: completed ? new Date().toISOString() : null,
-            }, { onConflict: 'user_id,day_number' });
+        await sb.from('bible_reading_progress').upsert({
+            user_id: userId, day_number: dayNumber,
+            completed: completed, completed_at: completed ? new Date().toISOString() : null,
+        }, { onConflict: 'user_id,day_number' });
     }
 
     var card = document.querySelector('[data-day-number="' + dayNumber + '"]');
@@ -367,70 +323,44 @@ async function toggleProgress(dayNumber, completed) {
     }
 }
 
-// --- Translation Toggle ---
+// --- Translation Toggle (for post pages) ---
 
 function initTranslationToggle() {
-    var saved = localStorage.getItem('bible_translation') || 'NIV';
-    setTranslation(saved);
-
     document.querySelectorAll('.translation-toggle button').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            setTranslation(btn.dataset.translation);
+            var t = btn.dataset.translation;
+            localStorage.setItem('bible_translation', t);
+            document.querySelectorAll('.passage-text[data-translation]').forEach(function(el) {
+                el.classList.toggle('active', el.dataset.translation === t);
+            });
+            document.querySelectorAll('.translation-toggle button').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.translation === t);
+            });
         });
     });
 }
 
-function setTranslation(translation) {
-    localStorage.setItem('bible_translation', translation);
-
-    document.querySelectorAll('.passage-text[data-translation]').forEach(function(el) {
-        el.classList.toggle('active', el.dataset.translation === translation);
-    });
-
-    document.querySelectorAll('.translation-toggle button').forEach(function(btn) {
-        btn.classList.toggle('active', btn.dataset.translation === translation);
-    });
-
-    document.querySelectorAll('.copyright-notice[data-translation]').forEach(function(el) {
-        el.style.display = el.dataset.translation === translation ? 'block' : 'none';
-    });
-}
-
-// --- Subscribe Form ---
+// --- Subscribe ---
 
 function initSubscribeForm() {
     var form = document.getElementById('subscribe-form');
     if (!form) return;
-
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         var email = form.querySelector('input[type="email"]').value;
         var button = form.querySelector('button');
-
         button.textContent = 'Subscribing...';
         button.disabled = true;
 
         if (sb) {
-            var result = await sb
-                .from('bible_subscribers')
-                .insert({ email: email, subscribed_at: new Date().toISOString() });
-
-            if (result.error && result.error.code === '23505') {
-                button.textContent = 'Already subscribed!';
-            } else if (result.error) {
-                button.textContent = 'Error — try again';
-                button.disabled = false;
-            } else {
-                button.textContent = 'Subscribed!';
-            }
+            var result = await sb.from('bible_subscribers').insert({ email: email, subscribed_at: new Date().toISOString() });
+            button.textContent = (result.error && result.error.code === '23505') ? 'Already subscribed!' :
+                                  result.error ? 'Error — try again' : 'Subscribed!';
+            if (result.error && result.error.code !== '23505') button.disabled = false;
         } else {
             button.textContent = 'Coming soon!';
         }
-
-        setTimeout(function() {
-            button.textContent = 'Subscribe';
-            button.disabled = false;
-        }, 3000);
+        setTimeout(function() { button.textContent = 'Subscribe'; button.disabled = false; }, 3000);
     });
 }
 
@@ -438,7 +368,6 @@ function initSubscribeForm() {
 
 document.addEventListener('DOMContentLoaded', async function() {
     initSupabase();
-
     var onboarding = document.getElementById('onboarding');
 
     if (hasStarted()) {
@@ -446,9 +375,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         await renderPersonalizedView();
     } else {
         var startBtn = document.getElementById('start-plan-btn');
-        if (startBtn) {
-            startBtn.addEventListener('click', startPlan);
-        }
+        if (startBtn) startBtn.addEventListener('click', startPlan);
     }
 
     initTranslationToggle();
