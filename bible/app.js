@@ -77,38 +77,34 @@ function getPersonalWeekEntries(plan, dayNumber) {
 
 // --- Bible Text Fetching ---
 
-async function fetchPassageText(passage) {
+async function fetchPassageVerses(passage) {
     if (passageCache[passage]) return passageCache[passage];
 
-    // Parse passage into book + chapter range (e.g., "Romans 1-2" → ["Romans 1", "Romans 2"])
+    // Parse passage into book + chapter range
     var match = passage.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
+    var book, startCh, endCh;
+
     if (!match) {
-        // Whole-book reference (e.g., "Ruth", "Jude") — try chapter 1
-        try {
-            var resp = await fetch('https://bible-api.com/' + encodeURIComponent(passage + ' 1') + '?translation=web');
-            if (resp.ok) {
-                var data = await resp.json();
-                if (data.text) { passageCache[passage] = data.text.trim(); return passageCache[passage]; }
-            }
-        } catch (e) { /* fall through */ }
-        return null;
+        // Whole-book reference (e.g., "Ruth", "Jude")
+        book = passage;
+        startCh = 1;
+        endCh = 1;
+    } else {
+        book = match[1];
+        startCh = parseInt(match[2]);
+        endCh = match[3] ? parseInt(match[3]) : startCh;
     }
 
-    var book = match[1];
-    var startCh = parseInt(match[2]);
-    var endCh = match[3] ? parseInt(match[3]) : startCh;
-
-    // Fetch each chapter individually and combine
-    var allText = '';
+    // Fetch each chapter and collect verses
+    var chapters = [];
     for (var ch = startCh; ch <= endCh; ch++) {
         try {
             var query = encodeURIComponent(book + ' ' + ch);
             var resp = await fetch('https://bible-api.com/' + query + '?translation=web');
             if (resp.ok) {
                 var data = await resp.json();
-                if (data.text) {
-                    if (allText) allText += '\n\n';
-                    allText += '— Chapter ' + ch + ' —\n\n' + data.text.trim();
+                if (data.verses && data.verses.length > 0) {
+                    chapters.push({ chapter: ch, verses: data.verses });
                 }
             }
         } catch (e) {
@@ -116,9 +112,9 @@ async function fetchPassageText(passage) {
         }
     }
 
-    if (allText) {
-        passageCache[passage] = allText;
-        return allText;
+    if (chapters.length > 0) {
+        passageCache[passage] = chapters;
+        return chapters;
     }
     return null;
 }
@@ -188,7 +184,11 @@ function renderTodayCard(entry) {
         '<div id="passage-text-container" class="passage-text active" style="margin-top: var(--spacing-6);">' +
             '<p style="color: var(--gray-400); font-style: italic;">Loading passage...</p>' +
         '</div>' +
-        '<p class="copyright-notice" id="passage-copyright"></p>';
+        '<p class="copyright-notice" id="passage-copyright"></p>' +
+        '<div id="analysis-container" class="analysis-section" style="margin-top: var(--spacing-6); display: none;">' +
+            '<h3>Analysis</h3>' +
+            '<div id="analysis-content"></div>' +
+        '</div>';
 }
 
 async function loadPassageForDay(entry) {
@@ -196,21 +196,59 @@ async function loadPassageForDay(entry) {
     var copyright = document.getElementById('passage-copyright');
     if (!container) return;
 
-    var text = await fetchPassageText(entry.passage);
+    var chapters = await fetchPassageVerses(entry.passage);
 
-    if (text) {
-        // Split into paragraphs for readability
-        var paragraphs = text.split('\n').filter(function(p) { return p.trim(); });
+    if (chapters && chapters.length > 0) {
         var html = '';
-        for (var i = 0; i < paragraphs.length; i++) {
-            html += '<p>' + paragraphs[i] + '</p>';
+        var multiChapter = chapters.length > 1;
+
+        for (var c = 0; c < chapters.length; c++) {
+            var ch = chapters[c];
+            if (multiChapter) {
+                html += '<h3 class="chapter-heading">Chapter ' + ch.chapter + '</h3>';
+            }
+            html += '<p class="verse-block">';
+            for (var v = 0; v < ch.verses.length; v++) {
+                var verse = ch.verses[v];
+                var text = verse.text.replace(/\n/g, ' ').trim();
+                html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup> ' + text + ' </span>';
+            }
+            html += '</p>';
         }
+
         container.innerHTML = html;
         if (copyright) {
             copyright.textContent = 'World English Bible (WEB) — Public Domain';
         }
     } else {
         container.innerHTML = '<p style="color: var(--gray-500);"><em>Unable to load passage text. Please read ' + entry.passage + ' in your Bible.</em></p>';
+    }
+
+    // Load analysis from generated post if it exists
+    loadAnalysisForDay(entry);
+}
+
+async function loadAnalysisForDay(entry) {
+    var analysisContainer = document.getElementById('analysis-container');
+    var analysisContent = document.getElementById('analysis-content');
+    if (!analysisContainer || !analysisContent) return;
+
+    // Try to fetch the generated post page and extract the analysis
+    try {
+        var resp = await fetch('/bible/posts/' + entry.date + '.html');
+        if (!resp.ok) return;
+
+        var html = await resp.text();
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var analysis = doc.querySelector('.analysis-section');
+
+        if (analysis && analysis.innerHTML.trim()) {
+            analysisContent.innerHTML = analysis.innerHTML;
+            analysisContainer.style.display = 'block';
+        }
+    } catch (e) {
+        // No post exists yet — that's fine, just don't show analysis
     }
 }
 
