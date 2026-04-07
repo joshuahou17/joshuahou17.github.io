@@ -200,7 +200,7 @@ BIBLE_POST_TEMPLATE = """<!DOCTYPE html>
         <p>&copy; 2026 Joshua Hou. Daily analysis powered by Claude and web research.</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../app.js"></script>
+    <script src="../app.js?v=2"></script>
 </body>
 </html>"""
 
