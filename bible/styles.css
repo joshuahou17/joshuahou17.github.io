@@ -1,0 +1,682 @@
+:root {
+    /* Genre colors */
+    --genre-epistles: #6366F1;
+    --genre-law: #D97706;
+    --genre-history: #059669;
+    --genre-psalms: #7C3AED;
+    --genre-poetry: #DB2777;
+    --genre-prophecy: #EA580C;
+    --genre-gospels: #2563EB;
+
+    /* Base palette */
+    --primary: #6366F1;
+    --primary-light: rgba(99, 102, 241, 0.08);
+    --white: #FFFFFF;
+    --black: #000000;
+    --gray-50: #FAFAFA;
+    --gray-100: #F5F5F5;
+    --gray-200: #EEEEEE;
+    --gray-300: #E0E0E0;
+    --gray-400: #BDBDBD;
+    --gray-500: #9E9E9E;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
+
+    --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-5: 1.25rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+    --spacing-20: 5rem;
+
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 250ms ease-in-out;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--gray-900);
+    background-color: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Navigation */
+.nav {
+    padding: var(--spacing-4) var(--spacing-6);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.nav-back {
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nav-back:hover {
+    color: var(--gray-900);
+}
+
+/* Container */
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: var(--spacing-8) var(--spacing-6);
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    margin-bottom: var(--spacing-10);
+}
+
+.hero-title {
+    font-size: var(--font-size-5xl);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--genre-epistles), var(--genre-gospels));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-3);
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--gray-600);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Progress indicator */
+.progress-indicator {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: var(--spacing-6);
+}
+
+/* Genre Badge */
+.genre-badge {
+    display: inline-block;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+    color: var(--white);
+}
+
+.genre-badge[data-genre="Epistles"] { background-color: var(--genre-epistles); }
+.genre-badge[data-genre="The Law"] { background-color: var(--genre-law); }
+.genre-badge[data-genre="History"] { background-color: var(--genre-history); }
+.genre-badge[data-genre="Psalms"] { background-color: var(--genre-psalms); }
+.genre-badge[data-genre="Poetry"] { background-color: var(--genre-poetry); }
+.genre-badge[data-genre="Prophecy"] { background-color: var(--genre-prophecy); }
+.genre-badge[data-genre="Gospels"] { background-color: var(--genre-gospels); }
+
+/* Today's Reading Card */
+.reading-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-normal);
+}
+
+.reading-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.reading-card.featured {
+    border-left: 4px solid var(--primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(37, 99, 235, 0.03));
+}
+
+.reading-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-3);
+    flex-wrap: wrap;
+}
+
+.reading-card-meta {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+}
+
+.reading-card .passage-ref {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-2);
+}
+
+.reading-card .analysis-title {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-3);
+}
+
+.reading-card .summary {
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-4);
+}
+
+.reading-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+}
+
+.read-analysis-link {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.read-analysis-link:hover {
+    color: var(--genre-gospels);
+}
+
+/* Checkbox */
+.mark-read-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    cursor: pointer;
+    user-select: none;
+}
+
+.mark-read-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* Week Strip */
+.week-strip {
+    margin-bottom: var(--spacing-10);
+}
+
+.week-strip-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-4);
+}
+
+.week-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-2);
+}
+
+.week-day-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-3);
+    text-align: center;
+    text-decoration: none;
+    color: var(--gray-900);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.week-day-card:hover {
+    background: var(--white);
+    box-shadow: var(--shadow-md);
+}
+
+.week-day-card.today {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.week-day-card.completed {
+    opacity: 0.7;
+}
+
+.week-day-card.completed::after {
+    content: "\2713";
+    position: absolute;
+    top: var(--spacing-1);
+    right: var(--spacing-2);
+    color: var(--genre-history);
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+}
+
+.week-day-label {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-1);
+}
+
+.week-day-passage {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: var(--spacing-2);
+}
+
+.week-day-card .genre-badge {
+    font-size: 0.625rem;
+    padding: 2px var(--spacing-2);
+}
+
+/* Subscribe Section */
+.subscribe-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    margin-bottom: var(--spacing-10);
+    text-align: center;
+}
+
+.subscribe-section h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-2);
+}
+
+.subscribe-section p {
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-6);
+}
+
+.subscribe-form {
+    display: flex;
+    gap: var(--spacing-2);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.subscribe-form input[type="email"] {
+    flex: 1;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.subscribe-form input[type="email"]:focus {
+    border-color: var(--primary);
+}
+
+.subscribe-form button {
+    padding: var(--spacing-3) var(--spacing-6);
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.subscribe-form button:hover {
+    background: #4F46E5;
+}
+
+/* Archive */
+.archive-section {
+    border-top: 1px solid var(--gray-200);
+    padding-top: var(--spacing-8);
+}
+
+.archive-heading {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-6);
+}
+
+.archive-list {
+    list-style: none;
+}
+
+.archive-list li {
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.archive-list li:last-child {
+    border-bottom: none;
+}
+
+.archive-list a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-2);
+    text-decoration: none;
+    color: var(--gray-900);
+    transition: background var(--transition-fast);
+    border-radius: var(--radius-sm);
+    gap: var(--spacing-3);
+}
+
+.archive-list a:hover {
+    background: var(--gray-50);
+}
+
+.archive-item-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    min-width: 0;
+}
+
+.archive-passage {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.archive-date {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.archive-empty {
+    padding: var(--spacing-4) var(--spacing-2);
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+/* Translation Toggle */
+.translation-toggle {
+    display: inline-flex;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--spacing-4);
+}
+
+.translation-toggle button {
+    padding: var(--spacing-2) var(--spacing-4);
+    border: none;
+    background: var(--white);
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.translation-toggle button.active {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.translation-toggle button:not(.active):hover {
+    background: var(--gray-100);
+}
+
+/* Passage Text */
+.passage-text {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+    line-height: 1.8;
+    font-size: var(--font-size-lg);
+}
+
+.passage-text[data-translation] {
+    display: none;
+}
+
+.passage-text[data-translation].active {
+    display: block;
+}
+
+/* Analysis */
+.analysis-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.analysis-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-4);
+    color: var(--gray-900);
+}
+
+.analysis-section p {
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: var(--spacing-4);
+}
+
+/* Cross References */
+.cross-references {
+    background: var(--primary-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+}
+
+.cross-references h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-3);
+}
+
+.cross-references ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.cross-references li {
+    background: var(--white);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--primary);
+}
+
+/* Sources */
+.sources-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.sources-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-3);
+}
+
+.sources-list {
+    list-style: none;
+}
+
+.sources-list li {
+    padding: var(--spacing-2) 0;
+}
+
+.sources-list a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+}
+
+.sources-list a:hover {
+    text-decoration: underline;
+}
+
+/* Post Navigation */
+.post-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-6) 0;
+    border-top: 1px solid var(--gray-200);
+    margin-top: var(--spacing-8);
+}
+
+.post-nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.post-nav a:hover {
+    color: var(--genre-gospels);
+}
+
+.post-nav .next-reading {
+    text-align: right;
+}
+
+.post-nav .next-reading .label {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    display: block;
+}
+
+/* Copyright */
+.copyright-notice {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    line-height: 1.5;
+    margin-top: var(--spacing-8);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: var(--spacing-8) var(--spacing-6);
+    border-top: 1px solid var(--gray-200);
+    margin-top: var(--spacing-8);
+}
+
+.footer p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: var(--font-size-4xl);
+    }
+
+    .container {
+        padding: var(--spacing-6) var(--spacing-4);
+    }
+
+    .week-strip-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .subscribe-form {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: var(--font-size-3xl);
+    }
+
+    .week-strip-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .archive-list a {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-1);
+    }
+
+    .archive-date {
+        margin-left: 0;
+    }
+
+    .reading-card-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .post-nav {
+        flex-direction: column;
+        gap: var(--spacing-4);
+        align-items: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}

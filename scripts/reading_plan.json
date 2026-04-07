@@ -1,0 +1,5923 @@
+[
+  {
+    "day_number": 1,
+    "date": "2026-03-29",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 1-2",
+    "passage_raw": "Rom 1-2",
+    "book": "Romans",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "ROM.1-ROM.2",
+    "week": 1
+  },
+  {
+    "day_number": 2,
+    "date": "2026-03-30",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 1-3",
+    "passage_raw": "Gen 1-3",
+    "book": "Genesis",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "GEN.1-GEN.3",
+    "week": 1
+  },
+  {
+    "day_number": 3,
+    "date": "2026-03-31",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Joshua 1-5",
+    "passage_raw": "Josh 1-5",
+    "book": "Joshua",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "JOS.1-JOS.5",
+    "week": 1
+  },
+  {
+    "day_number": 4,
+    "date": "2026-04-01",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 1-2",
+    "passage_raw": "Ps 1-2",
+    "book": "Psalms",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "PSA.1-PSA.2",
+    "week": 1
+  },
+  {
+    "day_number": 5,
+    "date": "2026-04-02",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 1-2",
+    "passage_raw": "Job 1-2",
+    "book": "Job",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "JOB.1-JOB.2",
+    "week": 1
+  },
+  {
+    "day_number": 6,
+    "date": "2026-04-03",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 1-6",
+    "passage_raw": "Isa 1-6",
+    "book": "Isaiah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "ISA.1-ISA.6",
+    "week": 1
+  },
+  {
+    "day_number": 7,
+    "date": "2026-04-04",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 1-2",
+    "passage_raw": "Matt 1-2",
+    "book": "Matthew",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "MAT.1-MAT.2",
+    "week": 1
+  },
+  {
+    "day_number": 8,
+    "date": "2026-04-05",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 3-4",
+    "passage_raw": "Rom 3-4",
+    "book": "Romans",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "ROM.3-ROM.4",
+    "week": 2
+  },
+  {
+    "day_number": 9,
+    "date": "2026-04-06",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 4-7",
+    "passage_raw": "Gen 4-7",
+    "book": "Genesis",
+    "chapters": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "osis_id": "GEN.4-GEN.7",
+    "week": 2
+  },
+  {
+    "day_number": 10,
+    "date": "2026-04-07",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Joshua 6-10",
+    "passage_raw": "Josh 6-10",
+    "book": "Joshua",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "JOS.6-JOS.10",
+    "week": 2
+  },
+  {
+    "day_number": 11,
+    "date": "2026-04-08",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 3-5",
+    "passage_raw": "Ps 3-5",
+    "book": "Psalms",
+    "chapters": [
+      3,
+      4,
+      5
+    ],
+    "osis_id": "PSA.3-PSA.5",
+    "week": 2
+  },
+  {
+    "day_number": 12,
+    "date": "2026-04-09",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 3-4",
+    "passage_raw": "Job 3-4",
+    "book": "Job",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "JOB.3-JOB.4",
+    "week": 2
+  },
+  {
+    "day_number": 13,
+    "date": "2026-04-10",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 7-11",
+    "passage_raw": "Isa 7-11",
+    "book": "Isaiah",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "osis_id": "ISA.7-ISA.11",
+    "week": 2
+  },
+  {
+    "day_number": 14,
+    "date": "2026-04-11",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 3-4",
+    "passage_raw": "Matt 3-4",
+    "book": "Matthew",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "MAT.3-MAT.4",
+    "week": 2
+  },
+  {
+    "day_number": 15,
+    "date": "2026-04-12",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 5-6",
+    "passage_raw": "Rom 5-6",
+    "book": "Romans",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "ROM.5-ROM.6",
+    "week": 3
+  },
+  {
+    "day_number": 16,
+    "date": "2026-04-13",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 8-11",
+    "passage_raw": "Gen 8-11",
+    "book": "Genesis",
+    "chapters": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "osis_id": "GEN.8-GEN.11",
+    "week": 3
+  },
+  {
+    "day_number": 17,
+    "date": "2026-04-14",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Joshua 11-15",
+    "passage_raw": "Josh 11-15",
+    "book": "Joshua",
+    "chapters": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "osis_id": "JOS.11-JOS.15",
+    "week": 3
+  },
+  {
+    "day_number": 18,
+    "date": "2026-04-15",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 6-8",
+    "passage_raw": "Ps 6-8",
+    "book": "Psalms",
+    "chapters": [
+      6,
+      7,
+      8
+    ],
+    "osis_id": "PSA.6-PSA.8",
+    "week": 3
+  },
+  {
+    "day_number": 19,
+    "date": "2026-04-16",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 5-6",
+    "passage_raw": "Job 5-6",
+    "book": "Job",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "JOB.5-JOB.6",
+    "week": 3
+  },
+  {
+    "day_number": 20,
+    "date": "2026-04-17",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 12-17",
+    "passage_raw": "Isa 12-17",
+    "book": "Isaiah",
+    "chapters": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "osis_id": "ISA.12-ISA.17",
+    "week": 3
+  },
+  {
+    "day_number": 21,
+    "date": "2026-04-18",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 5-7",
+    "passage_raw": "Matt 5-7",
+    "book": "Matthew",
+    "chapters": [
+      5,
+      6,
+      7
+    ],
+    "osis_id": "MAT.5-MAT.7",
+    "week": 3
+  },
+  {
+    "day_number": 22,
+    "date": "2026-04-19",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 7-8",
+    "passage_raw": "Rom 7-8",
+    "book": "Romans",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "ROM.7-ROM.8",
+    "week": 4
+  },
+  {
+    "day_number": 23,
+    "date": "2026-04-20",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 12-15",
+    "passage_raw": "Gen 12-15",
+    "book": "Genesis",
+    "chapters": [
+      12,
+      13,
+      14,
+      15
+    ],
+    "osis_id": "GEN.12-GEN.15",
+    "week": 4
+  },
+  {
+    "day_number": 24,
+    "date": "2026-04-21",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Joshua 16-20",
+    "passage_raw": "Josh 16-20",
+    "book": "Joshua",
+    "chapters": [
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "JOS.16-JOS.20",
+    "week": 4
+  },
+  {
+    "day_number": 25,
+    "date": "2026-04-22",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 9-11",
+    "passage_raw": "Ps 9-11",
+    "book": "Psalms",
+    "chapters": [
+      9,
+      10,
+      11
+    ],
+    "osis_id": "PSA.9-PSA.11",
+    "week": 4
+  },
+  {
+    "day_number": 26,
+    "date": "2026-04-23",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 7-8",
+    "passage_raw": "Job 7-8",
+    "book": "Job",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "JOB.7-JOB.8",
+    "week": 4
+  },
+  {
+    "day_number": 27,
+    "date": "2026-04-24",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 18-22",
+    "passage_raw": "Isa 18-22",
+    "book": "Isaiah",
+    "chapters": [
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "osis_id": "ISA.18-ISA.22",
+    "week": 4
+  },
+  {
+    "day_number": 28,
+    "date": "2026-04-25",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 8-10",
+    "passage_raw": "Matt 8-10",
+    "book": "Matthew",
+    "chapters": [
+      8,
+      9,
+      10
+    ],
+    "osis_id": "MAT.8-MAT.10",
+    "week": 4
+  },
+  {
+    "day_number": 29,
+    "date": "2026-04-26",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 9-10",
+    "passage_raw": "Rom 9-10",
+    "book": "Romans",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "ROM.9-ROM.10",
+    "week": 5
+  },
+  {
+    "day_number": 30,
+    "date": "2026-04-27",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 16-19",
+    "passage_raw": "Gen 16-19",
+    "book": "Genesis",
+    "chapters": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "osis_id": "GEN.16-GEN.19",
+    "week": 5
+  },
+  {
+    "day_number": 31,
+    "date": "2026-04-28",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Joshua 21-24",
+    "passage_raw": "Josh 21-24",
+    "book": "Joshua",
+    "chapters": [
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "JOS.21-JOS.24",
+    "week": 5
+  },
+  {
+    "day_number": 32,
+    "date": "2026-04-29",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 12-14",
+    "passage_raw": "Ps 12-14",
+    "book": "Psalms",
+    "chapters": [
+      12,
+      13,
+      14
+    ],
+    "osis_id": "PSA.12-PSA.14",
+    "week": 5
+  },
+  {
+    "day_number": 33,
+    "date": "2026-04-30",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 9-10",
+    "passage_raw": "Job 9-10",
+    "book": "Job",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "JOB.9-JOB.10",
+    "week": 5
+  },
+  {
+    "day_number": 34,
+    "date": "2026-05-01",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 23-28",
+    "passage_raw": "Isa 23-28",
+    "book": "Isaiah",
+    "chapters": [
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "osis_id": "ISA.23-ISA.28",
+    "week": 5
+  },
+  {
+    "day_number": 35,
+    "date": "2026-05-02",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 11-13",
+    "passage_raw": "Matt 11-13",
+    "book": "Matthew",
+    "chapters": [
+      11,
+      12,
+      13
+    ],
+    "osis_id": "MAT.11-MAT.13",
+    "week": 5
+  },
+  {
+    "day_number": 36,
+    "date": "2026-05-03",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 11-12",
+    "passage_raw": "Rom 11-12",
+    "book": "Romans",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "ROM.11-ROM.12",
+    "week": 6
+  },
+  {
+    "day_number": 37,
+    "date": "2026-05-04",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 20-23",
+    "passage_raw": "Gen 20-23",
+    "book": "Genesis",
+    "chapters": [
+      20,
+      21,
+      22,
+      23
+    ],
+    "osis_id": "GEN.20-GEN.23",
+    "week": 6
+  },
+  {
+    "day_number": 38,
+    "date": "2026-05-05",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Judges 1-6",
+    "passage_raw": "Judg 1-6",
+    "book": "Judges",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "JDG.1-JDG.6",
+    "week": 6
+  },
+  {
+    "day_number": 39,
+    "date": "2026-05-06",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 15-17",
+    "passage_raw": "Ps 15-17",
+    "book": "Psalms",
+    "chapters": [
+      15,
+      16,
+      17
+    ],
+    "osis_id": "PSA.15-PSA.17",
+    "week": 6
+  },
+  {
+    "day_number": 40,
+    "date": "2026-05-07",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 11-12",
+    "passage_raw": "Job 11-12",
+    "book": "Job",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "JOB.11-JOB.12",
+    "week": 6
+  },
+  {
+    "day_number": 41,
+    "date": "2026-05-08",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 29-33",
+    "passage_raw": "Isa 29-33",
+    "book": "Isaiah",
+    "chapters": [
+      29,
+      30,
+      31,
+      32,
+      33
+    ],
+    "osis_id": "ISA.29-ISA.33",
+    "week": 6
+  },
+  {
+    "day_number": 42,
+    "date": "2026-05-09",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 14-16",
+    "passage_raw": "Matt 14-16",
+    "book": "Matthew",
+    "chapters": [
+      14,
+      15,
+      16
+    ],
+    "osis_id": "MAT.14-MAT.16",
+    "week": 6
+  },
+  {
+    "day_number": 43,
+    "date": "2026-05-10",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 13-14",
+    "passage_raw": "Rom 13-14",
+    "book": "Romans",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "ROM.13-ROM.14",
+    "week": 7
+  },
+  {
+    "day_number": 44,
+    "date": "2026-05-11",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 24-27",
+    "passage_raw": "Gen 24-27",
+    "book": "Genesis",
+    "chapters": [
+      24,
+      25,
+      26,
+      27
+    ],
+    "osis_id": "GEN.24-GEN.27",
+    "week": 7
+  },
+  {
+    "day_number": 45,
+    "date": "2026-05-12",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Judges 7-11",
+    "passage_raw": "Judg 7-11",
+    "book": "Judges",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "osis_id": "JDG.7-JDG.11",
+    "week": 7
+  },
+  {
+    "day_number": 46,
+    "date": "2026-05-13",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 18-20",
+    "passage_raw": "Ps 18-20",
+    "book": "Psalms",
+    "chapters": [
+      18,
+      19,
+      20
+    ],
+    "osis_id": "PSA.18-PSA.20",
+    "week": 7
+  },
+  {
+    "day_number": 47,
+    "date": "2026-05-14",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 13-14",
+    "passage_raw": "Job 13-14",
+    "book": "Job",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "JOB.13-JOB.14",
+    "week": 7
+  },
+  {
+    "day_number": 48,
+    "date": "2026-05-15",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 34-39",
+    "passage_raw": "Isa 34-39",
+    "book": "Isaiah",
+    "chapters": [
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "osis_id": "ISA.34-ISA.39",
+    "week": 7
+  },
+  {
+    "day_number": 49,
+    "date": "2026-05-16",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 17-19",
+    "passage_raw": "Matt 17-19",
+    "book": "Matthew",
+    "chapters": [
+      17,
+      18,
+      19
+    ],
+    "osis_id": "MAT.17-MAT.19",
+    "week": 7
+  },
+  {
+    "day_number": 50,
+    "date": "2026-05-17",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Romans 15-16",
+    "passage_raw": "Rom 15-16",
+    "book": "Romans",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "ROM.15-ROM.16",
+    "week": 8
+  },
+  {
+    "day_number": 51,
+    "date": "2026-05-18",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 28-31",
+    "passage_raw": "Gen 28-31",
+    "book": "Genesis",
+    "chapters": [
+      28,
+      29,
+      30,
+      31
+    ],
+    "osis_id": "GEN.28-GEN.31",
+    "week": 8
+  },
+  {
+    "day_number": 52,
+    "date": "2026-05-19",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Judges 12-16",
+    "passage_raw": "Judg 12-16",
+    "book": "Judges",
+    "chapters": [
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "osis_id": "JDG.12-JDG.16",
+    "week": 8
+  },
+  {
+    "day_number": 53,
+    "date": "2026-05-20",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 21-23",
+    "passage_raw": "Ps 21-23",
+    "book": "Psalms",
+    "chapters": [
+      21,
+      22,
+      23
+    ],
+    "osis_id": "PSA.21-PSA.23",
+    "week": 8
+  },
+  {
+    "day_number": 54,
+    "date": "2026-05-21",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 15-16",
+    "passage_raw": "Job 15-16",
+    "book": "Job",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "JOB.15-JOB.16",
+    "week": 8
+  },
+  {
+    "day_number": 55,
+    "date": "2026-05-22",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 40-44",
+    "passage_raw": "Isa 40-44",
+    "book": "Isaiah",
+    "chapters": [
+      40,
+      41,
+      42,
+      43,
+      44
+    ],
+    "osis_id": "ISA.40-ISA.44",
+    "week": 8
+  },
+  {
+    "day_number": 56,
+    "date": "2026-05-23",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 20-22",
+    "passage_raw": "Matt 20-22",
+    "book": "Matthew",
+    "chapters": [
+      20,
+      21,
+      22
+    ],
+    "osis_id": "MAT.20-MAT.22",
+    "week": 8
+  },
+  {
+    "day_number": 57,
+    "date": "2026-05-24",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 1-2",
+    "passage_raw": "1Cor 1-2",
+    "book": "1 Corinthians",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "1CO.1-1CO.2",
+    "week": 9
+  },
+  {
+    "day_number": 58,
+    "date": "2026-05-25",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 32-35",
+    "passage_raw": "Gen 32-35",
+    "book": "Genesis",
+    "chapters": [
+      32,
+      33,
+      34,
+      35
+    ],
+    "osis_id": "GEN.32-GEN.35",
+    "week": 9
+  },
+  {
+    "day_number": 59,
+    "date": "2026-05-26",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Judges 17-21",
+    "passage_raw": "Judg 17-21",
+    "book": "Judges",
+    "chapters": [
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "osis_id": "JDG.17-JDG.21",
+    "week": 9
+  },
+  {
+    "day_number": 60,
+    "date": "2026-05-27",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 24-26",
+    "passage_raw": "Ps 24-26",
+    "book": "Psalms",
+    "chapters": [
+      24,
+      25,
+      26
+    ],
+    "osis_id": "PSA.24-PSA.26",
+    "week": 9
+  },
+  {
+    "day_number": 61,
+    "date": "2026-05-28",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 17-18",
+    "passage_raw": "Job 17-18",
+    "book": "Job",
+    "chapters": [
+      17,
+      18
+    ],
+    "osis_id": "JOB.17-JOB.18",
+    "week": 9
+  },
+  {
+    "day_number": 62,
+    "date": "2026-05-29",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 45-50",
+    "passage_raw": "Isa 45-50",
+    "book": "Isaiah",
+    "chapters": [
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "osis_id": "ISA.45-ISA.50",
+    "week": 9
+  },
+  {
+    "day_number": 63,
+    "date": "2026-05-30",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 23-25",
+    "passage_raw": "Matt 23-25",
+    "book": "Matthew",
+    "chapters": [
+      23,
+      24,
+      25
+    ],
+    "osis_id": "MAT.23-MAT.25",
+    "week": 9
+  },
+  {
+    "day_number": 64,
+    "date": "2026-05-31",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 3-4",
+    "passage_raw": "1Cor 3-4",
+    "book": "1 Corinthians",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "1CO.3-1CO.4",
+    "week": 10
+  },
+  {
+    "day_number": 65,
+    "date": "2026-06-01",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 36-39",
+    "passage_raw": "Gen 36-39",
+    "book": "Genesis",
+    "chapters": [
+      36,
+      37,
+      38,
+      39
+    ],
+    "osis_id": "GEN.36-GEN.39",
+    "week": 10
+  },
+  {
+    "day_number": 66,
+    "date": "2026-06-02",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Ruth",
+    "passage_raw": "Ruth",
+    "book": "Ruth",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "RUT.1-RUT.4",
+    "week": 10
+  },
+  {
+    "day_number": 67,
+    "date": "2026-06-03",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 27-29",
+    "passage_raw": "Ps 27-29",
+    "book": "Psalms",
+    "chapters": [
+      27,
+      28,
+      29
+    ],
+    "osis_id": "PSA.27-PSA.29",
+    "week": 10
+  },
+  {
+    "day_number": 68,
+    "date": "2026-06-04",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 19-20",
+    "passage_raw": "Job 19-20",
+    "book": "Job",
+    "chapters": [
+      19,
+      20
+    ],
+    "osis_id": "JOB.19-JOB.20",
+    "week": 10
+  },
+  {
+    "day_number": 69,
+    "date": "2026-06-05",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 51-55",
+    "passage_raw": "Isa 51-55",
+    "book": "Isaiah",
+    "chapters": [
+      51,
+      52,
+      53,
+      54,
+      55
+    ],
+    "osis_id": "ISA.51-ISA.55",
+    "week": 10
+  },
+  {
+    "day_number": 70,
+    "date": "2026-06-06",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Matthew 26-28",
+    "passage_raw": "Matt 26-28",
+    "book": "Matthew",
+    "chapters": [
+      26,
+      27,
+      28
+    ],
+    "osis_id": "MAT.26-MAT.28",
+    "week": 10
+  },
+  {
+    "day_number": 71,
+    "date": "2026-06-07",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 5-6",
+    "passage_raw": "1Cor 5-6",
+    "book": "1 Corinthians",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "1CO.5-1CO.6",
+    "week": 11
+  },
+  {
+    "day_number": 72,
+    "date": "2026-06-08",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 40-43",
+    "passage_raw": "Gen 40-43",
+    "book": "Genesis",
+    "chapters": [
+      40,
+      41,
+      42,
+      43
+    ],
+    "osis_id": "GEN.40-GEN.43",
+    "week": 11
+  },
+  {
+    "day_number": 73,
+    "date": "2026-06-09",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 1-5",
+    "passage_raw": "1Sam 1-5",
+    "book": "1 Samuel",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "1SA.1-1SA.5",
+    "week": 11
+  },
+  {
+    "day_number": 74,
+    "date": "2026-06-10",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 30-32",
+    "passage_raw": "Ps 30-32",
+    "book": "Psalms",
+    "chapters": [
+      30,
+      31,
+      32
+    ],
+    "osis_id": "PSA.30-PSA.32",
+    "week": 11
+  },
+  {
+    "day_number": 75,
+    "date": "2026-06-11",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 21-22",
+    "passage_raw": "Job 21-22",
+    "book": "Job",
+    "chapters": [
+      21,
+      22
+    ],
+    "osis_id": "JOB.21-JOB.22",
+    "week": 11
+  },
+  {
+    "day_number": 76,
+    "date": "2026-06-12",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 56-61",
+    "passage_raw": "Isa 56-61",
+    "book": "Isaiah",
+    "chapters": [
+      56,
+      57,
+      58,
+      59,
+      60,
+      61
+    ],
+    "osis_id": "ISA.56-ISA.61",
+    "week": 11
+  },
+  {
+    "day_number": 77,
+    "date": "2026-06-13",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 1-2",
+    "passage_raw": "Mark 1-2",
+    "book": "Mark",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "MRK.1-MRK.2",
+    "week": 11
+  },
+  {
+    "day_number": 78,
+    "date": "2026-06-14",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 7-8",
+    "passage_raw": "1Cor 7-8",
+    "book": "1 Corinthians",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "1CO.7-1CO.8",
+    "week": 12
+  },
+  {
+    "day_number": 79,
+    "date": "2026-06-15",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 44-47",
+    "passage_raw": "Gen 44-47",
+    "book": "Genesis",
+    "chapters": [
+      44,
+      45,
+      46,
+      47
+    ],
+    "osis_id": "GEN.44-GEN.47",
+    "week": 12
+  },
+  {
+    "day_number": 80,
+    "date": "2026-06-16",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 6-10",
+    "passage_raw": "1Sam 6-10",
+    "book": "1 Samuel",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "1SA.6-1SA.10",
+    "week": 12
+  },
+  {
+    "day_number": 81,
+    "date": "2026-06-17",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 33-35",
+    "passage_raw": "Ps 33-35",
+    "book": "Psalms",
+    "chapters": [
+      33,
+      34,
+      35
+    ],
+    "osis_id": "PSA.33-PSA.35",
+    "week": 12
+  },
+  {
+    "day_number": 82,
+    "date": "2026-06-18",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 23-24",
+    "passage_raw": "Job 23-24",
+    "book": "Job",
+    "chapters": [
+      23,
+      24
+    ],
+    "osis_id": "JOB.23-JOB.24",
+    "week": 12
+  },
+  {
+    "day_number": 83,
+    "date": "2026-06-19",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Isaiah 62-66",
+    "passage_raw": "Isa 62-66",
+    "book": "Isaiah",
+    "chapters": [
+      62,
+      63,
+      64,
+      65,
+      66
+    ],
+    "osis_id": "ISA.62-ISA.66",
+    "week": 12
+  },
+  {
+    "day_number": 84,
+    "date": "2026-06-20",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 3-4",
+    "passage_raw": "Mark 3-4",
+    "book": "Mark",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "MRK.3-MRK.4",
+    "week": 12
+  },
+  {
+    "day_number": 85,
+    "date": "2026-06-21",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 9-10",
+    "passage_raw": "1Cor 9-10",
+    "book": "1 Corinthians",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "1CO.9-1CO.10",
+    "week": 13
+  },
+  {
+    "day_number": 86,
+    "date": "2026-06-22",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Genesis 48-50",
+    "passage_raw": "Gen 48-50",
+    "book": "Genesis",
+    "chapters": [
+      48,
+      49,
+      50
+    ],
+    "osis_id": "GEN.48-GEN.50",
+    "week": 13
+  },
+  {
+    "day_number": 87,
+    "date": "2026-06-23",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 11-15",
+    "passage_raw": "1Sam 11-15",
+    "book": "1 Samuel",
+    "chapters": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "osis_id": "1SA.11-1SA.15",
+    "week": 13
+  },
+  {
+    "day_number": 88,
+    "date": "2026-06-24",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 36-38",
+    "passage_raw": "Ps 36-38",
+    "book": "Psalms",
+    "chapters": [
+      36,
+      37,
+      38
+    ],
+    "osis_id": "PSA.36-PSA.38",
+    "week": 13
+  },
+  {
+    "day_number": 89,
+    "date": "2026-06-25",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 25-26",
+    "passage_raw": "Job 25-26",
+    "book": "Job",
+    "chapters": [
+      25,
+      26
+    ],
+    "osis_id": "JOB.25-JOB.26",
+    "week": 13
+  },
+  {
+    "day_number": 90,
+    "date": "2026-06-26",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 1-6",
+    "passage_raw": "Jer 1-6",
+    "book": "Jeremiah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "JER.1-JER.6",
+    "week": 13
+  },
+  {
+    "day_number": 91,
+    "date": "2026-06-27",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 5-6",
+    "passage_raw": "Mark 5-6",
+    "book": "Mark",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "MRK.5-MRK.6",
+    "week": 13
+  },
+  {
+    "day_number": 92,
+    "date": "2026-06-28",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 11-12",
+    "passage_raw": "1Cor 11-12",
+    "book": "1 Corinthians",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "1CO.11-1CO.12",
+    "week": 14
+  },
+  {
+    "day_number": 93,
+    "date": "2026-06-29",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 1-4",
+    "passage_raw": "Ex 1-4",
+    "book": "Exodus",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "EXO.1-EXO.4",
+    "week": 14
+  },
+  {
+    "day_number": 94,
+    "date": "2026-06-30",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 16-20",
+    "passage_raw": "1Sam 16-20",
+    "book": "1 Samuel",
+    "chapters": [
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "1SA.16-1SA.20",
+    "week": 14
+  },
+  {
+    "day_number": 95,
+    "date": "2026-07-01",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 39-41",
+    "passage_raw": "Ps 39-41",
+    "book": "Psalms",
+    "chapters": [
+      39,
+      40,
+      41
+    ],
+    "osis_id": "PSA.39-PSA.41",
+    "week": 14
+  },
+  {
+    "day_number": 96,
+    "date": "2026-07-02",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 27-28",
+    "passage_raw": "Job 27-28",
+    "book": "Job",
+    "chapters": [
+      27,
+      28
+    ],
+    "osis_id": "JOB.27-JOB.28",
+    "week": 14
+  },
+  {
+    "day_number": 97,
+    "date": "2026-07-03",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 7-11",
+    "passage_raw": "Jer 7-11",
+    "book": "Jeremiah",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "osis_id": "JER.7-JER.11",
+    "week": 14
+  },
+  {
+    "day_number": 98,
+    "date": "2026-07-04",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 7-8",
+    "passage_raw": "Mark 7-8",
+    "book": "Mark",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "MRK.7-MRK.8",
+    "week": 14
+  },
+  {
+    "day_number": 99,
+    "date": "2026-07-05",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 13-14",
+    "passage_raw": "1Cor 13-14",
+    "book": "1 Corinthians",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "1CO.13-1CO.14",
+    "week": 15
+  },
+  {
+    "day_number": 100,
+    "date": "2026-07-06",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 5-8",
+    "passage_raw": "Ex 5-8",
+    "book": "Exodus",
+    "chapters": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "osis_id": "EXO.5-EXO.8",
+    "week": 15
+  },
+  {
+    "day_number": 101,
+    "date": "2026-07-07",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 21-25",
+    "passage_raw": "1Sam 21-25",
+    "book": "1 Samuel",
+    "chapters": [
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "osis_id": "1SA.21-1SA.25",
+    "week": 15
+  },
+  {
+    "day_number": 102,
+    "date": "2026-07-08",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 42-44",
+    "passage_raw": "Ps 42-44",
+    "book": "Psalms",
+    "chapters": [
+      42,
+      43,
+      44
+    ],
+    "osis_id": "PSA.42-PSA.44",
+    "week": 15
+  },
+  {
+    "day_number": 103,
+    "date": "2026-07-09",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 29-30",
+    "passage_raw": "Job 29-30",
+    "book": "Job",
+    "chapters": [
+      29,
+      30
+    ],
+    "osis_id": "JOB.29-JOB.30",
+    "week": 15
+  },
+  {
+    "day_number": 104,
+    "date": "2026-07-10",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 12-16",
+    "passage_raw": "Jer 12-16",
+    "book": "Jeremiah",
+    "chapters": [
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "osis_id": "JER.12-JER.16",
+    "week": 15
+  },
+  {
+    "day_number": 105,
+    "date": "2026-07-11",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 9-10",
+    "passage_raw": "Mark 9-10",
+    "book": "Mark",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "MRK.9-MRK.10",
+    "week": 15
+  },
+  {
+    "day_number": 106,
+    "date": "2026-07-12",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Corinthians 15-16",
+    "passage_raw": "1Cor 15-16",
+    "book": "1 Corinthians",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "1CO.15-1CO.16",
+    "week": 16
+  },
+  {
+    "day_number": 107,
+    "date": "2026-07-13",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 9-12",
+    "passage_raw": "Ex 9-12",
+    "book": "Exodus",
+    "chapters": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "osis_id": "EXO.9-EXO.12",
+    "week": 16
+  },
+  {
+    "day_number": 108,
+    "date": "2026-07-14",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Samuel 26-31",
+    "passage_raw": "1Sam 26-31",
+    "book": "1 Samuel",
+    "chapters": [
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "osis_id": "1SA.26-1SA.31",
+    "week": 16
+  },
+  {
+    "day_number": 109,
+    "date": "2026-07-15",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 45-47",
+    "passage_raw": "Ps 45-47",
+    "book": "Psalms",
+    "chapters": [
+      45,
+      46,
+      47
+    ],
+    "osis_id": "PSA.45-PSA.47",
+    "week": 16
+  },
+  {
+    "day_number": 110,
+    "date": "2026-07-16",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 31-32",
+    "passage_raw": "Job 31-32",
+    "book": "Job",
+    "chapters": [
+      31,
+      32
+    ],
+    "osis_id": "JOB.31-JOB.32",
+    "week": 16
+  },
+  {
+    "day_number": 111,
+    "date": "2026-07-17",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 17-21",
+    "passage_raw": "Jer 17-21",
+    "book": "Jeremiah",
+    "chapters": [
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "osis_id": "JER.17-JER.21",
+    "week": 16
+  },
+  {
+    "day_number": 112,
+    "date": "2026-07-18",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 11-12",
+    "passage_raw": "Mark 11-12",
+    "book": "Mark",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "MRK.11-MRK.12",
+    "week": 16
+  },
+  {
+    "day_number": 113,
+    "date": "2026-07-19",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Corinthians 1-3",
+    "passage_raw": "2Cor 1-3",
+    "book": "2 Corinthians",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "2CO.1-2CO.3",
+    "week": 17
+  },
+  {
+    "day_number": 114,
+    "date": "2026-07-20",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 13-16",
+    "passage_raw": "Ex 13-16",
+    "book": "Exodus",
+    "chapters": [
+      13,
+      14,
+      15,
+      16
+    ],
+    "osis_id": "EXO.13-EXO.16",
+    "week": 17
+  },
+  {
+    "day_number": 115,
+    "date": "2026-07-21",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Samuel 1-4",
+    "passage_raw": "2Sam 1-4",
+    "book": "2 Samuel",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "2SA.1-2SA.4",
+    "week": 17
+  },
+  {
+    "day_number": 116,
+    "date": "2026-07-22",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 48-50",
+    "passage_raw": "Ps 48-50",
+    "book": "Psalms",
+    "chapters": [
+      48,
+      49,
+      50
+    ],
+    "osis_id": "PSA.48-PSA.50",
+    "week": 17
+  },
+  {
+    "day_number": 117,
+    "date": "2026-07-23",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 33-34",
+    "passage_raw": "Job 33-34",
+    "book": "Job",
+    "chapters": [
+      33,
+      34
+    ],
+    "osis_id": "JOB.33-JOB.34",
+    "week": 17
+  },
+  {
+    "day_number": 118,
+    "date": "2026-07-24",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 22-26",
+    "passage_raw": "Jer 22-26",
+    "book": "Jeremiah",
+    "chapters": [
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "osis_id": "JER.22-JER.26",
+    "week": 17
+  },
+  {
+    "day_number": 119,
+    "date": "2026-07-25",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 13-14",
+    "passage_raw": "Mark 13-14",
+    "book": "Mark",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "MRK.13-MRK.14",
+    "week": 17
+  },
+  {
+    "day_number": 120,
+    "date": "2026-07-26",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Corinthians 4-5",
+    "passage_raw": "2Cor 4-5",
+    "book": "2 Corinthians",
+    "chapters": [
+      4,
+      5
+    ],
+    "osis_id": "2CO.4-2CO.5",
+    "week": 18
+  },
+  {
+    "day_number": 121,
+    "date": "2026-07-27",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 17-20",
+    "passage_raw": "Ex 17-20",
+    "book": "Exodus",
+    "chapters": [
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "EXO.17-EXO.20",
+    "week": 18
+  },
+  {
+    "day_number": 122,
+    "date": "2026-07-28",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Samuel 5-9",
+    "passage_raw": "2Sam 5-9",
+    "book": "2 Samuel",
+    "chapters": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "osis_id": "2SA.5-2SA.9",
+    "week": 18
+  },
+  {
+    "day_number": 123,
+    "date": "2026-07-29",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 51-53",
+    "passage_raw": "Ps 51-53",
+    "book": "Psalms",
+    "chapters": [
+      51,
+      52,
+      53
+    ],
+    "osis_id": "PSA.51-PSA.53",
+    "week": 18
+  },
+  {
+    "day_number": 124,
+    "date": "2026-07-30",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 35-36",
+    "passage_raw": "Job 35-36",
+    "book": "Job",
+    "chapters": [
+      35,
+      36
+    ],
+    "osis_id": "JOB.35-JOB.36",
+    "week": 18
+  },
+  {
+    "day_number": 125,
+    "date": "2026-07-31",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 27-31",
+    "passage_raw": "Jer 27-31",
+    "book": "Jeremiah",
+    "chapters": [
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "osis_id": "JER.27-JER.31",
+    "week": 18
+  },
+  {
+    "day_number": 126,
+    "date": "2026-08-01",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Mark 15-16",
+    "passage_raw": "Mark 15-16",
+    "book": "Mark",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "MRK.15-MRK.16",
+    "week": 18
+  },
+  {
+    "day_number": 127,
+    "date": "2026-08-02",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Corinthians 6-8",
+    "passage_raw": "2Cor 6-8",
+    "book": "2 Corinthians",
+    "chapters": [
+      6,
+      7,
+      8
+    ],
+    "osis_id": "2CO.6-2CO.8",
+    "week": 19
+  },
+  {
+    "day_number": 128,
+    "date": "2026-08-03",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 21-24",
+    "passage_raw": "Ex 21-24",
+    "book": "Exodus",
+    "chapters": [
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "EXO.21-EXO.24",
+    "week": 19
+  },
+  {
+    "day_number": 129,
+    "date": "2026-08-04",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Samuel 10-14",
+    "passage_raw": "2Sam 10-14",
+    "book": "2 Samuel",
+    "chapters": [
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "osis_id": "2SA.10-2SA.14",
+    "week": 19
+  },
+  {
+    "day_number": 130,
+    "date": "2026-08-05",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 54-56",
+    "passage_raw": "Ps 54-56",
+    "book": "Psalms",
+    "chapters": [
+      54,
+      55,
+      56
+    ],
+    "osis_id": "PSA.54-PSA.56",
+    "week": 19
+  },
+  {
+    "day_number": 131,
+    "date": "2026-08-06",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 37-38",
+    "passage_raw": "Job 37-38",
+    "book": "Job",
+    "chapters": [
+      37,
+      38
+    ],
+    "osis_id": "JOB.37-JOB.38",
+    "week": 19
+  },
+  {
+    "day_number": 132,
+    "date": "2026-08-07",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 32-36",
+    "passage_raw": "Jer 32-36",
+    "book": "Jeremiah",
+    "chapters": [
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "osis_id": "JER.32-JER.36",
+    "week": 19
+  },
+  {
+    "day_number": 133,
+    "date": "2026-08-08",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 1-2",
+    "passage_raw": "Luke 1-2",
+    "book": "Luke",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "LUK.1-LUK.2",
+    "week": 19
+  },
+  {
+    "day_number": 134,
+    "date": "2026-08-09",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Corinthians 9-10",
+    "passage_raw": "2Cor 9-10",
+    "book": "2 Corinthians",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "2CO.9-2CO.10",
+    "week": 20
+  },
+  {
+    "day_number": 135,
+    "date": "2026-08-10",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 25-28",
+    "passage_raw": "Ex 25-28",
+    "book": "Exodus",
+    "chapters": [
+      25,
+      26,
+      27,
+      28
+    ],
+    "osis_id": "EXO.25-EXO.28",
+    "week": 20
+  },
+  {
+    "day_number": 136,
+    "date": "2026-08-11",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Samuel 15-19",
+    "passage_raw": "2Sam 15-19",
+    "book": "2 Samuel",
+    "chapters": [
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "osis_id": "2SA.15-2SA.19",
+    "week": 20
+  },
+  {
+    "day_number": 137,
+    "date": "2026-08-12",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 57-59",
+    "passage_raw": "Ps 57-59",
+    "book": "Psalms",
+    "chapters": [
+      57,
+      58,
+      59
+    ],
+    "osis_id": "PSA.57-PSA.59",
+    "week": 20
+  },
+  {
+    "day_number": 138,
+    "date": "2026-08-13",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 39-40",
+    "passage_raw": "Job 39-40",
+    "book": "Job",
+    "chapters": [
+      39,
+      40
+    ],
+    "osis_id": "JOB.39-JOB.40",
+    "week": 20
+  },
+  {
+    "day_number": 139,
+    "date": "2026-08-14",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 37-41",
+    "passage_raw": "Jer 37-41",
+    "book": "Jeremiah",
+    "chapters": [
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    "osis_id": "JER.37-JER.41",
+    "week": 20
+  },
+  {
+    "day_number": 140,
+    "date": "2026-08-15",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 3-4",
+    "passage_raw": "Luke 3-4",
+    "book": "Luke",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "LUK.3-LUK.4",
+    "week": 20
+  },
+  {
+    "day_number": 141,
+    "date": "2026-08-16",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Corinthians 11-13",
+    "passage_raw": "2Cor 11-13",
+    "book": "2 Corinthians",
+    "chapters": [
+      11,
+      12,
+      13
+    ],
+    "osis_id": "2CO.11-2CO.13",
+    "week": 21
+  },
+  {
+    "day_number": 142,
+    "date": "2026-08-17",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 29-32",
+    "passage_raw": "Ex 29-32",
+    "book": "Exodus",
+    "chapters": [
+      29,
+      30,
+      31,
+      32
+    ],
+    "osis_id": "EXO.29-EXO.32",
+    "week": 21
+  },
+  {
+    "day_number": 143,
+    "date": "2026-08-18",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Samuel 20-24",
+    "passage_raw": "2Sam 20-24",
+    "book": "2 Samuel",
+    "chapters": [
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "2SA.20-2SA.24",
+    "week": 21
+  },
+  {
+    "day_number": 144,
+    "date": "2026-08-19",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 60-62",
+    "passage_raw": "Ps 60-62",
+    "book": "Psalms",
+    "chapters": [
+      60,
+      61,
+      62
+    ],
+    "osis_id": "PSA.60-PSA.62",
+    "week": 21
+  },
+  {
+    "day_number": 145,
+    "date": "2026-08-20",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Job 41-42",
+    "passage_raw": "Job 41-42",
+    "book": "Job",
+    "chapters": [
+      41,
+      42
+    ],
+    "osis_id": "JOB.41-JOB.42",
+    "week": 21
+  },
+  {
+    "day_number": 146,
+    "date": "2026-08-21",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 42-46",
+    "passage_raw": "Jer 42-46",
+    "book": "Jeremiah",
+    "chapters": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "osis_id": "JER.42-JER.46",
+    "week": 21
+  },
+  {
+    "day_number": 147,
+    "date": "2026-08-22",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 5-6",
+    "passage_raw": "Luke 5-6",
+    "book": "Luke",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "LUK.5-LUK.6",
+    "week": 21
+  },
+  {
+    "day_number": 148,
+    "date": "2026-08-23",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Galatians 1-3",
+    "passage_raw": "Gal 1-3",
+    "book": "Galatians",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "GAL.1-GAL.3",
+    "week": 22
+  },
+  {
+    "day_number": 149,
+    "date": "2026-08-24",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 33-36",
+    "passage_raw": "Ex 33-36",
+    "book": "Exodus",
+    "chapters": [
+      33,
+      34,
+      35,
+      36
+    ],
+    "osis_id": "EXO.33-EXO.36",
+    "week": 22
+  },
+  {
+    "day_number": 150,
+    "date": "2026-08-25",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Kings 1-4",
+    "passage_raw": "1Ki 1-4",
+    "book": "1 Kings",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "1KI.1-1KI.4",
+    "week": 22
+  },
+  {
+    "day_number": 151,
+    "date": "2026-08-26",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 63-65",
+    "passage_raw": "Ps 63-65",
+    "book": "Psalms",
+    "chapters": [
+      63,
+      64,
+      65
+    ],
+    "osis_id": "PSA.63-PSA.65",
+    "week": 22
+  },
+  {
+    "day_number": 152,
+    "date": "2026-08-27",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 1",
+    "passage_raw": "Prov 1",
+    "book": "Proverbs",
+    "chapters": [
+      1
+    ],
+    "osis_id": "PRO.1",
+    "week": 22
+  },
+  {
+    "day_number": 153,
+    "date": "2026-08-28",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jeremiah 47-52",
+    "passage_raw": "Jer 47-52",
+    "book": "Jeremiah",
+    "chapters": [
+      47,
+      48,
+      49,
+      50,
+      51,
+      52
+    ],
+    "osis_id": "JER.47-JER.52",
+    "week": 22
+  },
+  {
+    "day_number": 154,
+    "date": "2026-08-29",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 7-8",
+    "passage_raw": "Luke 7-8",
+    "book": "Luke",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "LUK.7-LUK.8",
+    "week": 22
+  },
+  {
+    "day_number": 155,
+    "date": "2026-08-30",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Galatians 4-6",
+    "passage_raw": "Gal 4-6",
+    "book": "Galatians",
+    "chapters": [
+      4,
+      5,
+      6
+    ],
+    "osis_id": "GAL.4-GAL.6",
+    "week": 23
+  },
+  {
+    "day_number": 156,
+    "date": "2026-08-31",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Exodus 37-40",
+    "passage_raw": "Ex 37-40",
+    "book": "Exodus",
+    "chapters": [
+      37,
+      38,
+      39,
+      40
+    ],
+    "osis_id": "EXO.37-EXO.40",
+    "week": 23
+  },
+  {
+    "day_number": 157,
+    "date": "2026-09-01",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Kings 5-9",
+    "passage_raw": "1Ki 5-9",
+    "book": "1 Kings",
+    "chapters": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "osis_id": "1KI.5-1KI.9",
+    "week": 23
+  },
+  {
+    "day_number": 158,
+    "date": "2026-09-02",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 66-68",
+    "passage_raw": "Ps 66-68",
+    "book": "Psalms",
+    "chapters": [
+      66,
+      67,
+      68
+    ],
+    "osis_id": "PSA.66-PSA.68",
+    "week": 23
+  },
+  {
+    "day_number": 159,
+    "date": "2026-09-03",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 2-3",
+    "passage_raw": "Prov 2-3",
+    "book": "Proverbs",
+    "chapters": [
+      2,
+      3
+    ],
+    "osis_id": "PRO.2-PRO.3",
+    "week": 23
+  },
+  {
+    "day_number": 160,
+    "date": "2026-09-04",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Lamentations",
+    "passage_raw": "Lamentations",
+    "book": "Lamentations",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "LAM.1-LAM.5",
+    "week": 23
+  },
+  {
+    "day_number": 161,
+    "date": "2026-09-05",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 9-10",
+    "passage_raw": "Luke 9-10",
+    "book": "Luke",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "LUK.9-LUK.10",
+    "week": 23
+  },
+  {
+    "day_number": 162,
+    "date": "2026-09-06",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Ephesians 1-3",
+    "passage_raw": "Eph 1-3",
+    "book": "Ephesians",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "EPH.1-EPH.3",
+    "week": 24
+  },
+  {
+    "day_number": 163,
+    "date": "2026-09-07",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 1-3",
+    "passage_raw": "Lev 1-3",
+    "book": "Leviticus",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "LEV.1-LEV.3",
+    "week": 24
+  },
+  {
+    "day_number": 164,
+    "date": "2026-09-08",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Kings 10-13",
+    "passage_raw": "1Ki 10-13",
+    "book": "1 Kings",
+    "chapters": [
+      10,
+      11,
+      12,
+      13
+    ],
+    "osis_id": "1KI.10-1KI.13",
+    "week": 24
+  },
+  {
+    "day_number": 165,
+    "date": "2026-09-09",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 69-71",
+    "passage_raw": "Ps 69-71",
+    "book": "Psalms",
+    "chapters": [
+      69,
+      70,
+      71
+    ],
+    "osis_id": "PSA.69-PSA.71",
+    "week": 24
+  },
+  {
+    "day_number": 166,
+    "date": "2026-09-10",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 4",
+    "passage_raw": "Prov 4",
+    "book": "Proverbs",
+    "chapters": [
+      4
+    ],
+    "osis_id": "PRO.4",
+    "week": 24
+  },
+  {
+    "day_number": 167,
+    "date": "2026-09-11",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 1-6",
+    "passage_raw": "Ezek 1-6",
+    "book": "Ezekiel",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "EZK.1-EZK.6",
+    "week": 24
+  },
+  {
+    "day_number": 168,
+    "date": "2026-09-12",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 11-12",
+    "passage_raw": "Luke 11-12",
+    "book": "Luke",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "LUK.11-LUK.12",
+    "week": 24
+  },
+  {
+    "day_number": 169,
+    "date": "2026-09-13",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Ephesians 4-6",
+    "passage_raw": "Eph 4-6",
+    "book": "Ephesians",
+    "chapters": [
+      4,
+      5,
+      6
+    ],
+    "osis_id": "EPH.4-EPH.6",
+    "week": 25
+  },
+  {
+    "day_number": 170,
+    "date": "2026-09-14",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 4-6",
+    "passage_raw": "Lev 4-6",
+    "book": "Leviticus",
+    "chapters": [
+      4,
+      5,
+      6
+    ],
+    "osis_id": "LEV.4-LEV.6",
+    "week": 25
+  },
+  {
+    "day_number": 171,
+    "date": "2026-09-15",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Kings 14-18",
+    "passage_raw": "1Ki 14-18",
+    "book": "1 Kings",
+    "chapters": [
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "osis_id": "1KI.14-1KI.18",
+    "week": 25
+  },
+  {
+    "day_number": 172,
+    "date": "2026-09-16",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 72-74",
+    "passage_raw": "Ps 72-74",
+    "book": "Psalms",
+    "chapters": [
+      72,
+      73,
+      74
+    ],
+    "osis_id": "PSA.72-PSA.74",
+    "week": 25
+  },
+  {
+    "day_number": 173,
+    "date": "2026-09-17",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 5-6",
+    "passage_raw": "Prov 5-6",
+    "book": "Proverbs",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "PRO.5-PRO.6",
+    "week": 25
+  },
+  {
+    "day_number": 174,
+    "date": "2026-09-18",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 7-12",
+    "passage_raw": "Ezek 7-12",
+    "book": "Ezekiel",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "osis_id": "EZK.7-EZK.12",
+    "week": 25
+  },
+  {
+    "day_number": 175,
+    "date": "2026-09-19",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 13-14",
+    "passage_raw": "Luke 13-14",
+    "book": "Luke",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "LUK.13-LUK.14",
+    "week": 25
+  },
+  {
+    "day_number": 176,
+    "date": "2026-09-20",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Philippians 1-2",
+    "passage_raw": "Phil 1-2",
+    "book": "Philippians",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "PHP.1-PHP.2",
+    "week": 26
+  },
+  {
+    "day_number": 177,
+    "date": "2026-09-21",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 7-9",
+    "passage_raw": "Lev 7-9",
+    "book": "Leviticus",
+    "chapters": [
+      7,
+      8,
+      9
+    ],
+    "osis_id": "LEV.7-LEV.9",
+    "week": 26
+  },
+  {
+    "day_number": 178,
+    "date": "2026-09-22",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Kings 19-22",
+    "passage_raw": "1Ki 19-22",
+    "book": "1 Kings",
+    "chapters": [
+      19,
+      20,
+      21,
+      22
+    ],
+    "osis_id": "1KI.19-1KI.22",
+    "week": 26
+  },
+  {
+    "day_number": 179,
+    "date": "2026-09-23",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 75-77",
+    "passage_raw": "Ps 75-77",
+    "book": "Psalms",
+    "chapters": [
+      75,
+      76,
+      77
+    ],
+    "osis_id": "PSA.75-PSA.77",
+    "week": 26
+  },
+  {
+    "day_number": 180,
+    "date": "2026-09-24",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 7",
+    "passage_raw": "Prov 7",
+    "book": "Proverbs",
+    "chapters": [
+      7
+    ],
+    "osis_id": "PRO.7",
+    "week": 26
+  },
+  {
+    "day_number": 181,
+    "date": "2026-09-25",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 13-18",
+    "passage_raw": "Ezek 13-18",
+    "book": "Ezekiel",
+    "chapters": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "osis_id": "EZK.13-EZK.18",
+    "week": 26
+  },
+  {
+    "day_number": 182,
+    "date": "2026-09-26",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 15-16",
+    "passage_raw": "Luke 15-16",
+    "book": "Luke",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "LUK.15-LUK.16",
+    "week": 26
+  },
+  {
+    "day_number": 183,
+    "date": "2026-09-27",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Philippians 3-4",
+    "passage_raw": "Phil 3-4",
+    "book": "Philippians",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "PHP.3-PHP.4",
+    "week": 27
+  },
+  {
+    "day_number": 184,
+    "date": "2026-09-28",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 10-12",
+    "passage_raw": "Lev 10-12",
+    "book": "Leviticus",
+    "chapters": [
+      10,
+      11,
+      12
+    ],
+    "osis_id": "LEV.10-LEV.12",
+    "week": 27
+  },
+  {
+    "day_number": 185,
+    "date": "2026-09-29",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Kings 1-5",
+    "passage_raw": "2Ki 1-5",
+    "book": "2 Kings",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "2KI.1-2KI.5",
+    "week": 27
+  },
+  {
+    "day_number": 186,
+    "date": "2026-09-30",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 78-80",
+    "passage_raw": "Ps 78-80",
+    "book": "Psalms",
+    "chapters": [
+      78,
+      79,
+      80
+    ],
+    "osis_id": "PSA.78-PSA.80",
+    "week": 27
+  },
+  {
+    "day_number": 187,
+    "date": "2026-10-01",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 8-9",
+    "passage_raw": "Prov 8-9",
+    "book": "Proverbs",
+    "chapters": [
+      8,
+      9
+    ],
+    "osis_id": "PRO.8-PRO.9",
+    "week": 27
+  },
+  {
+    "day_number": 188,
+    "date": "2026-10-02",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 19-24",
+    "passage_raw": "Ezek 19-24",
+    "book": "Ezekiel",
+    "chapters": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "EZK.19-EZK.24",
+    "week": 27
+  },
+  {
+    "day_number": 189,
+    "date": "2026-10-03",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 17-18",
+    "passage_raw": "Luke 17-18",
+    "book": "Luke",
+    "chapters": [
+      17,
+      18
+    ],
+    "osis_id": "LUK.17-LUK.18",
+    "week": 27
+  },
+  {
+    "day_number": 190,
+    "date": "2026-10-04",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Colossians 1-2",
+    "passage_raw": "Col 1-2",
+    "book": "Colossians",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "COL.1-COL.2",
+    "week": 28
+  },
+  {
+    "day_number": 191,
+    "date": "2026-10-05",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 13-15",
+    "passage_raw": "Lev 13-15",
+    "book": "Leviticus",
+    "chapters": [
+      13,
+      14,
+      15
+    ],
+    "osis_id": "LEV.13-LEV.15",
+    "week": 28
+  },
+  {
+    "day_number": 192,
+    "date": "2026-10-06",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Kings 6-10",
+    "passage_raw": "2Ki 6-10",
+    "book": "2 Kings",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "2KI.6-2KI.10",
+    "week": 28
+  },
+  {
+    "day_number": 193,
+    "date": "2026-10-07",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 81-83",
+    "passage_raw": "Ps 81-83",
+    "book": "Psalms",
+    "chapters": [
+      81,
+      82,
+      83
+    ],
+    "osis_id": "PSA.81-PSA.83",
+    "week": 28
+  },
+  {
+    "day_number": 194,
+    "date": "2026-10-08",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 10",
+    "passage_raw": "Prov 10",
+    "book": "Proverbs",
+    "chapters": [
+      10
+    ],
+    "osis_id": "PRO.10",
+    "week": 28
+  },
+  {
+    "day_number": 195,
+    "date": "2026-10-09",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 25-30",
+    "passage_raw": "Ezek 25-30",
+    "book": "Ezekiel",
+    "chapters": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "osis_id": "EZK.25-EZK.30",
+    "week": 28
+  },
+  {
+    "day_number": 196,
+    "date": "2026-10-10",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 19-20",
+    "passage_raw": "Luke 19-20",
+    "book": "Luke",
+    "chapters": [
+      19,
+      20
+    ],
+    "osis_id": "LUK.19-LUK.20",
+    "week": 28
+  },
+  {
+    "day_number": 197,
+    "date": "2026-10-11",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Colossians 3-4",
+    "passage_raw": "Col 3-4",
+    "book": "Colossians",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "COL.3-COL.4",
+    "week": 29
+  },
+  {
+    "day_number": 198,
+    "date": "2026-10-12",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 16-18",
+    "passage_raw": "Lev 16-18",
+    "book": "Leviticus",
+    "chapters": [
+      16,
+      17,
+      18
+    ],
+    "osis_id": "LEV.16-LEV.18",
+    "week": 29
+  },
+  {
+    "day_number": 199,
+    "date": "2026-10-13",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Kings 11-15",
+    "passage_raw": "2Ki 11-15",
+    "book": "2 Kings",
+    "chapters": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "osis_id": "2KI.11-2KI.15",
+    "week": 29
+  },
+  {
+    "day_number": 200,
+    "date": "2026-10-14",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 84-86",
+    "passage_raw": "Ps 84-86",
+    "book": "Psalms",
+    "chapters": [
+      84,
+      85,
+      86
+    ],
+    "osis_id": "PSA.84-PSA.86",
+    "week": 29
+  },
+  {
+    "day_number": 201,
+    "date": "2026-10-15",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 11-12",
+    "passage_raw": "Prov 11-12",
+    "book": "Proverbs",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "PRO.11-PRO.12",
+    "week": 29
+  },
+  {
+    "day_number": 202,
+    "date": "2026-10-16",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 31-36",
+    "passage_raw": "Ezek 31-36",
+    "book": "Ezekiel",
+    "chapters": [
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "osis_id": "EZK.31-EZK.36",
+    "week": 29
+  },
+  {
+    "day_number": 203,
+    "date": "2026-10-17",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 21-22",
+    "passage_raw": "Luke 21-22",
+    "book": "Luke",
+    "chapters": [
+      21,
+      22
+    ],
+    "osis_id": "LUK.21-LUK.22",
+    "week": 29
+  },
+  {
+    "day_number": 204,
+    "date": "2026-10-18",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Thessalonians 1-3",
+    "passage_raw": "1Thes 1-3",
+    "book": "1 Thessalonians",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "1TH.1-1TH.3",
+    "week": 30
+  },
+  {
+    "day_number": 205,
+    "date": "2026-10-19",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 19-21",
+    "passage_raw": "Lev 19-21",
+    "book": "Leviticus",
+    "chapters": [
+      19,
+      20,
+      21
+    ],
+    "osis_id": "LEV.19-LEV.21",
+    "week": 30
+  },
+  {
+    "day_number": 206,
+    "date": "2026-10-20",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Kings 16-20",
+    "passage_raw": "2Ki 16-20",
+    "book": "2 Kings",
+    "chapters": [
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "2KI.16-2KI.20",
+    "week": 30
+  },
+  {
+    "day_number": 207,
+    "date": "2026-10-21",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 87-89",
+    "passage_raw": "Ps 87-89",
+    "book": "Psalms",
+    "chapters": [
+      87,
+      88,
+      89
+    ],
+    "osis_id": "PSA.87-PSA.89",
+    "week": 30
+  },
+  {
+    "day_number": 208,
+    "date": "2026-10-22",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 13",
+    "passage_raw": "Prov 13",
+    "book": "Proverbs",
+    "chapters": [
+      13
+    ],
+    "osis_id": "PRO.13",
+    "week": 30
+  },
+  {
+    "day_number": 209,
+    "date": "2026-10-23",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 37-42",
+    "passage_raw": "Ezek 37-42",
+    "book": "Ezekiel",
+    "chapters": [
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "osis_id": "EZK.37-EZK.42",
+    "week": 30
+  },
+  {
+    "day_number": 210,
+    "date": "2026-10-24",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Luke 23-24",
+    "passage_raw": "Luke 23-24",
+    "book": "Luke",
+    "chapters": [
+      23,
+      24
+    ],
+    "osis_id": "LUK.23-LUK.24",
+    "week": 30
+  },
+  {
+    "day_number": 211,
+    "date": "2026-10-25",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Thessalonians 4-5",
+    "passage_raw": "1Thes 4-5",
+    "book": "1 Thessalonians",
+    "chapters": [
+      4,
+      5
+    ],
+    "osis_id": "1TH.4-1TH.5",
+    "week": 31
+  },
+  {
+    "day_number": 212,
+    "date": "2026-10-26",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 22-24",
+    "passage_raw": "Lev 22-24",
+    "book": "Leviticus",
+    "chapters": [
+      22,
+      23,
+      24
+    ],
+    "osis_id": "LEV.22-LEV.24",
+    "week": 31
+  },
+  {
+    "day_number": 213,
+    "date": "2026-10-27",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Kings 21-25",
+    "passage_raw": "2Ki 21-25",
+    "book": "2 Kings",
+    "chapters": [
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "osis_id": "2KI.21-2KI.25",
+    "week": 31
+  },
+  {
+    "day_number": 214,
+    "date": "2026-10-28",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 90-92",
+    "passage_raw": "Ps 90-92",
+    "book": "Psalms",
+    "chapters": [
+      90,
+      91,
+      92
+    ],
+    "osis_id": "PSA.90-PSA.92",
+    "week": 31
+  },
+  {
+    "day_number": 215,
+    "date": "2026-10-29",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 14-15",
+    "passage_raw": "Prov 14-15",
+    "book": "Proverbs",
+    "chapters": [
+      14,
+      15
+    ],
+    "osis_id": "PRO.14-PRO.15",
+    "week": 31
+  },
+  {
+    "day_number": 216,
+    "date": "2026-10-30",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Ezekiel 43-48",
+    "passage_raw": "Ezek 43-48",
+    "book": "Ezekiel",
+    "chapters": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "osis_id": "EZK.43-EZK.48",
+    "week": 31
+  },
+  {
+    "day_number": 217,
+    "date": "2026-10-31",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 1-2",
+    "passage_raw": "John 1-2",
+    "book": "John",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "JHN.1-JHN.2",
+    "week": 31
+  },
+  {
+    "day_number": 218,
+    "date": "2026-11-01",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Thessalonians",
+    "passage_raw": "2Thes",
+    "book": "2 Thessalonians",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "2TH.1-2TH.3",
+    "week": 32
+  },
+  {
+    "day_number": 219,
+    "date": "2026-11-02",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Leviticus 25-27",
+    "passage_raw": "Lev 25-27",
+    "book": "Leviticus",
+    "chapters": [
+      25,
+      26,
+      27
+    ],
+    "osis_id": "LEV.25-LEV.27",
+    "week": 32
+  },
+  {
+    "day_number": 220,
+    "date": "2026-11-03",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 1-4",
+    "passage_raw": "1Chr 1-4",
+    "book": "1 Chronicles",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "1CH.1-1CH.4",
+    "week": 32
+  },
+  {
+    "day_number": 221,
+    "date": "2026-11-04",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 93-95",
+    "passage_raw": "Ps 93-95",
+    "book": "Psalms",
+    "chapters": [
+      93,
+      94,
+      95
+    ],
+    "osis_id": "PSA.93-PSA.95",
+    "week": 32
+  },
+  {
+    "day_number": 222,
+    "date": "2026-11-05",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 16",
+    "passage_raw": "Prov 16",
+    "book": "Proverbs",
+    "chapters": [
+      16
+    ],
+    "osis_id": "PRO.16",
+    "week": 32
+  },
+  {
+    "day_number": 223,
+    "date": "2026-11-06",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Daniel 1-6",
+    "passage_raw": "Dan 1-6",
+    "book": "Daniel",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "DAN.1-DAN.6",
+    "week": 32
+  },
+  {
+    "day_number": 224,
+    "date": "2026-11-07",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 3-4",
+    "passage_raw": "John 3-4",
+    "book": "John",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "JHN.3-JHN.4",
+    "week": 32
+  },
+  {
+    "day_number": 225,
+    "date": "2026-11-08",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Timothy 1-3",
+    "passage_raw": "1Tim 1-3",
+    "book": "1 Timothy",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "1TI.1-1TI.3",
+    "week": 33
+  },
+  {
+    "day_number": 226,
+    "date": "2026-11-09",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 1-4",
+    "passage_raw": "Num 1-4",
+    "book": "Numbers",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "NUM.1-NUM.4",
+    "week": 33
+  },
+  {
+    "day_number": 227,
+    "date": "2026-11-10",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 5-9",
+    "passage_raw": "1Chr 5-9",
+    "book": "1 Chronicles",
+    "chapters": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "osis_id": "1CH.5-1CH.9",
+    "week": 33
+  },
+  {
+    "day_number": 228,
+    "date": "2026-11-11",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 96-98",
+    "passage_raw": "Ps 96-98",
+    "book": "Psalms",
+    "chapters": [
+      96,
+      97,
+      98
+    ],
+    "osis_id": "PSA.96-PSA.98",
+    "week": 33
+  },
+  {
+    "day_number": 229,
+    "date": "2026-11-12",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 17-18",
+    "passage_raw": "Prov 17-18",
+    "book": "Proverbs",
+    "chapters": [
+      17,
+      18
+    ],
+    "osis_id": "PRO.17-PRO.18",
+    "week": 33
+  },
+  {
+    "day_number": 230,
+    "date": "2026-11-13",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Daniel 7-12",
+    "passage_raw": "Dan 7-12",
+    "book": "Daniel",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "osis_id": "DAN.7-DAN.12",
+    "week": 33
+  },
+  {
+    "day_number": 231,
+    "date": "2026-11-14",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 5-6",
+    "passage_raw": "John 5-6",
+    "book": "John",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "JHN.5-JHN.6",
+    "week": 33
+  },
+  {
+    "day_number": 232,
+    "date": "2026-11-15",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Timothy 4-6",
+    "passage_raw": "1Tim 4-6",
+    "book": "1 Timothy",
+    "chapters": [
+      4,
+      5,
+      6
+    ],
+    "osis_id": "1TI.4-1TI.6",
+    "week": 34
+  },
+  {
+    "day_number": 233,
+    "date": "2026-11-16",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 5-8",
+    "passage_raw": "Num 5-8",
+    "book": "Numbers",
+    "chapters": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "osis_id": "NUM.5-NUM.8",
+    "week": 34
+  },
+  {
+    "day_number": 234,
+    "date": "2026-11-17",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 10-14",
+    "passage_raw": "1Chr 10-14",
+    "book": "1 Chronicles",
+    "chapters": [
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "osis_id": "1CH.10-1CH.14",
+    "week": 34
+  },
+  {
+    "day_number": 235,
+    "date": "2026-11-18",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 99-101",
+    "passage_raw": "Ps 99-101",
+    "book": "Psalms",
+    "chapters": [
+      99,
+      100,
+      101
+    ],
+    "osis_id": "PSA.99-PSA.101",
+    "week": 34
+  },
+  {
+    "day_number": 236,
+    "date": "2026-11-19",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 19",
+    "passage_raw": "Prov 19",
+    "book": "Proverbs",
+    "chapters": [
+      19
+    ],
+    "osis_id": "PRO.19",
+    "week": 34
+  },
+  {
+    "day_number": 237,
+    "date": "2026-11-20",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Hosea 1-7",
+    "passage_raw": "Hosea 1-7",
+    "book": "Hosea",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "osis_id": "HOS.1-HOS.7",
+    "week": 34
+  },
+  {
+    "day_number": 238,
+    "date": "2026-11-21",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 7-9",
+    "passage_raw": "John 7-9",
+    "book": "John",
+    "chapters": [
+      7,
+      8,
+      9
+    ],
+    "osis_id": "JHN.7-JHN.9",
+    "week": 34
+  },
+  {
+    "day_number": 239,
+    "date": "2026-11-22",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Timothy 1-2",
+    "passage_raw": "2Tim 1-2",
+    "book": "2 Timothy",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "2TI.1-2TI.2",
+    "week": 35
+  },
+  {
+    "day_number": 240,
+    "date": "2026-11-23",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 9-12",
+    "passage_raw": "Num 9-12",
+    "book": "Numbers",
+    "chapters": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "osis_id": "NUM.9-NUM.12",
+    "week": 35
+  },
+  {
+    "day_number": 241,
+    "date": "2026-11-24",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 15-19",
+    "passage_raw": "1Chr 15-19",
+    "book": "1 Chronicles",
+    "chapters": [
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "osis_id": "1CH.15-1CH.19",
+    "week": 35
+  },
+  {
+    "day_number": 242,
+    "date": "2026-11-25",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 102-104",
+    "passage_raw": "Ps 102-104",
+    "book": "Psalms",
+    "chapters": [
+      102,
+      103,
+      104
+    ],
+    "osis_id": "PSA.102-PSA.104",
+    "week": 35
+  },
+  {
+    "day_number": 243,
+    "date": "2026-11-26",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 20-21",
+    "passage_raw": "Prov 20-21",
+    "book": "Proverbs",
+    "chapters": [
+      20,
+      21
+    ],
+    "osis_id": "PRO.20-PRO.21",
+    "week": 35
+  },
+  {
+    "day_number": 244,
+    "date": "2026-11-27",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Hosea 8-14",
+    "passage_raw": "Hosea 8-14",
+    "book": "Hosea",
+    "chapters": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "osis_id": "HOS.8-HOS.14",
+    "week": 35
+  },
+  {
+    "day_number": 245,
+    "date": "2026-11-28",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 10-12",
+    "passage_raw": "John 10-12",
+    "book": "John",
+    "chapters": [
+      10,
+      11,
+      12
+    ],
+    "osis_id": "JHN.10-JHN.12",
+    "week": 35
+  },
+  {
+    "day_number": 246,
+    "date": "2026-11-29",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Timothy 3-4",
+    "passage_raw": "2Tim 3-4",
+    "book": "2 Timothy",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "2TI.3-2TI.4",
+    "week": 36
+  },
+  {
+    "day_number": 247,
+    "date": "2026-11-30",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 13-16",
+    "passage_raw": "Num 13-16",
+    "book": "Numbers",
+    "chapters": [
+      13,
+      14,
+      15,
+      16
+    ],
+    "osis_id": "NUM.13-NUM.16",
+    "week": 36
+  },
+  {
+    "day_number": 248,
+    "date": "2026-12-01",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 20-24",
+    "passage_raw": "1Chr 20-24",
+    "book": "1 Chronicles",
+    "chapters": [
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "1CH.20-1CH.24",
+    "week": 36
+  },
+  {
+    "day_number": 249,
+    "date": "2026-12-02",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 105-107",
+    "passage_raw": "Ps 105-107",
+    "book": "Psalms",
+    "chapters": [
+      105,
+      106,
+      107
+    ],
+    "osis_id": "PSA.105-PSA.107",
+    "week": 36
+  },
+  {
+    "day_number": 250,
+    "date": "2026-12-03",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 22",
+    "passage_raw": "Prov 22",
+    "book": "Proverbs",
+    "chapters": [
+      22
+    ],
+    "osis_id": "PRO.22",
+    "week": 36
+  },
+  {
+    "day_number": 251,
+    "date": "2026-12-04",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Joel",
+    "passage_raw": "Joel",
+    "book": "Joel",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "JOL.1-JOL.3",
+    "week": 36
+  },
+  {
+    "day_number": 252,
+    "date": "2026-12-05",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 13-15",
+    "passage_raw": "John 13-15",
+    "book": "John",
+    "chapters": [
+      13,
+      14,
+      15
+    ],
+    "osis_id": "JHN.13-JHN.15",
+    "week": 36
+  },
+  {
+    "day_number": 253,
+    "date": "2026-12-06",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Titus",
+    "passage_raw": "Titus",
+    "book": "Titus",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "TIT.1-TIT.3",
+    "week": 37
+  },
+  {
+    "day_number": 254,
+    "date": "2026-12-07",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 17-20",
+    "passage_raw": "Num 17-20",
+    "book": "Numbers",
+    "chapters": [
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "NUM.17-NUM.20",
+    "week": 37
+  },
+  {
+    "day_number": 255,
+    "date": "2026-12-08",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "1 Chronicles 25-29",
+    "passage_raw": "1Chr 25-29",
+    "book": "1 Chronicles",
+    "chapters": [
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "osis_id": "1CH.25-1CH.29",
+    "week": 37
+  },
+  {
+    "day_number": 256,
+    "date": "2026-12-09",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 108-110",
+    "passage_raw": "Ps 108-110",
+    "book": "Psalms",
+    "chapters": [
+      108,
+      109,
+      110
+    ],
+    "osis_id": "PSA.108-PSA.110",
+    "week": 37
+  },
+  {
+    "day_number": 257,
+    "date": "2026-12-10",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 23-24",
+    "passage_raw": "Prov 23-24",
+    "book": "Proverbs",
+    "chapters": [
+      23,
+      24
+    ],
+    "osis_id": "PRO.23-PRO.24",
+    "week": 37
+  },
+  {
+    "day_number": 258,
+    "date": "2026-12-11",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Amos 1-4",
+    "passage_raw": "Amos 1-4",
+    "book": "Amos",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "AMO.1-AMO.4",
+    "week": 37
+  },
+  {
+    "day_number": 259,
+    "date": "2026-12-12",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 16-18",
+    "passage_raw": "John 16-18",
+    "book": "John",
+    "chapters": [
+      16,
+      17,
+      18
+    ],
+    "osis_id": "JHN.16-JHN.18",
+    "week": 37
+  },
+  {
+    "day_number": 260,
+    "date": "2026-12-13",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Philemon",
+    "passage_raw": "Philemon",
+    "book": "Philemon",
+    "chapters": [
+      1
+    ],
+    "osis_id": "PHM.1",
+    "week": 38
+  },
+  {
+    "day_number": 261,
+    "date": "2026-12-14",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 21-24",
+    "passage_raw": "Num 21-24",
+    "book": "Numbers",
+    "chapters": [
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "NUM.21-NUM.24",
+    "week": 38
+  },
+  {
+    "day_number": 262,
+    "date": "2026-12-15",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 1-5",
+    "passage_raw": "2Chr 1-5",
+    "book": "2 Chronicles",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "2CH.1-2CH.5",
+    "week": 38
+  },
+  {
+    "day_number": 263,
+    "date": "2026-12-16",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 111-113",
+    "passage_raw": "Ps 111-113",
+    "book": "Psalms",
+    "chapters": [
+      111,
+      112,
+      113
+    ],
+    "osis_id": "PSA.111-PSA.113",
+    "week": 38
+  },
+  {
+    "day_number": 264,
+    "date": "2026-12-17",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 25",
+    "passage_raw": "Prov 25",
+    "book": "Proverbs",
+    "chapters": [
+      25
+    ],
+    "osis_id": "PRO.25",
+    "week": 38
+  },
+  {
+    "day_number": 265,
+    "date": "2026-12-18",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Amos 5-9",
+    "passage_raw": "Amos 5-9",
+    "book": "Amos",
+    "chapters": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "osis_id": "AMO.5-AMO.9",
+    "week": 38
+  },
+  {
+    "day_number": 266,
+    "date": "2026-12-19",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "John 19-21",
+    "passage_raw": "John 19-21",
+    "book": "John",
+    "chapters": [
+      19,
+      20,
+      21
+    ],
+    "osis_id": "JHN.19-JHN.21",
+    "week": 38
+  },
+  {
+    "day_number": 267,
+    "date": "2026-12-20",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Hebrews 1-4",
+    "passage_raw": "Heb 1-4",
+    "book": "Hebrews",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "HEB.1-HEB.4",
+    "week": 39
+  },
+  {
+    "day_number": 268,
+    "date": "2026-12-21",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 25-28",
+    "passage_raw": "Num 25-28",
+    "book": "Numbers",
+    "chapters": [
+      25,
+      26,
+      27,
+      28
+    ],
+    "osis_id": "NUM.25-NUM.28",
+    "week": 39
+  },
+  {
+    "day_number": 269,
+    "date": "2026-12-22",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 6-10",
+    "passage_raw": "2Chr 6-10",
+    "book": "2 Chronicles",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "2CH.6-2CH.10",
+    "week": 39
+  },
+  {
+    "day_number": 270,
+    "date": "2026-12-23",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 114-116",
+    "passage_raw": "Ps 114-116",
+    "book": "Psalms",
+    "chapters": [
+      114,
+      115,
+      116
+    ],
+    "osis_id": "PSA.114-PSA.116",
+    "week": 39
+  },
+  {
+    "day_number": 271,
+    "date": "2026-12-24",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 26-27",
+    "passage_raw": "Prov 26-27",
+    "book": "Proverbs",
+    "chapters": [
+      26,
+      27
+    ],
+    "osis_id": "PRO.26-PRO.27",
+    "week": 39
+  },
+  {
+    "day_number": 272,
+    "date": "2026-12-25",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Obadiah",
+    "passage_raw": "Obadiah",
+    "book": "Obadiah",
+    "chapters": [
+      1
+    ],
+    "osis_id": "OBA.1",
+    "week": 39
+  },
+  {
+    "day_number": 273,
+    "date": "2026-12-26",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 1-2",
+    "passage_raw": "Acts 1-2",
+    "book": "Acts",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "ACT.1-ACT.2",
+    "week": 39
+  },
+  {
+    "day_number": 274,
+    "date": "2026-12-27",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Hebrews 5-7",
+    "passage_raw": "Heb 5-7",
+    "book": "Hebrews",
+    "chapters": [
+      5,
+      6,
+      7
+    ],
+    "osis_id": "HEB.5-HEB.7",
+    "week": 40
+  },
+  {
+    "day_number": 275,
+    "date": "2026-12-28",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 29-32",
+    "passage_raw": "Num 29-32",
+    "book": "Numbers",
+    "chapters": [
+      29,
+      30,
+      31,
+      32
+    ],
+    "osis_id": "NUM.29-NUM.32",
+    "week": 40
+  },
+  {
+    "day_number": 276,
+    "date": "2026-12-29",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 11-15",
+    "passage_raw": "2Chr 11-15",
+    "book": "2 Chronicles",
+    "chapters": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "osis_id": "2CH.11-2CH.15",
+    "week": 40
+  },
+  {
+    "day_number": 277,
+    "date": "2026-12-30",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 117-118",
+    "passage_raw": "Ps 117-118",
+    "book": "Psalms",
+    "chapters": [
+      117,
+      118
+    ],
+    "osis_id": "PSA.117-PSA.118",
+    "week": 40
+  },
+  {
+    "day_number": 278,
+    "date": "2026-12-31",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 28",
+    "passage_raw": "Prov 28",
+    "book": "Proverbs",
+    "chapters": [
+      28
+    ],
+    "osis_id": "PRO.28",
+    "week": 40
+  },
+  {
+    "day_number": 279,
+    "date": "2027-01-01",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Jonah",
+    "passage_raw": "Jonah",
+    "book": "Jonah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "JON.1-JON.4",
+    "week": 40
+  },
+  {
+    "day_number": 280,
+    "date": "2027-01-02",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 3-4",
+    "passage_raw": "Acts 3-4",
+    "book": "Acts",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "ACT.3-ACT.4",
+    "week": 40
+  },
+  {
+    "day_number": 281,
+    "date": "2027-01-03",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Hebrews 8-10",
+    "passage_raw": "Heb 8-10",
+    "book": "Hebrews",
+    "chapters": [
+      8,
+      9,
+      10
+    ],
+    "osis_id": "HEB.8-HEB.10",
+    "week": 41
+  },
+  {
+    "day_number": 282,
+    "date": "2027-01-04",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Numbers 33-36",
+    "passage_raw": "Num 33-36",
+    "book": "Numbers",
+    "chapters": [
+      33,
+      34,
+      35,
+      36
+    ],
+    "osis_id": "NUM.33-NUM.36",
+    "week": 41
+  },
+  {
+    "day_number": 283,
+    "date": "2027-01-05",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 16-20",
+    "passage_raw": "2Chr 16-20",
+    "book": "2 Chronicles",
+    "chapters": [
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "osis_id": "2CH.16-2CH.20",
+    "week": 41
+  },
+  {
+    "day_number": 284,
+    "date": "2027-01-06",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 119",
+    "passage_raw": "Ps 119",
+    "book": "Psalms",
+    "chapters": [
+      119
+    ],
+    "osis_id": "PSA.119",
+    "week": 41
+  },
+  {
+    "day_number": 285,
+    "date": "2027-01-07",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 29-30",
+    "passage_raw": "Prov 29-30",
+    "book": "Proverbs",
+    "chapters": [
+      29,
+      30
+    ],
+    "osis_id": "PRO.29-PRO.30",
+    "week": 41
+  },
+  {
+    "day_number": 286,
+    "date": "2027-01-08",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Micah",
+    "passage_raw": "Micah",
+    "book": "Micah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "osis_id": "MIC.1-MIC.7",
+    "week": 41
+  },
+  {
+    "day_number": 287,
+    "date": "2027-01-09",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 5-6",
+    "passage_raw": "Acts 5-6",
+    "book": "Acts",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "ACT.5-ACT.6",
+    "week": 41
+  },
+  {
+    "day_number": 288,
+    "date": "2027-01-10",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Hebrews 11-13",
+    "passage_raw": "Heb 11-13",
+    "book": "Hebrews",
+    "chapters": [
+      11,
+      12,
+      13
+    ],
+    "osis_id": "HEB.11-HEB.13",
+    "week": 42
+  },
+  {
+    "day_number": 289,
+    "date": "2027-01-11",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 1-3",
+    "passage_raw": "Deut 1-3",
+    "book": "Deuteronomy",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "DEU.1-DEU.3",
+    "week": 42
+  },
+  {
+    "day_number": 290,
+    "date": "2027-01-12",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 21-24",
+    "passage_raw": "2Chr 21-24",
+    "book": "2 Chronicles",
+    "chapters": [
+      21,
+      22,
+      23,
+      24
+    ],
+    "osis_id": "2CH.21-2CH.24",
+    "week": 42
+  },
+  {
+    "day_number": 291,
+    "date": "2027-01-13",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 120-121",
+    "passage_raw": "Ps 120-121",
+    "book": "Psalms",
+    "chapters": [
+      120,
+      121
+    ],
+    "osis_id": "PSA.120-PSA.121",
+    "week": 42
+  },
+  {
+    "day_number": 292,
+    "date": "2027-01-14",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Proverbs 31",
+    "passage_raw": "Prov 31",
+    "book": "Proverbs",
+    "chapters": [
+      31
+    ],
+    "osis_id": "PRO.31",
+    "week": 42
+  },
+  {
+    "day_number": 293,
+    "date": "2027-01-15",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Nahum",
+    "passage_raw": "Nahum",
+    "book": "Nahum",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "NAM.1-NAM.3",
+    "week": 42
+  },
+  {
+    "day_number": 294,
+    "date": "2027-01-16",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 7-8",
+    "passage_raw": "Acts 7-8",
+    "book": "Acts",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "ACT.7-ACT.8",
+    "week": 42
+  },
+  {
+    "day_number": 295,
+    "date": "2027-01-17",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "James 1-3",
+    "passage_raw": "James 1-3",
+    "book": "James",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "JAS.1-JAS.3",
+    "week": 43
+  },
+  {
+    "day_number": 296,
+    "date": "2027-01-18",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 4-6",
+    "passage_raw": "Deut 4-6",
+    "book": "Deuteronomy",
+    "chapters": [
+      4,
+      5,
+      6
+    ],
+    "osis_id": "DEU.4-DEU.6",
+    "week": 43
+  },
+  {
+    "day_number": 297,
+    "date": "2027-01-19",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 25-28",
+    "passage_raw": "2Chr 25-28",
+    "book": "2 Chronicles",
+    "chapters": [
+      25,
+      26,
+      27,
+      28
+    ],
+    "osis_id": "2CH.25-2CH.28",
+    "week": 43
+  },
+  {
+    "day_number": 298,
+    "date": "2027-01-20",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 122-124",
+    "passage_raw": "Ps 122-124",
+    "book": "Psalms",
+    "chapters": [
+      122,
+      123,
+      124
+    ],
+    "osis_id": "PSA.122-PSA.124",
+    "week": 43
+  },
+  {
+    "day_number": 299,
+    "date": "2027-01-21",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 1-2",
+    "passage_raw": "Eccl 1-2",
+    "book": "Ecclesiastes",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "ECC.1-ECC.2",
+    "week": 43
+  },
+  {
+    "day_number": 300,
+    "date": "2027-01-22",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Habakkuk",
+    "passage_raw": "Habakkuk",
+    "book": "Habakkuk",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "HAB.1-HAB.3",
+    "week": 43
+  },
+  {
+    "day_number": 301,
+    "date": "2027-01-23",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 9-10",
+    "passage_raw": "Acts 9-10",
+    "book": "Acts",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "ACT.9-ACT.10",
+    "week": 43
+  },
+  {
+    "day_number": 302,
+    "date": "2027-01-24",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "James 4-5",
+    "passage_raw": "James 4-5",
+    "book": "James",
+    "chapters": [
+      4,
+      5
+    ],
+    "osis_id": "JAS.4-JAS.5",
+    "week": 44
+  },
+  {
+    "day_number": 303,
+    "date": "2027-01-25",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 7-9",
+    "passage_raw": "Deut 7-9",
+    "book": "Deuteronomy",
+    "chapters": [
+      7,
+      8,
+      9
+    ],
+    "osis_id": "DEU.7-DEU.9",
+    "week": 44
+  },
+  {
+    "day_number": 304,
+    "date": "2027-01-26",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 29-32",
+    "passage_raw": "2Chr 29-32",
+    "book": "2 Chronicles",
+    "chapters": [
+      29,
+      30,
+      31,
+      32
+    ],
+    "osis_id": "2CH.29-2CH.32",
+    "week": 44
+  },
+  {
+    "day_number": 305,
+    "date": "2027-01-27",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 125-127",
+    "passage_raw": "Ps 125-127",
+    "book": "Psalms",
+    "chapters": [
+      125,
+      126,
+      127
+    ],
+    "osis_id": "PSA.125-PSA.127",
+    "week": 44
+  },
+  {
+    "day_number": 306,
+    "date": "2027-01-28",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 3-4",
+    "passage_raw": "Eccl 3-4",
+    "book": "Ecclesiastes",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "ECC.3-ECC.4",
+    "week": 44
+  },
+  {
+    "day_number": 307,
+    "date": "2027-01-29",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Zephaniah",
+    "passage_raw": "Zephaniah",
+    "book": "Zephaniah",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "ZEP.1-ZEP.3",
+    "week": 44
+  },
+  {
+    "day_number": 308,
+    "date": "2027-01-30",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 11-12",
+    "passage_raw": "Acts 11-12",
+    "book": "Acts",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "ACT.11-ACT.12",
+    "week": 44
+  },
+  {
+    "day_number": 309,
+    "date": "2027-01-31",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Peter 1-3",
+    "passage_raw": "1Pet 1-3",
+    "book": "1 Peter",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "1PE.1-1PE.3",
+    "week": 45
+  },
+  {
+    "day_number": 310,
+    "date": "2027-02-01",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 10-12",
+    "passage_raw": "Deut 10-12",
+    "book": "Deuteronomy",
+    "chapters": [
+      10,
+      11,
+      12
+    ],
+    "osis_id": "DEU.10-DEU.12",
+    "week": 45
+  },
+  {
+    "day_number": 311,
+    "date": "2027-02-02",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "2 Chronicles 33-36",
+    "passage_raw": "2Chr 33-36",
+    "book": "2 Chronicles",
+    "chapters": [
+      33,
+      34,
+      35,
+      36
+    ],
+    "osis_id": "2CH.33-2CH.36",
+    "week": 45
+  },
+  {
+    "day_number": 312,
+    "date": "2027-02-03",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 128-130",
+    "passage_raw": "Ps 128-130",
+    "book": "Psalms",
+    "chapters": [
+      128,
+      129,
+      130
+    ],
+    "osis_id": "PSA.128-PSA.130",
+    "week": 45
+  },
+  {
+    "day_number": 313,
+    "date": "2027-02-04",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 5-6",
+    "passage_raw": "Eccl 5-6",
+    "book": "Ecclesiastes",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "ECC.5-ECC.6",
+    "week": 45
+  },
+  {
+    "day_number": 314,
+    "date": "2027-02-05",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Haggai",
+    "passage_raw": "Haggai",
+    "book": "Haggai",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "HAG.1-HAG.2",
+    "week": 45
+  },
+  {
+    "day_number": 315,
+    "date": "2027-02-06",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 13-14",
+    "passage_raw": "Acts 13-14",
+    "book": "Acts",
+    "chapters": [
+      13,
+      14
+    ],
+    "osis_id": "ACT.13-ACT.14",
+    "week": 45
+  },
+  {
+    "day_number": 316,
+    "date": "2027-02-07",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 Peter 4-5",
+    "passage_raw": "1Pet 4-5",
+    "book": "1 Peter",
+    "chapters": [
+      4,
+      5
+    ],
+    "osis_id": "1PE.4-1PE.5",
+    "week": 46
+  },
+  {
+    "day_number": 317,
+    "date": "2027-02-08",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 13-15",
+    "passage_raw": "Deut 13-15",
+    "book": "Deuteronomy",
+    "chapters": [
+      13,
+      14,
+      15
+    ],
+    "osis_id": "DEU.13-DEU.15",
+    "week": 46
+  },
+  {
+    "day_number": 318,
+    "date": "2027-02-09",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Ezra 1-5",
+    "passage_raw": "Ezra 1-5",
+    "book": "Ezra",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "EZR.1-EZR.5",
+    "week": 46
+  },
+  {
+    "day_number": 319,
+    "date": "2027-02-10",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 131-133",
+    "passage_raw": "Ps 131-133",
+    "book": "Psalms",
+    "chapters": [
+      131,
+      132,
+      133
+    ],
+    "osis_id": "PSA.131-PSA.133",
+    "week": 46
+  },
+  {
+    "day_number": 320,
+    "date": "2027-02-11",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 7-8",
+    "passage_raw": "Eccl 7-8",
+    "book": "Ecclesiastes",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "ECC.7-ECC.8",
+    "week": 46
+  },
+  {
+    "day_number": 321,
+    "date": "2027-02-12",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Zechariah 1-7",
+    "passage_raw": "Zechariah 1-7",
+    "book": "Zechariah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "osis_id": "ZEC.1-ZEC.7",
+    "week": 46
+  },
+  {
+    "day_number": 322,
+    "date": "2027-02-13",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 15-16",
+    "passage_raw": "Acts 15-16",
+    "book": "Acts",
+    "chapters": [
+      15,
+      16
+    ],
+    "osis_id": "ACT.15-ACT.16",
+    "week": 46
+  },
+  {
+    "day_number": 323,
+    "date": "2027-02-14",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 Peter",
+    "passage_raw": "2Pet",
+    "book": "2 Peter",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "2PE.1-2PE.3",
+    "week": 47
+  },
+  {
+    "day_number": 324,
+    "date": "2027-02-15",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 16-19",
+    "passage_raw": "Deut 16-19",
+    "book": "Deuteronomy",
+    "chapters": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "osis_id": "DEU.16-DEU.19",
+    "week": 47
+  },
+  {
+    "day_number": 325,
+    "date": "2027-02-16",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Ezra 6-10",
+    "passage_raw": "Ezra 6-10",
+    "book": "Ezra",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "EZR.6-EZR.10",
+    "week": 47
+  },
+  {
+    "day_number": 326,
+    "date": "2027-02-17",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 134-136",
+    "passage_raw": "Ps 134-136",
+    "book": "Psalms",
+    "chapters": [
+      134,
+      135,
+      136
+    ],
+    "osis_id": "PSA.134-PSA.136",
+    "week": 47
+  },
+  {
+    "day_number": 327,
+    "date": "2027-02-18",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 9-10",
+    "passage_raw": "Eccl 9-10",
+    "book": "Ecclesiastes",
+    "chapters": [
+      9,
+      10
+    ],
+    "osis_id": "ECC.9-ECC.10",
+    "week": 47
+  },
+  {
+    "day_number": 328,
+    "date": "2027-02-19",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Zechariah 8-14",
+    "passage_raw": "Zechariah 8-14",
+    "book": "Zechariah",
+    "chapters": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "osis_id": "ZEC.8-ZEC.14",
+    "week": 47
+  },
+  {
+    "day_number": 329,
+    "date": "2027-02-20",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 17-18",
+    "passage_raw": "Acts 17-18",
+    "book": "Acts",
+    "chapters": [
+      17,
+      18
+    ],
+    "osis_id": "ACT.17-ACT.18",
+    "week": 47
+  },
+  {
+    "day_number": 330,
+    "date": "2027-02-21",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 John 1-3",
+    "passage_raw": "1John 1-3",
+    "book": "1 John",
+    "chapters": [
+      1,
+      2,
+      3
+    ],
+    "osis_id": "1JN.1-1JN.3",
+    "week": 48
+  },
+  {
+    "day_number": 331,
+    "date": "2027-02-22",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 20-22",
+    "passage_raw": "Deut 20-22",
+    "book": "Deuteronomy",
+    "chapters": [
+      20,
+      21,
+      22
+    ],
+    "osis_id": "DEU.20-DEU.22",
+    "week": 48
+  },
+  {
+    "day_number": 332,
+    "date": "2027-02-23",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Nehemiah 1-4",
+    "passage_raw": "Neh 1-4",
+    "book": "Nehemiah",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "NEH.1-NEH.4",
+    "week": 48
+  },
+  {
+    "day_number": 333,
+    "date": "2027-02-24",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 137-139",
+    "passage_raw": "Ps 137-139",
+    "book": "Psalms",
+    "chapters": [
+      137,
+      138,
+      139
+    ],
+    "osis_id": "PSA.137-PSA.139",
+    "week": 48
+  },
+  {
+    "day_number": 334,
+    "date": "2027-02-25",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Ecclesiastes 11-12",
+    "passage_raw": "Eccl 11-12",
+    "book": "Ecclesiastes",
+    "chapters": [
+      11,
+      12
+    ],
+    "osis_id": "ECC.11-ECC.12",
+    "week": 48
+  },
+  {
+    "day_number": 335,
+    "date": "2027-02-26",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Malachi",
+    "passage_raw": "Malachi",
+    "book": "Malachi",
+    "chapters": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "osis_id": "MAL.1-MAL.4",
+    "week": 48
+  },
+  {
+    "day_number": 336,
+    "date": "2027-02-27",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 19-20",
+    "passage_raw": "Acts 19-20",
+    "book": "Acts",
+    "chapters": [
+      19,
+      20
+    ],
+    "osis_id": "ACT.19-ACT.20",
+    "week": 48
+  },
+  {
+    "day_number": 337,
+    "date": "2027-02-28",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "1 John 4-5",
+    "passage_raw": "1John 4-5",
+    "book": "1 John",
+    "chapters": [
+      4,
+      5
+    ],
+    "osis_id": "1JN.4-1JN.5",
+    "week": 49
+  },
+  {
+    "day_number": 338,
+    "date": "2027-03-01",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 23-25",
+    "passage_raw": "Deut 23-25",
+    "book": "Deuteronomy",
+    "chapters": [
+      23,
+      24,
+      25
+    ],
+    "osis_id": "DEU.23-DEU.25",
+    "week": 49
+  },
+  {
+    "day_number": 339,
+    "date": "2027-03-02",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Nehemiah 5-9",
+    "passage_raw": "Neh 5-9",
+    "book": "Nehemiah",
+    "chapters": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "osis_id": "NEH.5-NEH.9",
+    "week": 49
+  },
+  {
+    "day_number": 340,
+    "date": "2027-03-03",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 140-142",
+    "passage_raw": "Ps 140-142",
+    "book": "Psalms",
+    "chapters": [
+      140,
+      141,
+      142
+    ],
+    "osis_id": "PSA.140-PSA.142",
+    "week": 49
+  },
+  {
+    "day_number": 341,
+    "date": "2027-03-04",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Song of Solomon 1-2",
+    "passage_raw": "Song 1-2",
+    "book": "Song of Solomon",
+    "chapters": [
+      1,
+      2
+    ],
+    "osis_id": "SNG.1-SNG.2",
+    "week": 49
+  },
+  {
+    "day_number": 342,
+    "date": "2027-03-05",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Revelation 1-6",
+    "passage_raw": "Rev 1-6",
+    "book": "Revelation",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "osis_id": "REV.1-REV.6",
+    "week": 49
+  },
+  {
+    "day_number": 343,
+    "date": "2027-03-06",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 21-22",
+    "passage_raw": "Acts 21-22",
+    "book": "Acts",
+    "chapters": [
+      21,
+      22
+    ],
+    "osis_id": "ACT.21-ACT.22",
+    "week": 49
+  },
+  {
+    "day_number": 344,
+    "date": "2027-03-07",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "2 John",
+    "passage_raw": "2John",
+    "book": "2 John",
+    "chapters": [
+      1
+    ],
+    "osis_id": "2JN.1",
+    "week": 50
+  },
+  {
+    "day_number": 345,
+    "date": "2027-03-08",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 26-28",
+    "passage_raw": "Deut 26-28",
+    "book": "Deuteronomy",
+    "chapters": [
+      26,
+      27,
+      28
+    ],
+    "osis_id": "DEU.26-DEU.28",
+    "week": 50
+  },
+  {
+    "day_number": 346,
+    "date": "2027-03-09",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Nehemiah 10-13",
+    "passage_raw": "Neh 10-13",
+    "book": "Nehemiah",
+    "chapters": [
+      10,
+      11,
+      12,
+      13
+    ],
+    "osis_id": "NEH.10-NEH.13",
+    "week": 50
+  },
+  {
+    "day_number": 347,
+    "date": "2027-03-10",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 143-145",
+    "passage_raw": "Ps 143-145",
+    "book": "Psalms",
+    "chapters": [
+      143,
+      144,
+      145
+    ],
+    "osis_id": "PSA.143-PSA.145",
+    "week": 50
+  },
+  {
+    "day_number": 348,
+    "date": "2027-03-11",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Song of Solomon 3-4",
+    "passage_raw": "Song 3-4",
+    "book": "Song of Solomon",
+    "chapters": [
+      3,
+      4
+    ],
+    "osis_id": "SNG.3-SNG.4",
+    "week": 50
+  },
+  {
+    "day_number": 349,
+    "date": "2027-03-12",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Revelation 7-11",
+    "passage_raw": "Rev 7-11",
+    "book": "Revelation",
+    "chapters": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "osis_id": "REV.7-REV.11",
+    "week": 50
+  },
+  {
+    "day_number": 350,
+    "date": "2027-03-13",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 23-24",
+    "passage_raw": "Acts 23-24",
+    "book": "Acts",
+    "chapters": [
+      23,
+      24
+    ],
+    "osis_id": "ACT.23-ACT.24",
+    "week": 50
+  },
+  {
+    "day_number": 351,
+    "date": "2027-03-14",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "3 John",
+    "passage_raw": "3John",
+    "book": "3 John",
+    "chapters": [
+      1
+    ],
+    "osis_id": "3JN.1",
+    "week": 51
+  },
+  {
+    "day_number": 352,
+    "date": "2027-03-15",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 29-31",
+    "passage_raw": "Deut 29-31",
+    "book": "Deuteronomy",
+    "chapters": [
+      29,
+      30,
+      31
+    ],
+    "osis_id": "DEU.29-DEU.31",
+    "week": 51
+  },
+  {
+    "day_number": 353,
+    "date": "2027-03-16",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Esther 1-5",
+    "passage_raw": "Esther 1-5",
+    "book": "Esther",
+    "chapters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "osis_id": "EST.1-EST.5",
+    "week": 51
+  },
+  {
+    "day_number": 354,
+    "date": "2027-03-17",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 146-148",
+    "passage_raw": "Ps 146-148",
+    "book": "Psalms",
+    "chapters": [
+      146,
+      147,
+      148
+    ],
+    "osis_id": "PSA.146-PSA.148",
+    "week": 51
+  },
+  {
+    "day_number": 355,
+    "date": "2027-03-18",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Song of Solomon 5-6",
+    "passage_raw": "Song 5-6",
+    "book": "Song of Solomon",
+    "chapters": [
+      5,
+      6
+    ],
+    "osis_id": "SNG.5-SNG.6",
+    "week": 51
+  },
+  {
+    "day_number": 356,
+    "date": "2027-03-19",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Revelation 12-17",
+    "passage_raw": "Rev 12-17",
+    "book": "Revelation",
+    "chapters": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "osis_id": "REV.12-REV.17",
+    "week": 51
+  },
+  {
+    "day_number": 357,
+    "date": "2027-03-20",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 25-26",
+    "passage_raw": "Acts 25-26",
+    "book": "Acts",
+    "chapters": [
+      25,
+      26
+    ],
+    "osis_id": "ACT.25-ACT.26",
+    "week": 51
+  },
+  {
+    "day_number": 358,
+    "date": "2027-03-21",
+    "weekday": "Sunday",
+    "genre": "Epistles",
+    "passage": "Jude",
+    "passage_raw": "Jude",
+    "book": "Jude",
+    "chapters": [
+      1
+    ],
+    "osis_id": "JUD.1",
+    "week": 52
+  },
+  {
+    "day_number": 359,
+    "date": "2027-03-22",
+    "weekday": "Monday",
+    "genre": "The Law",
+    "passage": "Deuteronomy 32-34",
+    "passage_raw": "Deut 32-34",
+    "book": "Deuteronomy",
+    "chapters": [
+      32,
+      33,
+      34
+    ],
+    "osis_id": "DEU.32-DEU.34",
+    "week": 52
+  },
+  {
+    "day_number": 360,
+    "date": "2027-03-23",
+    "weekday": "Tuesday",
+    "genre": "History",
+    "passage": "Esther 6-10",
+    "passage_raw": "Esther 6-10",
+    "book": "Esther",
+    "chapters": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "osis_id": "EST.6-EST.10",
+    "week": 52
+  },
+  {
+    "day_number": 361,
+    "date": "2027-03-24",
+    "weekday": "Wednesday",
+    "genre": "Psalms",
+    "passage": "Psalms 149-150",
+    "passage_raw": "Ps 149-150",
+    "book": "Psalms",
+    "chapters": [
+      149,
+      150
+    ],
+    "osis_id": "PSA.149-PSA.150",
+    "week": 52
+  },
+  {
+    "day_number": 362,
+    "date": "2027-03-25",
+    "weekday": "Thursday",
+    "genre": "Poetry",
+    "passage": "Song of Solomon 7-8",
+    "passage_raw": "Song 7-8",
+    "book": "Song of Solomon",
+    "chapters": [
+      7,
+      8
+    ],
+    "osis_id": "SNG.7-SNG.8",
+    "week": 52
+  },
+  {
+    "day_number": 363,
+    "date": "2027-03-26",
+    "weekday": "Friday",
+    "genre": "Prophecy",
+    "passage": "Revelation 18-22",
+    "passage_raw": "Rev 18-22",
+    "book": "Revelation",
+    "chapters": [
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "osis_id": "REV.18-REV.22",
+    "week": 52
+  },
+  {
+    "day_number": 364,
+    "date": "2027-03-27",
+    "weekday": "Saturday",
+    "genre": "Gospels",
+    "passage": "Acts 27-28",
+    "passage_raw": "Acts 27-28",
+    "book": "Acts",
+    "chapters": [
+      27,
+      28
+    ],
+    "osis_id": "ACT.27-ACT.28",
+    "week": 52
+  }
+]

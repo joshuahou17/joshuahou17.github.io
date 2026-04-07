@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Bible Reading | Josh Hou</title>
+    <meta name="description" content="A 365-day journey through Scripture with daily analysis and reflection.">
+    <meta property="og:title" content="Daily Bible Reading">
+    <meta property="og:description" content="A 365-day journey through Scripture with daily analysis and reflection.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://joshhou.com/bible">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-back">&larr; joshhou.com</a>
+    </nav>
+    <main class="container">
+        <header class="hero">
+            <h1 class="hero-title">Daily Bible Reading</h1>
+            <p class="hero-subtitle">A 365-day journey through Scripture — with daily analysis and reflection.</p>
+        </header>
+
+        <section id="todays-reading" class="todays-reading">
+            <!-- Populated by generate_bible.py -->
+        </section>
+
+        <section id="week-strip" class="week-strip">
+            <!-- Populated by generate_bible.py -->
+        </section>
+
+        <section class="subscribe-section">
+            <h2>Get the daily reading in your inbox</h2>
+            <p>Receive each day's passage, analysis, and reflection every morning at 8 AM ET.</p>
+            <form class="subscribe-form" id="subscribe-form">
+                <input type="email" placeholder="you@email.com" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </section>
+
+        <section class="archive-section">
+            <h2 class="archive-heading">Archive</h2>
+            <ul id="archive-list" class="archive-list">
+                <li class="archive-empty">No readings yet. The first one is on its way.</li>
+            </ul>
+        </section>
+    </main>
+    <footer class="footer">
+        <p>&copy; 2026 Joshua Hou. Daily analysis powered by Claude and web research.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
