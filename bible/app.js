@@ -76,10 +76,15 @@ function getWeekEntries(plan, week) {
 
 // --- Onboarding ---
 
-function startPlan() {
+async function startPlan() {
+    const plan = await loadReadingPlan();
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    const todayEntry = plan ? plan.find(e => e.date === today) : null;
+    const startDay = todayEntry ? todayEntry.day_number : 1;
+
     localStorage.setItem('bible_started', 'true');
-    setCurrentDay(1);
-    getUserId(); // ensure user ID exists
+    setCurrentDay(startDay);
+    getUserId();
     renderPersonalizedView();
 }
 
