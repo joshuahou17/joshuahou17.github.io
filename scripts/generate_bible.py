@@ -323,129 +323,17 @@ def generate_post_html(entry, niv_text, esv_text, analysis_data, plan):
 
 
 def update_index(entry, analysis_data, plan):
-    """Regenerate the bible/index.html with latest content and archive."""
-    date_obj = datetime.strptime(entry["date"], "%Y-%m-%d")
-    date_formatted = date_obj.strftime("%B %d, %Y")
-    today_str = datetime.now(ET_OFFSET).strftime("%Y-%m-%d")
+    """Regenerate the bible/index.html.
 
-    # Render today's reading card
-    today_template = Template(INDEX_TODAY_TEMPLATE)
-    today_html = today_template.render(
-        day_number=entry["day_number"],
-        date_iso=entry["date"],
-        date_formatted=date_formatted,
-        genre=entry["genre"],
-        passage=entry["passage"],
-        week=entry["week"],
-        title=analysis_data.get("title", "") if analysis_data else "",
-        summary=analysis_data.get("summary", "") if analysis_data else "",
-    )
-
-    # Render week strip
-    week_entries = get_week_entries(plan, entry["week"])
-    week_days = []
-    for we in week_entries:
-        post_exists = (POSTS_DIR / f"{we['date']}.html").exists()
-        week_days.append({
-            "day_number": we["day_number"],
-            "date": we["date"],
-            "weekday": we["weekday"],
-            "genre": we["genre"],
-            "passage": we["passage"],
-            "has_post": post_exists,
-            "is_today": we["date"] == today_str,
-        })
-
-    week_template = Template(INDEX_WEEK_TEMPLATE)
-    week_html = week_template.render(week=entry["week"], week_days=week_days)
-
-    # Build archive list
-    archive_items = []
-    archive_template = Template(ARCHIVE_ITEM_TEMPLATE)
-    if POSTS_DIR.exists():
-        for post_file in sorted(POSTS_DIR.glob("*.html"), reverse=True):
-            post_date_str = post_file.stem
-            try:
-                post_date = datetime.strptime(post_date_str, "%Y-%m-%d")
-                post_date_fmt = post_date.strftime("%B %d, %Y")
-            except ValueError:
-                continue
-
-            # Find the entry for this date to get passage and genre
-            for e in plan:
-                if e["date"] == post_date_str:
-                    archive_items.append(archive_template.render(
-                        date_iso=post_date_str,
-                        date_formatted=post_date_fmt,
-                        genre=e["genre"],
-                        passage=e["passage"],
-                    ))
-                    break
-
-    archive_html = "\n                ".join(archive_items) if archive_items else '<li class="archive-empty">No readings yet. The first one is on its way.</li>'
-
-    # Build full index HTML
-    index_html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Bible Reading | Josh Hou</title>
-    <meta name="description" content="A 365-day journey through Scripture with daily analysis and reflection.">
-    <meta property="og:title" content="Daily Bible Reading">
-    <meta property="og:description" content="A 365-day journey through Scripture with daily analysis and reflection.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://joshhou.com/bible">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <nav class="nav">
-        <a href="/" class="nav-back">&larr; joshhou.com</a>
-    </nav>
-    <main class="container">
-        <header class="hero">
-            <h1 class="hero-title">Daily Bible Reading</h1>
-            <p class="hero-subtitle">A 365-day journey through Scripture — with daily analysis and reflection.</p>
-        </header>
-
-        <section id="todays-reading" class="todays-reading">
-{today_html}
-        </section>
-
-        <section id="week-strip" class="week-strip">
-{week_html}
-        </section>
-
-        <section class="subscribe-section">
-            <h2>Get the daily reading in your inbox</h2>
-            <p>Receive each day's passage, analysis, and reflection every morning at 8 AM ET.</p>
-            <form class="subscribe-form" id="subscribe-form">
-                <input type="email" placeholder="you@email.com" required>
-                <button type="submit">Subscribe</button>
-            </form>
-        </section>
-
-        <section class="archive-section">
-            <h2 class="archive-heading">Archive</h2>
-            <ul id="archive-list" class="archive-list">
-                {archive_html}
-            </ul>
-        </section>
-    </main>
-    <footer class="footer">
-        <p>&copy; 2026 Joshua Hou. Daily analysis powered by Claude and web research.</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
-</body>
-</html>"""
-
-    INDEX_PATH.write_text(index_html, encoding="utf-8")
-    logger.info(f"Updated index: {INDEX_PATH}")
+    The index page is personalized client-side by app.js.
+    The server just maintains the static shell with onboarding
+    and placeholders that JS fills in per-user.
+    """
+    # The index.html is now client-side rendered for personalization.
+    # We only need to ensure the static shell exists, which it does.
+    # No need to regenerate it on each run since app.js handles
+    # today's card, week strip, and archive dynamically.
+    logger.info("Index is client-side rendered — skipping server-side update")
 
 
 # --- Email ---

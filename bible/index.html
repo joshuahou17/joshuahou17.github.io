@@ -25,90 +25,31 @@
             <p class="hero-subtitle">A 365-day journey through Scripture — with daily analysis and reflection.</p>
         </header>
 
-        <section id="todays-reading" class="todays-reading">
-
-        <p class="progress-indicator">Day 9 of 364 &bull; Week 2</p>
-
-        <div class="reading-card featured" data-day-number="9">
-            <div class="reading-card-header">
-                <span class="genre-badge" data-genre="The Law">The Law</span>
-                <span class="reading-card-meta">April 06, 2026</span>
+        <!-- Onboarding view (shown to new users) -->
+        <section id="onboarding" class="onboarding-section" style="display: none;">
+            <div class="onboarding-card">
+                <h2>Start Your Journey</h2>
+                <p>Read through the Bible in one year with daily AI-powered analysis and reflection. Each day covers a different genre — Epistles, Law, History, Psalms, Poetry, Prophecy, and Gospels.</p>
+                <div class="genre-preview">
+                    <span class="genre-badge" data-genre="Epistles">Epistles</span>
+                    <span class="genre-badge" data-genre="The Law">The Law</span>
+                    <span class="genre-badge" data-genre="History">History</span>
+                    <span class="genre-badge" data-genre="Psalms">Psalms</span>
+                    <span class="genre-badge" data-genre="Poetry">Poetry</span>
+                    <span class="genre-badge" data-genre="Prophecy">Prophecy</span>
+                    <span class="genre-badge" data-genre="Gospels">Gospels</span>
+                </div>
+                <button id="start-plan-btn" class="start-btn">Start Reading Plan</button>
             </div>
-            <div class="passage-ref">Genesis 4-7</div>
-            
-            
-            <div class="reading-card-actions">
-                <a href="/bible/posts/2026-04-06.html" class="read-analysis-link">Read Analysis &rarr;</a>
-                <label class="mark-read-label">
-                    <input type="checkbox" class="mark-read-checkbox" data-day-number="9">
-                    Mark as read
-                </label>
-            </div>
-        </div>
         </section>
 
-        <section id="week-strip" class="week-strip">
+        <!-- Personalized reading view (shown after user starts) -->
+        <section id="todays-reading" class="todays-reading" style="display: none;">
+            <!-- Rendered by app.js based on user's current day -->
+        </section>
 
-        <h2 class="week-strip-title">Week 2</h2>
-        <div class="week-strip-grid">
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="8">
-                <div class="week-day-label">Sun</div>
-                <div class="week-day-passage">Romans 3-4</div>
-                <span class="genre-badge" data-genre="Epistles">Epistles</span>
-            </a>
-            
-            <a href="/bible/posts/2026-04-06.html"
-               class="week-day-card today"
-               data-day-number="9">
-                <div class="week-day-label">Mon</div>
-                <div class="week-day-passage">Genesis 4-7</div>
-                <span class="genre-badge" data-genre="The Law">The Law</span>
-            </a>
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="10">
-                <div class="week-day-label">Tue</div>
-                <div class="week-day-passage">Joshua 6-10</div>
-                <span class="genre-badge" data-genre="History">History</span>
-            </a>
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="11">
-                <div class="week-day-label">Wed</div>
-                <div class="week-day-passage">Psalms 3-5</div>
-                <span class="genre-badge" data-genre="Psalms">Psalms</span>
-            </a>
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="12">
-                <div class="week-day-label">Thu</div>
-                <div class="week-day-passage">Job 3-4</div>
-                <span class="genre-badge" data-genre="Poetry">Poetry</span>
-            </a>
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="13">
-                <div class="week-day-label">Fri</div>
-                <div class="week-day-passage">Isaiah 7-11</div>
-                <span class="genre-badge" data-genre="Prophecy">Prophecy</span>
-            </a>
-            
-            <a href="#"
-               class="week-day-card"
-               data-day-number="14">
-                <div class="week-day-label">Sat</div>
-                <div class="week-day-passage">Matthew 3-4</div>
-                <span class="genre-badge" data-genre="Gospels">Gospels</span>
-            </a>
-            
-        </div>
+        <section id="week-strip" class="week-strip" style="display: none;">
+            <!-- Rendered by app.js -->
         </section>
 
         <section class="subscribe-section">
@@ -123,7 +64,7 @@
         <section class="archive-section">
             <h2 class="archive-heading">Archive</h2>
             <ul id="archive-list" class="archive-list">
-                <li><a href="/bible/posts/2026-04-06.html"><div class="archive-item-left"><span class="genre-badge" data-genre="The Law">The Law</span><span class="archive-passage">Genesis 4-7</span></div><span class="archive-date">April 06, 2026</span></a></li>
+                <li class="archive-empty">No readings yet. The first one is on its way.</li>
             </ul>
         </section>
     </main>
