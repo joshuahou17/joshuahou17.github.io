@@ -1,54 +1,155 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.png.png">
-    
-    <link rel="stylesheet" href="main.css">
-  
-    <title>Josh Hou</title>
-  </head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Josh Hou</title>
+<meta name="description" content="Josh Hou — building Ren with two of my best friends.">
+
+<link rel="shortcut icon" type="image/x-icon" href="favicon.png.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f7f5f0;
+    --ink: #1d1c18;
+    --muted: #6b675c;
+    --faint: #a8a496;
+    --rule: #c8c2b3;
+    --accent: #2f3a8c;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Newsreader', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    min-height: min(620px, calc(100vh - 96px));
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 34px;
+  }
+
+  .prose {
+    font-size: 21px;
+    line-height: 1.74;
+    font-weight: 300;
+    margin: 0;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .dropcap {
+    float: left;
+    font-weight: 500;
+    font-size: 82px;
+    line-height: 0.66;
+    margin: 9px 12px 0 0;
+  }
+
+  /* primary venture — Ren */
+  .prose a.lead {
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+  }
+  .prose a.lead:hover { color: var(--accent); }
+
+  /* project + writing links */
+  .prose a:not(.lead) {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--rule);
+    transition: border-color 0.2s;
+  }
+  .prose a:not(.lead):hover { border-color: var(--accent); }
+
+  .footer {
+    margin-top: auto;
+    padding-top: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+  }
+
+  .email {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .social {
+    display: flex;
+    gap: 16px;
+    font-style: italic;
+    font-size: 16px;
+  }
+  .social a {
+    color: #94907f;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .social a:hover { color: var(--accent); }
+
+  @media (max-width: 520px) {
+    body { padding: 32px 20px; }
+    .prose { font-size: 19px; text-align: left; }
+    .dropcap { font-size: 70px; }
+  }
+</style>
+</head>
 <body>
-  <div style="text-align: center;">
-  <div style="display: inline-block; text-align: left; max-width:38em; margin-top:3em;">
+  <main class="page">
+    <p class="eyebrow">Josh Hou · New York</p>
 
-      <h1 style="font-size:50px;">Josh Hou</h1>
-      <p>
-      Hi, I'm Josh! I'm currently a first year investment banking analyst at Evercore.
-      <br>
-      <br>
-      If you're curious about what I'm thinking, check out my <a href="https://joshhou.substack.com">blog</a> or <a href="https://minimallyedited.com/">podcast</a>.
-      <br>
-      <br>
-      <strong>Sandbox:</strong>
-      <br>
-      <br>
-      • <a href="/split" style="background: linear-gradient(135deg, #8AD8FF, #FF9580); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600;">Split</a> - Receipt splitting app
-      <br>
-      <br>
-      • <a href="/calendar-peek" style="background: linear-gradient(135deg, #8AD8FF, #FF9580); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600;">Peek</a> - Chrome extension for exporting available calendar dates to email
-      <br>
-      <br>
-      • <a href="/digest" style="background: linear-gradient(135deg, #8AD8FF, #FF9580); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600;">Digest</a> - Daily AI & startup news briefing
-      <br>
-      <br>
-      • <a href="/bible" style="background: linear-gradient(135deg, #6366F1, #2563EB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600;">Bible</a> - 365-day reading plan with daily analysis
-      <br>
-      <br>
-      Want to reach me? Shoot me an email at:
-      <br>
-      <br>
-      <code style="font-size: 16px;">joshuahou17 [at] gmail [dot] com</code>
-      <br>
-      <br>
-      You can also find me on <a href="https://www.linkedin.com/in/joshua-hou/">LinkedIn</a>, <a href="https://www.instagram.com/Joshua.hhou/">Instagram</a>, and <a href="https://twitter.com/macrohou">Twitter</a>.
-      </p>
-    
- </div>
- </div>
+    <p class="prose">
+      <span class="dropcap">I</span>'m building <a class="lead" href="https://www.ren.so/">Ren</a> with
+      two of my best friends. I've worked on these small projects in the past —
+      <a href="https://joshhou.com/split" target="_blank" rel="noopener">Split</a>,
+      <a href="https://joshhou.com/calendar-peek" target="_blank" rel="noopener">Peek</a>,
+      <a href="https://joshhou.com/digest" target="_blank" rel="noopener">Digest</a>, and
+      <a href="https://joshhou.com/bible" target="_blank" rel="noopener">Bible</a>. I also write on
+      <a href="https://joshhou.substack.com" target="_blank" rel="noopener">my blog</a> and used to talk on
+      <a href="https://minimallyedited.com/" target="_blank" rel="noopener">Minimally Edited</a>.
+      Feel free to reach out.
+    </p>
 
+    <footer class="footer">
+      <a class="email" href="mailto:joshuahou17@gmail.com">joshuahou17 [at] gmail [dot] com</a>
+      <span class="social">
+        <a href="https://www.linkedin.com/in/joshua-hou/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/Joshua.hhou/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://twitter.com/macrohou" target="_blank" rel="noopener">Twitter</a>
+      </span>
+    </footer>
+  </main>
 </body>
 </html>
