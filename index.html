@@ -119,10 +119,21 @@
   }
   .social a:hover { color: var(--accent); }
 
+  .photo {
+    display: block;
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    margin: 40px auto 0;
+    border-radius: 4px;
+    border: 1px solid rgba(29, 28, 24, 0.08);
+  }
+
   @media (max-width: 520px) {
     body { padding: 32px 20px; }
     .prose { font-size: 19px; text-align: left; }
     .dropcap { font-size: 70px; }
+    .photo { margin-top: 28px; }
   }
 </style>
 </head>
@@ -139,6 +150,9 @@
       <a href="https://minimallyedited.com/" target="_blank" rel="noopener">Minimally Edited</a>.
       Feel free to reach out.
     </p>
+
+    <img class="photo" src="friends.jpg" width="1280" height="831" loading="lazy"
+         alt="Three friends walking down a New York City street at night, seen from behind, wearing backpacks.">
 
     <footer class="footer">
       <a class="email" href="mailto:joshuahou17@gmail.com">joshuahou17 [at] gmail [dot] com</a>
