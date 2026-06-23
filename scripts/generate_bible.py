@@ -245,7 +245,7 @@ def generate_analysis(entry, niv_text, esv_text, context):
 
             # Use Claude with web search via server-side tool
             response = client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-6",
                 max_tokens=4096,
                 system=BIBLE_SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": user_prompt}],
