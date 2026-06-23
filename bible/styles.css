@@ -497,6 +497,27 @@ body {
     background: #4F46E5;
 }
 
+/* Reset / start-over control */
+.reset-row {
+    text-align: center;
+    margin: var(--spacing-6) 0 var(--spacing-2);
+}
+
+.reset-btn {
+    background: none;
+    border: none;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.reset-btn:hover {
+    color: var(--gray-600);
+}
+
 /* Translation Toggle */
 .translation-toggle {
     display: inline-flex;

@@ -123,6 +123,14 @@ async function startPlan() {
     await renderPersonalizedView();
 }
 
+function resetPlan() {
+    var ok = window.confirm('Start over from Day 1? This clears your reading progress on this device.');
+    if (!ok) return;
+    ['bible_started', 'bible_start_date', 'bible_current_day', 'bible_user_id', 'bible_translation']
+        .forEach(function(key) { localStorage.removeItem(key); });
+    window.location.reload();
+}
+
 // --- Rendering ---
 
 async function renderPersonalizedView() {
@@ -145,6 +153,16 @@ async function renderPersonalizedView() {
     if (weekStrip) {
         weekStrip.style.display = 'block';
         weekStrip.innerHTML = renderWeekStrip(plan, entry);
+    }
+
+    var resetRow = document.getElementById('reset-row');
+    if (resetRow) {
+        resetRow.style.display = 'block';
+        var resetBtn = document.getElementById('reset-plan-btn');
+        if (resetBtn && !resetBtn.dataset.wired) {
+            resetBtn.addEventListener('click', resetPlan);
+            resetBtn.dataset.wired = 'true';
+        }
     }
 
     // Load and display Bible text
