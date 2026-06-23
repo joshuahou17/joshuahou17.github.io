@@ -235,42 +235,47 @@ def generate_analysis(entry, niv_text, esv_text, context):
         context_section=context_section,
     )
 
-    try:
-        client = anthropic.Anthropic(api_key=api_key)
+    # Retry a few times so a single transient blip (network, rate limit,
+    # malformed JSON) doesn't lose the day. Returns None only if every
+    # attempt fails — the caller treats that as fatal.
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            client = anthropic.Anthropic(api_key=api_key)
 
-        # Use Claude with web search via server-side tool
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=BIBLE_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-            tools=[{
-                "type": "web_search_20250305",
-                "name": "web_search",
-                "max_uses": 3,
-            }],
-        )
+            # Use Claude with web search via server-side tool
+            response = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=4096,
+                system=BIBLE_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_prompt}],
+                tools=[{
+                    "type": "web_search_20250305",
+                    "name": "web_search",
+                    "max_uses": 3,
+                }],
+            )
 
-        # Extract text content from response
-        result_text = ""
-        for block in response.content:
-            if block.type == "text":
-                result_text += block.text
+            # Extract text content from response
+            result_text = ""
+            for block in response.content:
+                if block.type == "text":
+                    result_text += block.text
 
-        # Parse JSON from response
-        # Try to find JSON in the response
-        json_match = re.search(r'\{[\s\S]*\}', result_text)
-        if json_match:
-            analysis_data = json.loads(json_match.group())
-            logger.info("Claude analysis generated successfully")
-            return analysis_data
-        else:
-            logger.warning("Could not find JSON in Claude response")
-            return None
+            # Parse JSON from response
+            json_match = re.search(r'\{[\s\S]*\}', result_text)
+            if json_match:
+                analysis_data = json.loads(json_match.group())
+                logger.info(f"Claude analysis generated successfully (attempt {attempt})")
+                return analysis_data
+            else:
+                logger.warning(f"Attempt {attempt}/{max_attempts}: no JSON found in Claude response")
 
-    except Exception as e:
-        logger.warning(f"Claude API call failed: {e}")
-        return None
+        except Exception as e:
+            logger.warning(f"Attempt {attempt}/{max_attempts}: Claude API call failed: {e}")
+
+    logger.error(f"All {max_attempts} attempts to generate analysis failed")
+    return None
 
 
 # --- HTML Generation ---
@@ -545,11 +550,89 @@ def send_reminder_emails(plan, reminder_type):
     logger.info(f"Sent {reminder_type} reminders to {len(incomplete)} subscribers")
 
 
+# --- Backfill ---
+
+def _analysis_is_missing(post_path):
+    """True if a post file is absent or has no real analysis section."""
+    if not post_path.exists():
+        return True
+    html = post_path.read_text(encoding="utf-8")
+    m = re.search(r'<section class="analysis-section">(.*?)</section>', html, re.S)
+    if not m:
+        return True
+    # Collapse whitespace; treat a near-empty section as missing.
+    return len(re.sub(r"\s+", " ", m.group(1)).strip()) < 200
+
+
+def run_backfill(plan):
+    """Regenerate analysis for any PAST day that is missing it.
+
+    Covers both never-generated days (e.g. days 1-8, before the system
+    existed) and days whose analysis failed (empty posts). Never sends
+    email and never overwrites a day that already has good analysis.
+    Processes chronologically so cross-references only point backward.
+    """
+    today = datetime.now(ET_OFFSET).strftime("%Y-%m-%d")
+
+    targets = [
+        e for e in plan
+        if e["date"] <= today and _analysis_is_missing(POSTS_DIR / f"{e['date']}.html")
+    ]
+    if not targets:
+        logger.info("Backfill: nothing to do — every past day already has analysis")
+        return
+
+    logger.info(f"Backfill: {len(targets)} day(s) need analysis: {[t['day_number'] for t in targets]}")
+
+    # Context keyed by day_number, seeded from the existing context file so
+    # earlier real summaries are available for cross-references.
+    ctx_by_day = {c["day_number"]: c for c in load_context()}
+    succeeded, failed = 0, []
+
+    for entry in sorted(targets, key=lambda x: x["day_number"]):
+        # Only feed Claude summaries from strictly-earlier days that actually have one.
+        prior = [
+            ctx_by_day[d] for d in sorted(ctx_by_day)
+            if d < entry["day_number"] and ctx_by_day[d].get("summary")
+        ]
+
+        niv_text, esv_text = fetch_passage_text(entry)
+        analysis_data = generate_analysis(entry, niv_text, esv_text, prior)
+
+        if analysis_data is None:
+            logger.error(
+                f"Backfill: analysis FAILED for Day {entry['day_number']} ({entry['date']}) — "
+                "skipping (no post written, no email sent)"
+            )
+            failed.append(entry["day_number"])
+            continue
+
+        generate_post_html(entry, niv_text, esv_text, analysis_data, plan)
+        ctx_by_day[entry["day_number"]] = {
+            "day_number": entry["day_number"],
+            "date": entry["date"],
+            "weekday": entry["weekday"],
+            "genre": entry["genre"],
+            "passage": entry["passage"],
+            "summary": analysis_data.get("summary", ""),
+        }
+        succeeded += 1
+        logger.info(f"Backfill: wrote Day {entry['day_number']} ({entry['passage']})")
+
+    # Persist the merged context in day order (NO emails are sent in backfill).
+    save_context([ctx_by_day[d] for d in sorted(ctx_by_day)])
+    logger.info(f"Backfill complete: {succeeded} written, {len(failed)} failed {failed if failed else ''}")
+
+    # If any day failed, exit non-zero so the Action surfaces it.
+    if failed:
+        sys.exit(1)
+
+
 # --- Main ---
 
 def main():
     parser = argparse.ArgumentParser(description="Bible Reading Plan Generator")
-    parser.add_argument("--mode", default="generate", choices=["generate", "remind-evening", "remind-morning"])
+    parser.add_argument("--mode", default="generate", choices=["generate", "remind-evening", "remind-morning", "backfill"])
     parser.add_argument("--date", default=None, help="Override date (YYYY-MM-DD) for generation")
     args = parser.parse_args()
 
@@ -558,6 +641,10 @@ def main():
     if args.mode in ("remind-evening", "remind-morning"):
         reminder_type = "evening" if args.mode == "remind-evening" else "morning"
         send_reminder_emails(plan, reminder_type)
+        return
+
+    if args.mode == "backfill":
+        run_backfill(plan)
         return
 
     # Generate mode
@@ -599,6 +686,17 @@ def main():
 
     # Step 3: Generate analysis via Claude
     analysis_data = generate_analysis(entry, niv_text, esv_text, context)
+
+    # Fail loudly instead of publishing a blank post. A None result means
+    # the API key, model, or web-search call is broken — we want the GitHub
+    # Action to go RED so the problem is noticed, not silently committed.
+    if analysis_data is None:
+        logger.error(
+            f"Analysis FAILED for Day {entry['day_number']} ({entry['passage']}). "
+            "Not writing a post and not sending email. "
+            "Check ANTHROPIC_API_KEY, the model name, and the run logs."
+        )
+        sys.exit(1)
 
     # Step 4: Generate post HTML
     generate_post_html(entry, niv_text, esv_text, analysis_data, plan)
