@@ -1,402 +1,237 @@
-(function() {
+(function () {
 'use strict';
 
 var SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
 
+var TOTAL_DAYS = 365;
 var sb = null;
-var readingPlan = null;
-var nivBible = null;
+var plan = null;
 
-var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-var NIV_COPYRIGHT = 'Scripture quotations taken from The Holy Bible, New International Version\u00ae NIV\u00ae. Copyright \u00a9 1973, 1978, 1984, 2011 by Biblica, Inc.\u2122 Used by permission. All rights reserved worldwide.';
-
+// --- state ---
 function initSupabase() {
     try {
-        if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
-            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+        if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (e) { /* ignore */ }
 }
-
 function getUserId() {
-    var userId = localStorage.getItem('bible_user_id');
-    if (!userId) {
-        userId = crypto.randomUUID();
-        localStorage.setItem('bible_user_id', userId);
-    }
-    return userId;
+    var id = localStorage.getItem('bible_user_id');
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem('bible_user_id', id); }
+    return id;
 }
-
 function hasStarted() { return localStorage.getItem('bible_started') === 'true'; }
-function getCurrentDay() { return parseInt(localStorage.getItem('bible_current_day') || '1'); }
-function setCurrentDay(day) { localStorage.setItem('bible_current_day', String(day)); }
+function getCurrentDay() { return Math.min(Math.max(parseInt(localStorage.getItem('bible_current_day') || '1'), 1), TOTAL_DAYS); }
+function setCurrentDay(d) { localStorage.setItem('bible_current_day', String(d)); }
+function pad(n) { return String(n).padStart(3, '0'); }
 
-function getUserDateForDay(dayNumber) {
-    var startDate = localStorage.getItem('bible_start_date');
-    if (!startDate) return new Date();
-    var d = new Date(startDate + 'T12:00:00');
-    d.setDate(d.getDate() + (dayNumber - 1));
-    return d;
+async function loadPlan() {
+    if (plan) return plan;
+    var r = await fetch('/scripts/reading_plan.json');
+    plan = await r.json();
+    return plan;
 }
+function entryByDay(p, d) { return p.find(function (e) { return e.day_number === d; }) || null; }
 
-async function loadReadingPlan() {
-    if (readingPlan) return readingPlan;
+async function loadAnalysis(day) {
     try {
-        var resp = await fetch('/scripts/reading_plan.json');
-        readingPlan = await resp.json();
-        return readingPlan;
+        var r = await fetch('/bible/posts/day-' + pad(day) + '.json');
+        if (!r.ok) return null;
+        return await r.json();
     } catch (e) { return null; }
 }
 
-async function loadNivBible() {
-    if (nivBible) return nivBible;
-    try {
-        var resp = await fetch('/bible/niv.json');
-        nivBible = await resp.json();
-        return nivBible;
-    } catch (e) { return null; }
-}
-
-function getEntryByDay(plan, dayNumber) {
-    return plan.find(function(e) { return e.day_number === dayNumber; }) || null;
-}
-
-function getPersonalWeekEntries(plan, dayNumber) {
-    var weekStart = Math.floor((dayNumber - 1) / 7) * 7 + 1;
-    var entries = [];
-    for (var i = 0; i < 7; i++) {
-        var entry = getEntryByDay(plan, weekStart + i);
-        if (entry) entries.push(entry);
-    }
-    return entries;
-}
-
-// --- Bible Text ---
-
-function getPassageText(bible, book, chapters) {
-    if (!bible || !bible[book]) return null;
-
-    var result = [];
-    for (var i = 0; i < chapters.length; i++) {
-        var ch = String(chapters[i]);
-        var chData = bible[book][ch];
-        if (!chData) continue;
-
-        var verses = [];
-        // Sort verse numbers numerically
-        var verseNums = Object.keys(chData).sort(function(a, b) { return parseInt(a) - parseInt(b); });
-        for (var j = 0; j < verseNums.length; j++) {
-            verses.push({ num: verseNums[j], text: chData[verseNums[j]] });
-        }
-        result.push({ chapter: chapters[i], verses: verses });
-    }
-    return result.length > 0 ? result : null;
-}
-
-function renderPassageHtml(chaptersData, multiChapter) {
-    var html = '';
-    for (var c = 0; c < chaptersData.length; c++) {
-        var ch = chaptersData[c];
-        if (multiChapter) {
-            html += '<h3 class="chapter-heading">Chapter ' + ch.chapter + '</h3>';
-        }
-        html += '<p class="verse-block">';
-        for (var v = 0; v < ch.verses.length; v++) {
-            var verse = ch.verses[v];
-            html += '<span class="verse"><sup class="verse-num">' + verse.num + '</sup>\u00a0' + verse.text + ' </span>';
-        }
-        html += '</p>';
-    }
-    return html;
-}
-
-// --- Onboarding ---
-
+// --- onboarding ---
 async function startPlan() {
     var today = new Date().toLocaleDateString('en-CA');
     localStorage.setItem('bible_started', 'true');
     localStorage.setItem('bible_start_date', today);
     setCurrentDay(1);
-    getUserId();
-    await renderPersonalizedView();
+    var uid = getUserId();
+    // record start date server-side so daily emails know which day to send
+    if (sb) {
+        try { await sb.from('bible_subscribers').update({ start_date: today, current_day: 1 }).eq('user_id', uid); } catch (e) {}
+    }
+    await renderView();
 }
-
 function resetPlan() {
-    var ok = window.confirm('Start over from Day 1? This clears your reading progress on this device.');
-    if (!ok) return;
-    ['bible_started', 'bible_start_date', 'bible_current_day', 'bible_user_id', 'bible_translation']
-        .forEach(function(key) { localStorage.removeItem(key); });
+    if (!window.confirm('Start over from Day 1? This clears your progress on this device.')) return;
+    ['bible_started', 'bible_start_date', 'bible_current_day'].forEach(function (k) { localStorage.removeItem(k); });
     window.location.reload();
 }
 
-// --- Rendering ---
+// --- rendering ---
+function buttonsHtml(entry) {
+    return (entry.segments || []).map(function (s) {
+        return '<a class="read-btn" href="' + s.link + '" target="_blank" rel="noopener">Read ' + s.ref + ' in the NIV &rarr;</a>';
+    }).join('');
+}
 
-async function renderPersonalizedView() {
-    var plan = await loadReadingPlan();
-    if (!plan) return;
+function analysisHtml(a) {
+    var h = '';
+    if (a.context) h += '<p class="section-kicker">Context</p><div class="analysis-sec">' + a.context + '</div>';
+    if (a.themes) h += '<p class="section-kicker">Key themes</p><div class="analysis-sec">' + a.themes + '</div>';
+    if (a.takeaways && a.takeaways.length) {
+        h += '<p class="section-kicker">Takeaways</p><ul class="takeaways">' +
+            a.takeaways.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
+    }
+    if (a.connections) {
+        h += '<p class="section-kicker">Connections</p><div class="analysis-sec">' + a.connections;
+        var xr = a.cross_reference_links || [];
+        if (xr.length) {
+            h += '<div class="xref-links">' + xr.map(function (x) {
+                return x.url
+                    ? '<a href="' + x.url + '" target="_blank" rel="noopener">' + x.label + ' &rarr;</a>'
+                    : '<span>' + x.label + '</span>';
+            }).join('') + '</div>';
+        }
+        h += '</div>';
+    }
+    if (a.reflection) h += '<p class="section-kicker">Reflection</p><div class="analysis-sec">' + a.reflection + '</div>';
+    if (a.sources && a.sources.length) {
+        h += '<div class="sources-section"><p class="section-kicker" style="color:var(--faint)">Sources</p><ul class="sources-list">' +
+            a.sources.map(function (s) { return '<li><a href="' + s.url + '" target="_blank" rel="noopener">' + s.name + '</a></li>'; }).join('') +
+            '</ul></div>';
+    }
+    return h;
+}
 
-    var currentDay = getCurrentDay();
-    var entry = getEntryByDay(plan, currentDay);
+function renderToday(entry, a, day) {
+    var h = '<p class="post-meta">Day ' + day + ' of ' + TOTAL_DAYS + '</p>';
+    h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
+    if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
+    h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
+    h += '<div data-day-number="' + day + '"><label class="mark-read-label" style="margin-bottom:8px;">' +
+         '<input type="checkbox" class="mark-read-checkbox" data-day-number="' + day + '"> Mark as read</label></div>';
+    h += a ? analysisHtml(a)
+           : '<p class="analysis-sec" style="color:var(--muted);"><em>Today’s analysis is being prepared — check back shortly.</em></p>';
+    return h;
+}
+
+function renderComingUp(p, day) {
+    var cards = '';
+    for (var i = 1; i <= 6 && day + i <= TOTAL_DAYS; i++) {
+        var e = entryByDay(p, day + i);
+        if (!e) continue;
+        cards += '<a class="week-day-card" href="/bible/posts/day-' + pad(e.day_number) + '.html">' +
+                 '<div class="week-day-label">Day ' + e.day_number + '</div>' +
+                 '<div class="week-day-passage">' + e.passage + '</div></a>';
+    }
+    if (!cards) return '';
+    return '<h2 class="week-strip-title">Coming up</h2><div class="week-strip-grid">' + cards + '</div>';
+}
+
+function renderArchive(p, day) {
+    var list = document.getElementById('archive-list');
+    if (!list) return;
+    var past = p.filter(function (e) { return e.day_number < day; }).reverse();
+    if (!past.length) { list.innerHTML = '<li class="archive-empty">Your finished readings will appear here.</li>'; return; }
+    list.innerHTML = past.map(function (e) {
+        return '<li><a href="/bible/posts/day-' + pad(e.day_number) + '.html">' +
+               '<div class="archive-item-left"><span class="archive-passage">Day ' + e.day_number + ': ' + e.passage + '</span></div></a></li>';
+    }).join('');
+}
+
+async function renderView() {
+    var p = await loadPlan();
+    var day = getCurrentDay();
+    var entry = entryByDay(p, day);
     if (!entry) return;
 
     var onboarding = document.getElementById('onboarding');
-    var todaysReading = document.getElementById('todays-reading');
-    var weekStrip = document.getElementById('week-strip');
-
     if (onboarding) onboarding.style.display = 'none';
-    if (todaysReading) {
-        todaysReading.style.display = 'block';
-        todaysReading.innerHTML = renderTodayCard(entry);
-    }
-    if (weekStrip) {
-        weekStrip.style.display = 'block';
-        weekStrip.innerHTML = renderWeekStrip(plan, entry);
-    }
+
+    var todays = document.getElementById('todays-reading');
+    var a = await loadAnalysis(day);
+    if (todays) { todays.style.display = 'block'; todays.innerHTML = renderToday(entry, a, day); }
+
+    var strip = document.getElementById('week-strip');
+    if (strip) { strip.style.display = 'block'; strip.innerHTML = renderComingUp(p, day); }
 
     var resetRow = document.getElementById('reset-row');
     if (resetRow) {
         resetRow.style.display = 'block';
-        var resetBtn = document.getElementById('reset-plan-btn');
-        if (resetBtn && !resetBtn.dataset.wired) {
-            resetBtn.addEventListener('click', resetPlan);
-            resetBtn.dataset.wired = 'true';
-        }
+        var rb = document.getElementById('reset-plan-btn');
+        if (rb && !rb.dataset.wired) { rb.addEventListener('click', resetPlan); rb.dataset.wired = 'true'; }
     }
 
-    // Load and display Bible text
-    loadPassageForDay(entry);
-
-    await renderProgress(plan);
-    await renderArchive(plan);
+    renderArchive(p, day);
+    renderProgress();
 }
 
-function renderTodayCard(entry) {
-    var dateObj = getUserDateForDay(entry.day_number);
-    var dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
-    var weekday = WEEKDAYS[dateObj.getDay()];
-    var personalWeek = Math.ceil(entry.day_number / 7);
-
-    return '<p class="progress-indicator">Day ' + entry.day_number + ' of 364 &bull; Week ' + personalWeek + '</p>' +
-        '<div class="reading-card featured" data-day-number="' + entry.day_number + '">' +
-            '<div class="reading-card-header">' +
-                '<span class="genre-badge" data-genre="' + entry.genre + '">' + entry.genre + '</span>' +
-                '<span class="reading-card-meta">' + weekday + ', ' + dateFormatted + '</span>' +
-            '</div>' +
-            '<div class="passage-ref">' + entry.passage + '</div>' +
-            '<div class="reading-card-actions">' +
-                '<label class="mark-read-label">' +
-                    '<input type="checkbox" class="mark-read-checkbox" data-day-number="' + entry.day_number + '">' +
-                    ' Mark as read' +
-                '</label>' +
-            '</div>' +
-        '</div>' +
-        '<div id="passage-text-container" class="passage-text active" style="margin-top: 1.5rem;">' +
-            '<p style="color: #BDBDBD; font-style: italic;">Loading passage...</p>' +
-        '</div>' +
-        '<p class="copyright-notice" id="passage-copyright"></p>' +
-        '<div id="analysis-container" class="analysis-section" style="display: none;">' +
-            '<h3>Analysis</h3>' +
-            '<div id="analysis-content"></div>' +
-        '</div>';
-}
-
-async function loadPassageForDay(entry) {
-    var container = document.getElementById('passage-text-container');
-    var copyright = document.getElementById('passage-copyright');
-    if (!container) return;
-
-    var bible = await loadNivBible();
-    var chaptersData = bible ? getPassageText(bible, entry.book, entry.chapters) : null;
-
-    if (chaptersData) {
-        var multiChapter = chaptersData.length > 1;
-        container.innerHTML = renderPassageHtml(chaptersData, multiChapter);
-        if (copyright) copyright.textContent = NIV_COPYRIGHT;
-    } else {
-        container.innerHTML = '<p style="color: #9E9E9E;"><em>Unable to load passage text. Please read ' + entry.passage + ' in your Bible.</em></p>';
-    }
-
-    // Try to load analysis from generated post
-    loadAnalysisForDay(entry);
-}
-
-async function loadAnalysisForDay(entry) {
-    var analysisContainer = document.getElementById('analysis-container');
-    var analysisContent = document.getElementById('analysis-content');
-    if (!analysisContainer || !analysisContent) return;
-
-    try {
-        var resp = await fetch('/bible/posts/' + entry.date + '.html');
-        if (!resp.ok) return;
-
-        var html = await resp.text();
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, 'text/html');
-        var analysis = doc.querySelector('.analysis-section');
-
-        if (analysis && analysis.innerHTML.trim()) {
-            analysisContent.innerHTML = analysis.innerHTML;
-            analysisContainer.style.display = 'block';
-        }
-    } catch (e) { /* no post yet */ }
-}
-
-function renderWeekStrip(plan, currentEntry) {
-    var weekEntries = getPersonalWeekEntries(plan, currentEntry.day_number);
-    var currentDay = getCurrentDay();
-    var personalWeek = Math.ceil(currentEntry.day_number / 7);
-
-    var cards = '';
-    for (var i = 0; i < weekEntries.length; i++) {
-        var day = weekEntries[i];
-        var isToday = day.day_number === currentDay;
-        var dateObj = getUserDateForDay(day.day_number);
-        var weekdayLabel = WEEKDAYS[dateObj.getDay()];
-        var cls = 'week-day-card' + (isToday ? ' today' : '');
-
-        cards += '<div class="' + cls + '" data-day-number="' + day.day_number + '">' +
-                '<div class="week-day-label">' + weekdayLabel + '</div>' +
-                '<div class="week-day-passage">' + day.passage + '</div>' +
-                '<span class="genre-badge" data-genre="' + day.genre + '">' + day.genre + '</span>' +
-            '</div>';
-    }
-
-    return '<h2 class="week-strip-title">Week ' + personalWeek + '</h2>' +
-        '<div class="week-strip-grid">' + cards + '</div>';
-}
-
-async function renderArchive(plan) {
-    var archiveList = document.getElementById('archive-list');
-    if (!archiveList) return;
-
-    var currentDay = getCurrentDay();
-    var pastDays = plan.filter(function(e) { return e.day_number <= currentDay; }).reverse();
-
-    if (pastDays.length === 0) {
-        archiveList.innerHTML = '<li class="archive-empty">Complete your first reading to see it here.</li>';
-        return;
-    }
-
-    var html = '';
-    for (var i = 0; i < pastDays.length; i++) {
-        var entry = pastDays[i];
-        var dateObj = getUserDateForDay(entry.day_number);
-        var dateFormatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
-
-        html += '<li><div class="archive-item-left" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 0.5rem;">' +
-                '<span class="genre-badge" data-genre="' + entry.genre + '">' + entry.genre + '</span>' +
-                '<span class="archive-passage">Day ' + entry.day_number + ': ' + entry.passage + '</span>' +
-                '<span class="archive-date" style="margin-left:auto;">' + dateFormatted + '</span>' +
-            '</div></li>';
-    }
-
-    archiveList.innerHTML = html;
-}
-
-// --- Progress ---
-
+// --- progress (Supabase) ---
 async function renderProgress() {
-    if (!sb) return;
-    var userId = getUserId();
-    try {
-        var result = await sb.from('bible_reading_progress').select('day_number, completed').eq('user_id', userId);
-        if (result.data) {
-            var completed = {};
-            result.data.forEach(function(r) { if (r.completed) completed[r.day_number] = true; });
-            document.querySelectorAll('[data-day-number]').forEach(function(el) {
-                var dayNum = parseInt(el.dataset.dayNumber);
-                if (completed[dayNum]) {
-                    var cb = el.querySelector('input[type="checkbox"]');
-                    if (cb) cb.checked = true;
-                    el.classList.add('completed');
-                }
-            });
-        }
-    } catch (e) { /* ignore */ }
-
-    document.querySelectorAll('.mark-read-checkbox').forEach(function(checkbox) {
-        checkbox.addEventListener('change', function(e) {
-            toggleProgress(parseInt(e.target.dataset.dayNumber), e.target.checked);
-        });
-    });
-}
-
-async function toggleProgress(dayNumber, completed) {
-    var userId = getUserId();
     if (sb) {
-        await sb.from('bible_reading_progress').upsert({
-            user_id: userId, day_number: dayNumber,
-            completed: completed, completed_at: completed ? new Date().toISOString() : null,
-        }, { onConflict: 'user_id,day_number' });
+        try {
+            var res = await sb.from('bible_reading_progress').select('day_number, completed').eq('user_id', getUserId());
+            if (res.data) {
+                var done = {};
+                res.data.forEach(function (r) { if (r.completed) done[r.day_number] = true; });
+                document.querySelectorAll('[data-day-number]').forEach(function (el) {
+                    if (done[parseInt(el.dataset.dayNumber)]) {
+                        var cb = el.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = true;
+                        el.classList.add('completed');
+                    }
+                });
+            }
+        } catch (e) { /* ignore */ }
     }
-
-    var card = document.querySelector('[data-day-number="' + dayNumber + '"]');
-    if (card) card.classList.toggle('completed', completed);
-
-    if (completed && dayNumber === getCurrentDay()) {
-        setCurrentDay(dayNumber + 1);
-        setTimeout(renderPersonalizedView, 500);
-    }
-}
-
-// --- Translation Toggle (for post pages) ---
-
-function initTranslationToggle() {
-    document.querySelectorAll('.translation-toggle button').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var t = btn.dataset.translation;
-            localStorage.setItem('bible_translation', t);
-            document.querySelectorAll('.passage-text[data-translation]').forEach(function(el) {
-                el.classList.toggle('active', el.dataset.translation === t);
-            });
-            document.querySelectorAll('.translation-toggle button').forEach(function(b) {
-                b.classList.toggle('active', b.dataset.translation === t);
-            });
-        });
+    document.querySelectorAll('.mark-read-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function (e) { toggleProgress(parseInt(e.target.dataset.dayNumber), e.target.checked); });
     });
 }
 
-// --- Subscribe ---
+async function toggleProgress(day, completed) {
+    var uid = getUserId();
+    if (sb) {
+        try {
+            await sb.from('bible_reading_progress').upsert({
+                user_id: uid, day_number: day, completed: completed,
+                completed_at: completed ? new Date().toISOString() : null
+            }, { onConflict: 'user_id,day_number' });
+        } catch (e) {}
+    }
+    if (completed && day === getCurrentDay() && day < TOTAL_DAYS) {
+        setCurrentDay(day + 1);
+        if (sb) { try { await sb.from('bible_subscribers').update({ current_day: day + 1 }).eq('user_id', uid); } catch (e) {} }
+        setTimeout(renderView, 500);
+    }
+}
 
+// --- subscribe ---
 function initSubscribeForm() {
     var form = document.getElementById('subscribe-form');
     if (!form) return;
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
         var email = form.querySelector('input[type="email"]').value;
-        var button = form.querySelector('button');
-        button.textContent = 'Subscribing...';
-        button.disabled = true;
-
+        var btn = form.querySelector('button');
+        btn.textContent = 'Subscribing...'; btn.disabled = true;
         if (sb) {
-            var result = await sb.from('bible_subscribers').insert({ email: email, subscribed_at: new Date().toISOString() });
-            button.textContent = (result.error && result.error.code === '23505') ? 'Already subscribed!' :
-                                  result.error ? 'Error — try again' : 'Subscribed!';
-            if (result.error && result.error.code !== '23505') button.disabled = false;
-        } else {
-            button.textContent = 'Coming soon!';
-        }
-        setTimeout(function() { button.textContent = 'Subscribe'; button.disabled = false; }, 3000);
+            var today = new Date().toLocaleDateString('en-CA');
+            var res = await sb.from('bible_subscribers').insert({
+                email: email, user_id: getUserId(), start_date: today, current_day: 1,
+                subscribed_at: new Date().toISOString()
+            });
+            btn.textContent = (res.error && res.error.code === '23505') ? 'Already subscribed!' :
+                              res.error ? 'Error — try again' : 'Subscribed!';
+            if (res.error && res.error.code !== '23505') btn.disabled = false;
+        } else { btn.textContent = 'Coming soon!'; }
+        setTimeout(function () { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
     });
 }
 
-// --- Init ---
-
-document.addEventListener('DOMContentLoaded', async function() {
+// --- init ---
+document.addEventListener('DOMContentLoaded', function () {
     initSupabase();
     var onboarding = document.getElementById('onboarding');
-
     if (hasStarted()) {
         if (onboarding) onboarding.style.display = 'none';
-        await renderPersonalizedView();
+        renderView();
     } else {
         var startBtn = document.getElementById('start-plan-btn');
         if (startBtn) startBtn.addEventListener('click', startPlan);
     }
-
-    initTranslationToggle();
     initSubscribeForm();
 });
 
