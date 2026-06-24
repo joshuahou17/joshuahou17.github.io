@@ -2,22 +2,31 @@ name: Bible Reading Plan
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # 8:00 AM ET (EDT) — generate + send
-    - cron: '0 0 * * *'    # 8:00 PM ET (EDT) — evening reminder
-    - cron: '0 9 * * *'    # 5:00 AM ET (EDT) — morning reminder
+    - cron: '0 12 * * *'   # 8:00 AM ET — send each subscriber their day's email
+    - cron: '0 0 * * *'    # 8:00 PM ET — evening reminder
+    - cron: '0 9 * * *'    # 5:00 AM ET — morning reminder
   workflow_dispatch:
     inputs:
       mode:
         description: 'Run mode'
         required: true
-        default: 'generate'
+        default: 'send'
         type: choice
         options:
-          - generate
+          - send            # email subscribers the day they're on
+          - backfill        # generate analysis for every day missing it (one-time)
+          - day             # (re)generate a single day  (set "day")
+          - send-test       # email ONE day to a test address (set "day" + optional "to")
           - remind-evening
           - remind-morning
-          - seed
-          - backfill
+      day:
+        description: 'Day number (for day / send-test)'
+        required: false
+        type: string
+      to:
+        description: 'Recipient (for send-test; defaults to TEST_EMAIL secret)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -25,13 +34,10 @@ permissions:
 jobs:
   bible-reading:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -45,41 +51,32 @@ jobs:
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
           else
             HOUR=$(date -u +%H)
-            if [ "$HOUR" = "12" ]; then
-              echo "mode=generate" >> $GITHUB_OUTPUT
-            elif [ "$HOUR" = "00" ]; then
-              echo "mode=remind-evening" >> $GITHUB_OUTPUT
-            elif [ "$HOUR" = "09" ]; then
-              echo "mode=remind-morning" >> $GITHUB_OUTPUT
-            else
-              echo "mode=generate" >> $GITHUB_OUTPUT
+            if [ "$HOUR" = "00" ]; then echo "mode=remind-evening" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "09" ]; then echo "mode=remind-morning" >> $GITHUB_OUTPUT
+            else echo "mode=send" >> $GITHUB_OUTPUT
             fi
           fi
 
-      - name: Seed reading plan to Supabase
-        if: steps.mode.outputs.mode == 'seed'
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python scripts/seed_reading_plan.py
-
-      - name: Run Bible reading script
-        if: steps.mode.outputs.mode != 'seed'
+      - name: Run generator
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          BIBLE_API_KEY: ${{ secrets.BIBLE_API_KEY }}
-          ESV_API_KEY: ${{ secrets.ESV_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           HMAC_SECRET: ${{ secrets.HMAC_SECRET }}
-        run: python scripts/generate_bible.py --mode ${{ steps.mode.outputs.mode }}
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+        run: |
+          ARGS="--mode ${{ steps.mode.outputs.mode }}"
+          if [ -n "${{ inputs.day }}" ]; then ARGS="$ARGS --day ${{ inputs.day }}"; fi
+          if [ -n "${{ inputs.to }}" ]; then ARGS="$ARGS --to ${{ inputs.to }}"; fi
+          echo "Running: python scripts/generate_bible.py $ARGS"
+          python scripts/generate_bible.py $ARGS
 
-      - name: Commit and push if changed
-        if: steps.mode.outputs.mode == 'generate' || steps.mode.outputs.mode == 'backfill'
+      - name: Commit generated pages
+        if: steps.mode.outputs.mode == 'backfill' || steps.mode.outputs.mode == 'day'
         run: |
           git config user.name "Bible Bot"
           git config user.email "actions@github.com"
-          git add bible/ scripts/bible_context.json
-          git diff --cached --quiet || git commit -m "Bible reading (${{ steps.mode.outputs.mode }}) for $(date -u +%Y-%m-%d)"
+          git add bible/posts
+          git diff --cached --quiet || git commit -m "Bible analysis (${{ steps.mode.outputs.mode }}) $(date -u +%Y-%m-%d)"
           git push
