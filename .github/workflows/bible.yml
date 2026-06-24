@@ -10,10 +10,11 @@ on:
       mode:
         description: 'Run mode'
         required: true
-        default: 'send'
+        default: 'daily'
         type: choice
         options:
-          - send            # email subscribers the day they're on
+          - daily           # generate the day(s) due, then email subscribers
+          - send            # email subscribers the day they're on (no generation)
           - backfill        # generate analysis for every day missing it (one-time)
           - day             # (re)generate a single day  (set "day")
           - send-test       # email ONE day to a test address (set "day" + optional "to")
@@ -53,7 +54,7 @@ jobs:
             HOUR=$(date -u +%H)
             if [ "$HOUR" = "00" ]; then echo "mode=remind-evening" >> $GITHUB_OUTPUT
             elif [ "$HOUR" = "09" ]; then echo "mode=remind-morning" >> $GITHUB_OUTPUT
-            else echo "mode=send" >> $GITHUB_OUTPUT
+            else echo "mode=daily" >> $GITHUB_OUTPUT
             fi
           fi
 
@@ -73,7 +74,7 @@ jobs:
           python scripts/generate_bible.py $ARGS
 
       - name: Commit generated pages
-        if: ${{ always() && (steps.mode.outputs.mode == 'backfill' || steps.mode.outputs.mode == 'day') }}
+        if: ${{ always() && (steps.mode.outputs.mode == 'daily' || steps.mode.outputs.mode == 'backfill' || steps.mode.outputs.mode == 'day') }}
         run: |
           git config user.name "Bible Bot"
           git config user.email "actions@github.com"

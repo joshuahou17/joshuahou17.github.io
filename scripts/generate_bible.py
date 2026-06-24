@@ -370,6 +370,34 @@ def run_send(plan):
     logger.info(f"Sent {sent} email(s)")
 
 
+def run_daily(plan):
+    """Cheap daily run: generate only the day(s) due so far that are missing
+    (normally just one), then send. Replaces the all-at-once backfill."""
+    sb = get_supabase_client()
+    subs = get_subscribers(sb)
+    target = max([scheduled_day(s) for s in subs], default=1)
+    logger.info(f"Daily: ensuring days 1..{target} are generated, then sending")
+
+    prior = []
+    for e in sorted(plan, key=lambda x: x["day_number"]):
+        d = e["day_number"]
+        if d > target:
+            break
+        if post_json_path(d).exists():
+            a = load_analysis(d) or {}
+            if a.get("summary"):
+                prior.append({"day_number": d, "passage": e["passage"], "summary": a["summary"]})
+            continue
+        analysis = generate_analysis(e, prior)
+        if analysis is None:
+            logger.error(f"Daily: failed Day {d} — will retry next run; not sending past it")
+            break
+        write_day(e, analysis, plan)
+        prior.append({"day_number": d, "passage": e["passage"], "summary": analysis.get("summary", "")})
+
+    run_send(plan)
+
+
 def run_send_test(plan, day, to_email):
     entry, analysis = get_entry_by_day(plan, day), load_analysis(day)
     if not entry or not analysis:
@@ -404,15 +432,17 @@ def run_reminders(plan, kind):
 
 def main():
     p = argparse.ArgumentParser(description="Bible Reading Plan Generator")
-    p.add_argument("--mode", default="backfill",
-                   choices=["backfill", "day", "send", "send-test", "remind-evening", "remind-morning"])
+    p.add_argument("--mode", default="daily",
+                   choices=["daily", "backfill", "day", "send", "send-test", "remind-evening", "remind-morning"])
     p.add_argument("--day", type=int, default=None)
     p.add_argument("--to", default=None, help="recipient for send-test")
     args = p.parse_args()
 
     plan = load_reading_plan()
 
-    if args.mode == "backfill":
+    if args.mode == "daily":
+        run_daily(plan)
+    elif args.mode == "backfill":
         run_backfill(plan)
     elif args.mode == "day":
         if not args.day:
