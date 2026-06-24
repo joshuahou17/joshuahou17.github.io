@@ -54,7 +54,7 @@ jobs:
             HOUR=$(date -u +%H)
             if [ "$HOUR" = "00" ]; then echo "mode=remind-evening" >> $GITHUB_OUTPUT
             elif [ "$HOUR" = "09" ]; then echo "mode=remind-morning" >> $GITHUB_OUTPUT
-            else echo "mode=daily" >> $GITHUB_OUTPUT
+            else echo "mode=send" >> $GITHUB_OUTPUT
             fi
           fi
 
