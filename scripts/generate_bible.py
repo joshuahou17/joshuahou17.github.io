@@ -255,8 +255,8 @@ def get_subscribers(sb):
         return []
 
 
-def subscriber_day(sub):
-    """Which plan day a subscriber is on, from their personal start date."""
+def scheduled_day(sub):
+    """How far the calendar has advanced for this subscriber (one day per day)."""
     sd = sub.get("start_date")
     if sd:
         try:
@@ -266,6 +266,34 @@ def subscriber_day(sub):
         except Exception:
             pass
     return min(max(sub.get("current_day") or 1, 1), TOTAL_DAYS)
+
+
+def completed_days(sb, user_id):
+    if not sb or not user_id:
+        return set()
+    try:
+        res = sb.table("bible_reading_progress").select("day_number, completed").eq("user_id", user_id).execute()
+        return {r["day_number"] for r in (res.data or []) if r.get("completed")}
+    except Exception:
+        return set()
+
+
+def first_incomplete(done):
+    d = 1
+    while d in done and d < TOTAL_DAYS:
+        d += 1
+    return d
+
+
+def email_day_for(sb, sub):
+    """The day to email: the oldest UNREAD day, but never ahead of the calendar
+    schedule. Returns None if the reader is caught up (nothing due today)."""
+    sched = scheduled_day(sub)
+    done = completed_days(sb, sub.get("user_id") or sub.get("id"))
+    fi = first_incomplete(done)
+    if fi > sched:
+        return None  # everything due so far is read — no email today
+    return min(fi, sched)
 
 
 # --- Modes ---
@@ -318,19 +346,28 @@ def run_day(plan, day):
 
 
 def run_send(plan):
-    """Daily send: each subscriber gets the day they're on."""
-    subs = get_subscribers(get_supabase_client())
+    """Daily send: each subscriber gets their oldest unread day (resending a
+    missed day rather than marching past it)."""
+    sb = get_supabase_client()
+    subs = get_subscribers(sb)
     if not subs:
         logger.info("No subscribers")
         return
+    sent = 0
     for sub in subs:
-        day = subscriber_day(sub)
+        day = email_day_for(sb, sub)
+        if day is None:
+            logger.info(f"{sub.get('email')} is caught up — no email today")
+            continue
         entry, analysis = get_entry_by_day(plan, day), load_analysis(day)
         if not entry or not analysis:
             logger.warning(f"Day {day} not generated yet — skipping {sub.get('email')}")
             continue
+        uid = sub.get("user_id") or sub["id"]
         subject = f"Day {day}: {entry['passage']}" + (f" — {analysis['title']}" if analysis.get("title") else "")
-        send_email(sub["email"], subject, render_email(entry, analysis, plan, sub["id"]))
+        if send_email(sub["email"], subject, render_email(entry, analysis, plan, uid)):
+            sent += 1
+    logger.info(f"Sent {sent} email(s)")
 
 
 def run_send_test(plan, day, to_email):
@@ -351,21 +388,16 @@ def run_reminders(plan, kind):
         return
     sent = 0
     for sub in subs:
-        day = subscriber_day(sub)
-        # skip if they've completed today's reading
-        try:
-            done = sb.table("bible_reading_progress").select("completed").eq(
-                "user_id", sub["id"]).eq("day_number", day).execute().data
-            if done and done[0].get("completed"):
-                continue
-        except Exception:
-            pass
+        day = email_day_for(sb, sub)
+        if day is None:
+            continue  # caught up — no nudge needed
         entry, analysis = get_entry_by_day(plan, day), load_analysis(day)
         if not entry or not analysis:
             continue
+        uid = sub.get("user_id") or sub["id"]
         word = "waiting for you" if kind == "evening" else "before today's reading"
         subject = f"Day {day}: {entry['passage']} is {word}"
-        send_email(sub["email"], subject, render_email(entry, analysis, plan, sub["id"], reminder=True))
+        send_email(sub["email"], subject, render_email(entry, analysis, plan, uid, reminder=True))
         sent += 1
     logger.info(f"Sent {sent} {kind} reminders")
 

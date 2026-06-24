@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress | Daily Bible Reading</title>
+    <meta name="description" content="Your progress through the one-year chronological Bible reading plan.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-back">&larr; joshhou.com</a>
+    </nav>
+    <main class="container">
+        <div class="tabbar">
+            <a href="/bible">Today</a>
+            <a href="/bible/progress.html" class="active">Progress</a>
+        </div>
+
+        <header class="progress-header">
+            <p class="progress-count" id="progress-count">Day — of 365</p>
+            <p class="progress-read"><span id="progress-read">0 read</span></p>
+        </header>
+
+        <div id="progress-calendar"><p class="analysis-sec" style="text-align:center;color:var(--muted)"><em>Loading your calendar…</em></p></div>
+    </main>
+    <footer class="footer">
+        <p>&copy; 2026 Joshua Hou &bull; One-year chronological reading plan</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js?v=9"></script>
+</body>
+</html>
