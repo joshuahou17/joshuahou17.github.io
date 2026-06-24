@@ -1019,6 +1019,22 @@ ul.takeaways li:before {
 }
 .nav-progress:hover { color: var(--accent); }
 
+/* Footer unsubscribe */
+.unsub-link {
+    display: inline-block;
+    margin-top: 10px;
+    background: none;
+    border: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--faint);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+.unsub-link:hover { color: var(--muted); }
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {

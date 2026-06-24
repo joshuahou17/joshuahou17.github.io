@@ -273,9 +273,21 @@ function initSubscribeForm() {
     });
 }
 
+// --- unsubscribe (footer, any page) ---
+function wireUnsubscribe() {
+    var btn = document.getElementById('unsubscribe-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        var email = window.prompt('Enter the email you subscribed with to unsubscribe:');
+        if (!email) return;
+        window.location.href = SUPABASE_URL + '/functions/v1/unsubscribe?email=' + encodeURIComponent(email.trim());
+    });
+}
+
 // --- init / route ---
 document.addEventListener('DOMContentLoaded', function () {
     initSupabase();
+    wireUnsubscribe();
     if (document.getElementById('progress-calendar')) { renderProgressPage(); return; }
     if (document.querySelector('main.post')) { initPostPage(); return; }
     // index

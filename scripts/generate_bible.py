@@ -199,7 +199,7 @@ def render_email(entry, analysis, plan, sub_id, reminder=False):
     ctx.update(
         mark_read_url=f"{supa}/functions/v1/mark-read?user_id={sub_id}&day={day}&token={token}",
         web_url=f"{SITE}/bible/posts/day-{day:03d}.html",
-        unsubscribe_url=f"{supa}/functions/v1/unsubscribe?subscriber_id={sub_id}",
+        unsubscribe_url=f"{supa}/functions/v1/unsubscribe?user_id={sub_id}",
     )
     tmpl = REMINDER_EMAIL_TEMPLATE if reminder else EMAIL_TEMPLATE
     return Template(tmpl).render(**ctx)
