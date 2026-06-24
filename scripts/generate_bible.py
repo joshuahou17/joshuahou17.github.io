@@ -279,6 +279,7 @@ def run_backfill(plan):
     logger.info(f"Backfill: generating {len(targets)} day(s)")
 
     prior = []  # accumulate summaries in day order for backward cross-references
+    failures = []
     for e in sorted(plan, key=lambda x: x["day_number"]):
         if post_json_path(e["day_number"]).exists():
             existing = load_analysis(e["day_number"]) or {}
@@ -287,11 +288,17 @@ def run_backfill(plan):
             continue
         analysis = generate_analysis(e, prior)
         if analysis is None:
-            logger.error(f"Backfill: FAILED Day {e['day_number']} — stopping so it can be retried")
-            sys.exit(1)
+            # Don't lose the whole run for one bad day — skip and keep going.
+            # The day stays un-generated, so a later backfill re-run retries just it.
+            logger.error(f"Backfill: FAILED Day {e['day_number']} — skipping; re-run backfill to retry it")
+            failures.append(e["day_number"])
+            continue
         write_day(e, analysis, plan)
         prior.append({"day_number": e["day_number"], "passage": e["passage"], "summary": analysis.get("summary", "")})
-    logger.info("Backfill complete")
+    if failures:
+        logger.warning(f"Backfill finished with {len(failures)} failed day(s): {failures} — re-run 'backfill' to fill them")
+    else:
+        logger.info("Backfill complete — all days generated")
 
 
 def run_day(plan, day):

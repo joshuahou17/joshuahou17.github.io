@@ -73,7 +73,7 @@ jobs:
           python scripts/generate_bible.py $ARGS
 
       - name: Commit generated pages
-        if: steps.mode.outputs.mode == 'backfill' || steps.mode.outputs.mode == 'day'
+        if: ${{ always() && (steps.mode.outputs.mode == 'backfill' || steps.mode.outputs.mode == 'day') }}
         run: |
           git config user.name "Bible Bot"
           git config user.email "actions@github.com"
