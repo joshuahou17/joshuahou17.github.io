@@ -131,47 +131,80 @@ function analysisHtml(a) {
     if (a.sources && a.sources.length) h += '<div class="sources-section"><p class="section-kicker" style="color:var(--faint)">Sources</p><ul class="sources-list">' + a.sources.map(function (s) { return '<li><a href="' + s.url + '" target="_blank" rel="noopener">' + s.name + '</a></li>'; }).join('') + '</ul></div>';
     return h;
 }
-async function renderToday() {
+// How far the calendar has unlocked: one new day per day since you started.
+function scheduledDay() {
+    var s = localStorage.getItem('bible_start_date');
+    if (!s) return TOTAL_DAYS;
+    var start = new Date(s + 'T12:00:00');
+    var today = new Date(); today.setHours(12, 0, 0, 0);
+    var d = Math.floor((today - start) / 86400000) + 1;
+    return Math.min(Math.max(d, 1), TOTAL_DAYS);
+}
+
+// view = an explicit day to show (read-ahead or back nav); omit for the default daily reading.
+async function renderToday(view) {
     var p = await loadPlan();
     var done = await getCompleted();
-    var day = Object.keys(done).length ? firstIncomplete(done) : getCurrentDay();
-    setCurrentDay(day);
-    var entry = entryByDay(p, day);
-    if (!entry) return;
+    var sched = scheduledDay();
+    var firstUnread = Object.keys(done).length ? firstIncomplete(done) : 1;
     var onboarding = document.getElementById('onboarding'); if (onboarding) onboarding.style.display = 'none';
-    var a = await loadAnalysis(day);
     var todays = document.getElementById('todays-reading');
+    var stripBase = firstUnread;
+
     if (todays) {
         todays.style.display = 'block';
-        var h = '<p class="post-meta">Day ' + day + ' of ' + TOTAL_DAYS + '</p>';
-        h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
-        if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
-        h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
-        h += '<div class="read-actions" data-day-number="' + day + '">' +
-                '<label class="mark-read-label"><input type="checkbox" class="mark-read-checkbox"> Mark as read</label>' +
-                '<button class="read-btn" id="continue-btn" type="button" style="display:none;">Read the next one &rarr;</button>' +
-             '</div>';
-        h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>Today’s analysis is being prepared — check back shortly.</em></p>';
-        todays.innerHTML = h;
-        var cb = todays.querySelector('.mark-read-checkbox');
-        var cont = todays.querySelector('#continue-btn');
-        cb.addEventListener('change', async function () {
-            await toggleProgress(day, cb.checked);
-            if (cb.checked) {
+        var caughtUp = (typeof view !== 'number') && (firstUnread > sched);
+        if (caughtUp) {
+            var nextEntry = entryByDay(p, firstUnread);
+            var ch = '<p class="post-meta">' + (firstUnread - 1) + ' of ' + TOTAL_DAYS + ' read · all caught up</p>';
+            ch += '<h1 class="passage-ref">You’re all caught up</h1>';
+            ch += '<p class="post-title">Your next reading' + (nextEntry ? ' — ' + nextEntry.passage : '') + ' arrives tomorrow morning.</p>';
+            if (nextEntry) ch += '<div class="read-buttons"><button class="read-btn" id="ahead-btn" type="button">Read ahead &rarr;</button></div>';
+            todays.innerHTML = ch;
+            var ab = document.getElementById('ahead-btn');
+            if (ab) ab.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(firstUnread); });
+            stripBase = firstUnread - 1;
+        } else {
+            var day = (typeof view === 'number') ? Math.min(Math.max(view, 1), TOTAL_DAYS) : firstUnread;
+            stripBase = day;
+            var entry = entryByDay(p, day);
+            var a = await loadAnalysis(day);
+            var ahead = day > sched;
+            var offTrack = (typeof view === 'number') && day !== firstUnread;
+            var h = '<p class="post-meta">Day ' + day + ' of ' + TOTAL_DAYS + (ahead ? ' · reading ahead' : '') + '</p>';
+            h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
+            if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
+            h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
+            h += '<div class="read-actions" data-day-number="' + day + '">';
+            if (day > 1) h += '<button class="read-nav" id="prev-btn" type="button">&larr; Previous day</button>';
+            h += '<label class="mark-read-label"><input type="checkbox" class="mark-read-checkbox"' + (done[day] ? ' checked' : '') + '> Mark as read</label>';
+            h += '<button class="read-btn" id="continue-btn" type="button" style="display:' + (done[day] ? 'inline-block' : 'none') + ';">Read the next one &rarr;</button>';
+            h += '</div>';
+            if (ahead || offTrack) h += '<p class="reading-hint"><a href="#" id="back-today">&larr; Back to today’s reading</a></p>';
+            h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>This analysis is being prepared — check back shortly.</em></p>';
+            todays.innerHTML = h;
+            var cb = todays.querySelector('.mark-read-checkbox');
+            var cont = todays.querySelector('#continue-btn');
+            cb.addEventListener('change', async function () {
+                await toggleProgress(day, cb.checked);
                 var nextDay = Math.min(day + 1, TOTAL_DAYS);
-                setCurrentDay(nextDay);
-                if (sb) { try { await sb.from('bible_subscribers').update({ current_day: nextDay }).eq('user_id', getUserId()); } catch (e) {} }
-                if (day < TOTAL_DAYS) cont.style.display = 'inline-block';
-            } else if (cont) { cont.style.display = 'none'; }
-        });
-        if (cont) cont.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(); });
+                if (sb) { try { await sb.from('bible_subscribers').update({ current_day: cb.checked ? nextDay : day }).eq('user_id', getUserId()); } catch (e) {} }
+                if (cb.checked) { setCurrentDay(nextDay); if (day < TOTAL_DAYS) cont.style.display = 'inline-block'; }
+                else { cont.style.display = 'none'; }
+            });
+            if (cont) cont.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(day + 1); });
+            var pv = document.getElementById('prev-btn');
+            if (pv) pv.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(day - 1); });
+            var bt = document.getElementById('back-today');
+            if (bt) bt.addEventListener('click', function (ev) { ev.preventDefault(); window.scrollTo(0, 0); renderToday(); });
+        }
     }
     var strip = document.getElementById('week-strip');
     if (strip) {
         strip.style.display = 'block';
         var cards = '';
-        for (var i = 1; i <= 6 && day + i <= TOTAL_DAYS; i++) {
-            var e = entryByDay(p, day + i);
+        for (var i = 1; i <= 6 && stripBase + i <= TOTAL_DAYS; i++) {
+            var e = entryByDay(p, stripBase + i);
             cards += '<a class="week-day-card" href="' + dayHref(e.day_number) + '"><div class="week-day-label">Day ' + e.day_number + '</div><div class="week-day-passage">' + e.passage + '</div></a>';
         }
         strip.innerHTML = cards ? '<h2 class="week-strip-title">Coming up</h2><div class="week-strip-grid">' + cards + '</div>' : '';
