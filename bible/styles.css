@@ -838,6 +838,8 @@ h1.passage-ref {
 
 .read-btn:hover { background: var(--accent); border-color: var(--accent); }
 
+.read-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 4px 0 8px; }
+
 .section-kicker {
     font-family: var(--mono);
     font-size: 11px;
