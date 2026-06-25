@@ -286,14 +286,14 @@ def first_incomplete(done):
 
 
 def email_day_for(sb, sub):
-    """The day to email: the oldest UNREAD day, but never ahead of the calendar
-    schedule. Returns None if the reader is caught up (nothing due today)."""
-    sched = scheduled_day(sub)
+    """The day to email: the oldest day the reader hasn't marked read. Reading
+    ahead moves it forward; falling behind resends the missed day. Returns None
+    only once the whole plan is finished."""
     done = completed_days(sb, sub.get("user_id") or sub.get("id"))
     fi = first_incomplete(done)
-    if fi > sched:
-        return None  # everything due so far is read — no email today
-    return min(fi, sched)
+    if fi >= TOTAL_DAYS and TOTAL_DAYS in done:
+        return None
+    return fi
 
 
 # --- Modes ---

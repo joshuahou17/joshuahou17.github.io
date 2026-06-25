@@ -60,8 +60,8 @@ async function getCompleted() {
     var done = {};
     if (!sb) return done;
     try {
-        var res = await sb.from('bible_reading_progress').select('day_number, completed').eq('user_id', getUserId());
-        (res.data || []).forEach(function (r) { if (r.completed) done[r.day_number] = true; });
+        var res = await sb.from('bible_reading_progress').select('day_number, completed, completed_at').eq('user_id', getUserId());
+        (res.data || []).forEach(function (r) { if (r.completed) done[r.day_number] = r.completed_at || true; });
     } catch (e) {}
     return done;
 }
@@ -134,7 +134,8 @@ function analysisHtml(a) {
 async function renderToday() {
     var p = await loadPlan();
     var done = await getCompleted();
-    var day = getCurrentDay();
+    var day = Object.keys(done).length ? firstIncomplete(done) : getCurrentDay();
+    setCurrentDay(day);
     var entry = entryByDay(p, day);
     if (!entry) return;
     var onboarding = document.getElementById('onboarding'); if (onboarding) onboarding.style.display = 'none';
@@ -146,14 +147,24 @@ async function renderToday() {
         h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
         if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
         h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
-        h += '<div data-day-number="' + day + '"><label class="mark-read-label" style="margin-bottom:8px;"><input type="checkbox" class="mark-read-checkbox"' + (done[day] ? ' checked' : '') + '> Mark as read</label></div>';
+        h += '<div class="read-actions" data-day-number="' + day + '">' +
+                '<label class="mark-read-label"><input type="checkbox" class="mark-read-checkbox"> Mark as read</label>' +
+                '<button class="read-btn" id="continue-btn" type="button" style="display:none;">Read the next one &rarr;</button>' +
+             '</div>';
         h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>Today’s analysis is being prepared — check back shortly.</em></p>';
         todays.innerHTML = h;
         var cb = todays.querySelector('.mark-read-checkbox');
+        var cont = todays.querySelector('#continue-btn');
         cb.addEventListener('change', async function () {
             await toggleProgress(day, cb.checked);
-            if (cb.checked && day < TOTAL_DAYS) { setCurrentDay(day + 1); if (sb) { try { await sb.from('bible_subscribers').update({ current_day: day + 1 }).eq('user_id', getUserId()); } catch (e) {} } setTimeout(renderToday, 400); }
+            if (cb.checked) {
+                var nextDay = Math.min(day + 1, TOTAL_DAYS);
+                setCurrentDay(nextDay);
+                if (sb) { try { await sb.from('bible_subscribers').update({ current_day: nextDay }).eq('user_id', getUserId()); } catch (e) {} }
+                if (day < TOTAL_DAYS) cont.style.display = 'inline-block';
+            } else if (cont) { cont.style.display = 'none'; }
         });
+        if (cont) cont.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(); });
     }
     var strip = document.getElementById('week-strip');
     if (strip) {
@@ -175,31 +186,43 @@ var calMonth = null; // Date pointing at first of the displayed month
 async function renderProgressPage() {
     var p = await loadPlan();
     var done = await getCompleted();
-    var start = getStartDate();
-    var current = hasStarted() ? firstIncomplete(done) : 1;
+    var current = (Object.keys(done).length || hasStarted()) ? firstIncomplete(done) : 1;
+    var readCount = Object.keys(done).length;
 
     var countEl = document.getElementById('progress-count');
     if (countEl) countEl.textContent = 'Day ' + current + ' of ' + TOTAL_DAYS;
     var readEl = document.getElementById('progress-read');
-    if (readEl) readEl.textContent = Object.keys(done).length + ' read';
+    if (readEl) {
+        var remaining = TOTAL_DAYS - (current - 1);
+        var finish = new Date(); finish.setHours(12, 0, 0, 0); finish.setDate(finish.getDate() + remaining - 1);
+        readEl.textContent = readCount + ' read · on pace to finish ' +
+            finish.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
 
-    // map each date (yyyy-mm-dd) -> plan entry
+    // Progress-driven dates: a completed day sits on the date it was read;
+    // the current day is "today"; upcoming days flow forward from today.
+    var today = new Date(); today.setHours(12, 0, 0, 0);
     var byDate = {};
     p.forEach(function (e) {
-        var d = new Date(start.getTime()); d.setDate(d.getDate() + (e.day_number - 1));
-        byDate[d.toLocaleDateString('en-CA')] = e;
+        var c = done[e.day_number];
+        var d;
+        if (c && c !== true) { d = new Date(c); }
+        else if (c === true) { d = new Date(today); }
+        else { d = new Date(today); d.setDate(d.getDate() + (e.day_number - current)); }
+        var key = d.toLocaleDateString('en-CA');
+        (byDate[key] = byDate[key] || []).push(e);
     });
 
-    if (!calMonth) { var c = new Date(start.getTime()); c.setDate(c.getDate() + (current - 1)); calMonth = new Date(c.getFullYear(), c.getMonth(), 1); }
-    drawCalendar(byDate, done, current, start);
+    if (!calMonth) { calMonth = new Date(today.getFullYear(), today.getMonth(), 1); }
+    drawCalendar(byDate, done, current);
 }
 
-function drawCalendar(byDate, done, current, start) {
+function drawCalendar(byDate, done, current) {
     var el = document.getElementById('progress-calendar');
     if (!el) return;
     var year = calMonth.getFullYear(), month = calMonth.getMonth();
     var monthName = calMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    var first = new Date(year, month, 1), startDow = first.getDay();
+    var startDow = new Date(year, month, 1).getDay();
     var daysInMonth = new Date(year, month + 1, 0).getDate();
     var todayKey = new Date().toLocaleDateString('en-CA');
 
@@ -211,20 +234,22 @@ function drawCalendar(byDate, done, current, start) {
     for (var b = 0; b < startDow; b++) h += '<div class="cal-cell empty"></div>';
     for (var dt = 1; dt <= daysInMonth; dt++) {
         var key = new Date(year, month, dt).toLocaleDateString('en-CA');
-        var e = byDate[key];
-        if (!e) { h += '<div class="cal-cell empty"><span class="cal-date">' + dt + '</span></div>'; continue; }
-        var cls = 'cal-cell has-day';
-        if (done[e.day_number]) cls += ' done';
-        if (e.day_number === current) cls += ' current';
-        if (key === todayKey) cls += ' today';
+        var list = byDate[key];
+        if (!list || !list.length) { h += '<div class="cal-cell empty"><span class="cal-date">' + dt + '</span></div>'; continue; }
+        list.sort(function (x, y) { return x.day_number - y.day_number; });
+        var e = list[0];
+        var allDone = list.every(function (x) { return done[x.day_number]; });
+        var isCurrent = list.some(function (x) { return x.day_number === current; });
+        var cls = 'cal-cell has-day' + (allDone ? ' done' : '') + (isCurrent ? ' current' : '') + (key === todayKey ? ' today' : '');
+        var more = list.length > 1 ? ' <span style="font-family:var(--mono);font-size:9px;color:var(--faint)">+' + (list.length - 1) + ' more</span>' : '';
         h += '<a class="' + cls + '" href="' + dayHref(e.day_number) + '">' +
-             '<span class="cal-date">' + dt + (done[e.day_number] ? ' &#10003;' : '') + '</span>' +
-             '<span class="cal-passage">' + shortPassage(e) + '</span></a>';
+             '<span class="cal-date">' + dt + (allDone ? ' &#10003;' : '') + '</span>' +
+             '<span class="cal-passage">' + shortPassage(e) + more + '</span></a>';
     }
     h += '</div>';
     el.innerHTML = h;
-    document.getElementById('cal-prev').addEventListener('click', function () { calMonth = new Date(year, month - 1, 1); drawCalendar(byDate, done, current, start); });
-    document.getElementById('cal-next').addEventListener('click', function () { calMonth = new Date(year, month + 1, 1); drawCalendar(byDate, done, current, start); });
+    document.getElementById('cal-prev').addEventListener('click', function () { calMonth = new Date(year, month - 1, 1); drawCalendar(byDate, done, current); });
+    document.getElementById('cal-next').addEventListener('click', function () { calMonth = new Date(year, month + 1, 1); drawCalendar(byDate, done, current); });
 }
 
 // ============ POST PAGE (day-NNN.html) ============
