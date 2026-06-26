@@ -838,6 +838,11 @@ h1.passage-ref {
 
 .read-btn:hover { background: var(--accent); border-color: var(--accent); }
 
+.start-form { display: flex; gap: var(--spacing-2); max-width: 420px; margin: 0 auto var(--spacing-3); flex-wrap: wrap; justify-content: center; }
+.start-form input { flex: 1; min-width: 200px; padding: var(--spacing-3) var(--spacing-4); border: 1px solid var(--rule); border-radius: var(--radius-full); background: var(--paper); font-family: var(--mono); font-size: var(--font-size-sm); color: var(--ink); outline: none; }
+.start-form input:focus { border-color: var(--accent); }
+.start-note { font-family: var(--mono); font-size: 11px; color: var(--faint); max-width: 380px; margin: 0 auto; line-height: 1.5; }
+
 .read-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 4px 0 8px; }
 .read-nav { font-family: var(--mono); font-size: 12px; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; transition: color var(--transition-fast); }
 .read-nav:hover { color: var(--accent); }
