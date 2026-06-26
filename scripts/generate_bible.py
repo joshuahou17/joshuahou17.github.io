@@ -291,7 +291,7 @@ def email_day_for(sb, sub):
     has read ahead, so nobody is sent the next day early or more than one new day
     in a day. (Falling behind still resends the oldest unread day.)"""
     sched = scheduled_day(sub)
-    done = completed_days(sb, sub.get("user_id") or sub.get("id"))
+    done = completed_days(sb, sub["id"])
     fi = first_incomplete(done)
     return fi if fi <= sched else None
 
@@ -363,7 +363,7 @@ def run_send(plan):
         if not entry or not analysis:
             logger.warning(f"Day {day} not generated yet — skipping {sub.get('email')}")
             continue
-        uid = sub.get("user_id") or sub["id"]
+        uid = sub["id"]
         subject = f"Day {day}: {entry['passage']}" + (f" — {analysis['title']}" if analysis.get("title") else "")
         if send_email(sub["email"], subject, render_email(entry, analysis, plan, uid)):
             sent += 1
@@ -422,7 +422,7 @@ def run_reminders(plan, kind):
         entry, analysis = get_entry_by_day(plan, day), load_analysis(day)
         if not entry or not analysis:
             continue
-        uid = sub.get("user_id") or sub["id"]
+        uid = sub["id"]
         word = "waiting for you" if kind == "evening" else "before today's reading"
         subject = f"Day {day}: {entry['passage']} is {word}"
         send_email(sub["email"], subject, render_email(entry, analysis, plan, uid, reminder=True))

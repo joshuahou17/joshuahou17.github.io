@@ -5,6 +5,7 @@ var SUPABASE_URL = 'https://iaspidhmxppsuwydmvym.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhc3BpZGhteHBwc3V3eWRtdnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjY5MjUsImV4cCI6MjA5MTEwMjkyNX0.1tnqoNxczpZkEUyUEdi0W1pLh8nwL7LE1Ig5PgjSU5U';
 
 var TOTAL_DAYS = 365;
+var ENROLL_URL = SUPABASE_URL + '/functions/v1/enroll';
 var sb = null;
 var plan = null;
 
@@ -28,12 +29,11 @@ var ABBR = {
 function initSupabase() {
     try { if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) {}
 }
-function getUserId() {
-    var id = localStorage.getItem('bible_user_id');
-    if (!id) { id = crypto.randomUUID(); localStorage.setItem('bible_user_id', id); }
-    return id;
-}
-function hasStarted() { return localStorage.getItem('bible_started') === 'true'; }
+// Identity is the subscriber id (tied to email), so progress is shared across
+// devices and with the daily email. Set by enrolling with an email.
+function getUserId() { return localStorage.getItem('bible_sub_id') || null; }
+function hasStarted() { return !!localStorage.getItem('bible_sub_id'); }
+function getEmail() { return localStorage.getItem('bible_email') || ''; }
 function getCurrentDay() { return Math.min(Math.max(parseInt(localStorage.getItem('bible_current_day') || '1'), 1), TOTAL_DAYS); }
 function setCurrentDay(d) { localStorage.setItem('bible_current_day', String(d)); }
 function getStartDate() {
@@ -80,10 +80,11 @@ function shortPassage(entry) {
 
 // --- shared actions ---
 async function toggleProgress(day, completed) {
-    if (sb) {
+    var uid = getUserId();
+    if (sb && uid) {
         try {
             await sb.from('bible_reading_progress').upsert({
-                user_id: getUserId(), day_number: day, completed: completed,
+                user_id: uid, day_number: day, completed: completed,
                 completed_at: completed ? new Date().toISOString() : null
             }, { onConflict: 'user_id,day_number' });
         } catch (e) {}
@@ -97,14 +98,18 @@ async function makeCurrentDay(day) {
 }
 
 // ============ INDEX (Today) ============
-async function startPlan() {
-    var today = new Date().toLocaleDateString('en-CA');
-    localStorage.setItem('bible_started', 'true');
-    localStorage.setItem('bible_start_date', today);
-    setCurrentDay(1);
-    var uid = getUserId();
-    if (sb) { try { await sb.from('bible_subscribers').update({ start_date: today, current_day: 1 }).eq('user_id', uid); } catch (e) {} }
-    await renderToday();
+async function startPlan(email) {
+    try {
+        var r = await fetch(ENROLL_URL + '?email=' + encodeURIComponent(email));
+        if (!r.ok) return false;
+        var d = await r.json();
+        if (!d || !d.id) return false;
+        localStorage.setItem('bible_sub_id', d.id);
+        localStorage.setItem('bible_email', email);
+        if (d.start_date) localStorage.setItem('bible_start_date', d.start_date);
+        await renderToday();
+        return true;
+    } catch (e) { return false; }
 }
 function resetPlan() {
     if (!window.confirm('Start over from Day 1? This clears your progress on this device.')) return;
@@ -321,12 +326,10 @@ function initSubscribeForm() {
         var email = form.querySelector('input[type="email"]').value;
         var btn = form.querySelector('button');
         btn.textContent = 'Subscribing...'; btn.disabled = true;
-        if (sb) {
-            var today = new Date().toLocaleDateString('en-CA');
-            var res = await sb.from('bible_subscribers').insert({ email: email, user_id: getUserId(), start_date: today, current_day: 1, subscribed_at: new Date().toISOString() });
-            btn.textContent = (res.error && res.error.code === '23505') ? 'Already subscribed!' : res.error ? 'Error — try again' : 'Subscribed!';
-            if (res.error && res.error.code !== '23505') btn.disabled = false;
-        } else { btn.textContent = 'Coming soon!'; }
+        try {
+            var r = await fetch(ENROLL_URL + '?email=' + encodeURIComponent((email || '').trim()));
+            btn.textContent = r.ok ? 'Subscribed!' : 'Error — try again';
+        } catch (e2) { btn.textContent = 'Error — try again'; }
         setTimeout(function () { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
     });
 }
@@ -350,7 +353,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.querySelector('main.post')) { initPostPage(); return; }
     // index
     if (hasStarted()) { var ob = document.getElementById('onboarding'); if (ob) ob.style.display = 'none'; renderToday(); }
-    else { var sbtn = document.getElementById('start-plan-btn'); if (sbtn) sbtn.addEventListener('click', startPlan); }
+    else {
+        var sf = document.getElementById('start-form');
+        if (sf) sf.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var em = (document.getElementById('start-email').value || '').trim();
+            if (!em) return;
+            var b = document.getElementById('start-plan-btn');
+            b.textContent = 'Starting…'; b.disabled = true;
+            var ok = await startPlan(em);
+            if (!ok) { b.textContent = 'Try again'; b.disabled = false; setTimeout(function () { b.textContent = 'Start reading plan'; }, 2500); }
+        });
+    }
     initSubscribeForm();
 });
 

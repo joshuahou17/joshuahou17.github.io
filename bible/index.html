@@ -35,7 +35,11 @@
             <div class="onboarding-card">
                 <h2>Start your journey</h2>
                 <p>Read through the whole Bible in one year, in <em>chronological</em> order — the events roughly as they happened. Each day gives you the passage to read in the NIV plus a short, research-backed analysis: context, key themes, takeaways, and a reflection.</p>
-                <button id="start-plan-btn" class="start-btn">Start reading plan</button>
+                <form id="start-form" class="start-form">
+                    <input type="email" id="start-email" placeholder="you@email.com" autocomplete="email" required>
+                    <button id="start-plan-btn" class="start-btn" type="submit">Start reading plan</button>
+                </form>
+                <p class="start-note">We'll email you the day's reading each morning, and save your progress to your email so it follows you across devices.</p>
             </div>
         </section>
 
@@ -73,6 +77,6 @@
         <button class="unsub-link" id="unsubscribe-btn" type="button">Unsubscribe from the daily email</button>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>
