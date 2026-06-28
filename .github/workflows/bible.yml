@@ -2,7 +2,7 @@ name: Bible Reading Plan
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # 8:00 AM ET (EDT) — one daily reading email
+    - cron: '0 10 * * *'   # 6:00 AM ET (EDT) — one daily reading email
   workflow_dispatch:
     inputs:
       mode:
