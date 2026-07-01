@@ -238,15 +238,25 @@ async function renderProgressPage() {
     }
 
     // Progress-driven dates: a completed day sits on the date it was read;
-    // the current day is "today"; upcoming days flow forward from today.
+    // upcoming days flow forward one-per-day from the next unread reading.
+    // If today's reading is already done, the next unread reading belongs to
+    // tomorrow — anchor there so it isn't stacked on top of today's completed
+    // day, which used to shift every future reading one day early.
     var today = new Date(); today.setHours(12, 0, 0, 0);
+    var todayKey = today.toLocaleDateString('en-CA');
+    var readToday = p.some(function (e) {
+        var c = done[e.day_number];
+        return c && c !== true && new Date(c).toLocaleDateString('en-CA') === todayKey;
+    });
+    var upcomingBase = new Date(today);
+    if (readToday) upcomingBase.setDate(upcomingBase.getDate() + 1);
     var byDate = {};
     p.forEach(function (e) {
         var c = done[e.day_number];
         var d;
         if (c && c !== true) { d = new Date(c); }
         else if (c === true) { d = new Date(today); }
-        else { d = new Date(today); d.setDate(d.getDate() + (e.day_number - current)); }
+        else { d = new Date(upcomingBase); d.setDate(d.getDate() + (e.day_number - current)); }
         var key = d.toLocaleDateString('en-CA');
         (byDate[key] = byDate[key] || []).push(e);
     });
