@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     ARCHIVE_ITEM_TEMPLATE,
     INDEX_DIGEST_TEMPLATE,
+    MAX_ARTICLES_PER_FEED,
     POST_TEMPLATE,
     RSS_FEEDS,
     SYSTEM_PROMPT,
@@ -56,7 +57,10 @@ def fetch_articles():
         source = feed_config["name"]
         try:
             feed = feedparser.parse(url)
+            feed_count = 0  # cap articles taken from this feed
             for entry in feed.entries:
+                if feed_count >= MAX_ARTICLES_PER_FEED:
+                    break
                 # Parse publish date
                 published = None
                 if hasattr(entry, "published_parsed") and entry.published_parsed:
@@ -87,7 +91,8 @@ def fetch_articles():
                         "published": published.isoformat() if published else "",
                     }
                 )
-            logger.info(f"Fetched {len(feed.entries)} entries from {source}")
+                feed_count += 1
+            logger.info(f"Fetched {feed_count} recent entries from {source}")
         except Exception as e:
             logger.warning(f"Failed to fetch {source} ({url}): {e}")
 
@@ -99,7 +104,7 @@ def curate_with_gpt(articles):
     """Send articles to GPT-4o for curation and summarization."""
     if len(articles) < 3:
         logger.info("Fewer than 3 articles found — quiet day")
-        return {"quiet_day": True, "message": "Not much happened in AI and startups today. Check back tomorrow."}
+        return {"quiet_day": True, "message": "Not much happened in AI, startups, or health tech today. Check back tomorrow."}
 
     # Format articles for the prompt
     articles_text = ""
@@ -153,6 +158,7 @@ def generate_post_html(digest_data, date_obj):
             funding_rounds=digest_data.get("funding_rounds", []),
             product_launches=digest_data.get("product_launches", []),
             stealth_launches=digest_data.get("stealth_launches", []),
+            health_tech=digest_data.get("health_tech", []),
             sections=sections,
         )
 
@@ -188,6 +194,7 @@ def update_index(digest_data, date_obj):
             funding_rounds=digest_data.get("funding_rounds", []),
             product_launches=digest_data.get("product_launches", []),
             stealth_launches=digest_data.get("stealth_launches", []),
+            health_tech=digest_data.get("health_tech", []),
             sections=digest_data.get("sections", []),
         )
 
@@ -224,10 +231,10 @@ def update_index(digest_data, date_obj):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Digest – AI & Startup News | Joshua Hou</title>
-    <meta name="description" content="A daily curated briefing on what's happening in AI and startups, powered by an autonomous agent.">
-    <meta property="og:title" content="Daily Digest – AI & Startup News">
-    <meta property="og:description" content="A daily curated briefing on what's happening in AI and startups.">
+    <title>Daily News – AI, Startups & Health Tech | Joshua Hou</title>
+    <meta name="description" content="A daily curated briefing on what's happening in AI, startups, and personal health tech, powered by an autonomous agent.">
+    <meta property="og:title" content="Daily News – AI, Startups & Health Tech">
+    <meta property="og:description" content="A daily curated briefing on what's happening in AI, startups, and personal health tech.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://joshhou.com/digest">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -242,8 +249,8 @@ def update_index(digest_data, date_obj):
     </nav>
     <main class="container">
         <header class="hero">
-            <h1 class="hero-title">Daily Digest</h1>
-            <p class="hero-subtitle">A curated briefing on AI and startups, generated every morning by an autonomous agent.</p>
+            <h1 class="hero-title">Daily News</h1>
+            <p class="hero-subtitle">A curated briefing on AI, startups, and personal health tech, generated every morning by an autonomous agent.</p>
         </header>
 
         <section id="latest-digest" class="latest-digest">
@@ -276,7 +283,7 @@ def send_resend_email(digest_data, date_obj):
         return
 
     date_formatted = date_obj.strftime("%B %d, %Y")
-    subject = f"AI & Startup Digest — {date_formatted}"
+    subject = f"Daily News — {date_formatted}"
 
     # Build a simple email-friendly HTML body
     if digest_data.get("quiet_day"):
@@ -289,7 +296,7 @@ def send_resend_email(digest_data, date_obj):
         body += "<hr>\n"
 
         # Bullet list sections
-        for label, key in [("💰 New Funding Rounds", "funding_rounds"), ("🚀 New Product Launches", "product_launches"), ("👀 Out of Stealth", "stealth_launches")]:
+        for label, key in [("💰 New Funding Rounds", "funding_rounds"), ("🚀 New Product Launches", "product_launches"), ("👀 Out of Stealth", "stealth_launches"), ("❤️ Personal Health Tech", "health_tech")]:
             items = digest_data.get(key, [])
             if items:
                 body += f"<h3>{label}</h3>\n<ul>\n"
