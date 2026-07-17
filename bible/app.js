@@ -302,15 +302,15 @@ function drawCalendar(byDate, done, current) {
 
 // ============ POST PAGE (day-NNN.html) ============
 async function initPostPage() {
-    var holder = document.querySelector('[data-day-number]');
-    if (!holder) return;
-    var day = parseInt(holder.dataset.dayNumber);
+    var cb = document.querySelector('.mark-read-checkbox');
+    if (!cb) return;
+    var day = parseInt(cb.dataset.dayNumber);
     var done = await getCompleted();
 
     // inject a "make this my current day" button next to mark-as-read
-    var label = holder.querySelector('.mark-read-label');
-    var cb = holder.querySelector('.mark-read-checkbox');
-    if (cb) { cb.checked = !!done[day]; cb.addEventListener('change', function () { toggleProgress(day, cb.checked); }); }
+    var label = document.querySelector('.mark-read-label');
+    cb.checked = !!done[day];
+    cb.addEventListener('change', function () { toggleProgress(day, cb.checked); });
     if (label && !document.getElementById('make-current-btn')) {
         var btn = document.createElement('button');
         btn.id = 'make-current-btn'; btn.className = 'make-current-btn'; btn.type = 'button';

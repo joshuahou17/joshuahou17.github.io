@@ -107,11 +107,6 @@ BIBLE_POST_TEMPLATE = """<!DOCTYPE html>
             {% endfor %}
         </div>
 
-        <label class="mark-read-label" style="margin-bottom: 8px;">
-            <input type="checkbox" class="mark-read-checkbox" data-day-number="{{ day_number }}">
-            Mark as read
-        </label>
-
         {% if context %}<p class="section-kicker">Context</p><div class="analysis-sec">{{ context }}</div>{% endif %}
         {% if themes %}<p class="section-kicker">Key themes</p><div class="analysis-sec">{{ themes }}</div>{% endif %}
         {% if takeaways %}
@@ -141,6 +136,11 @@ BIBLE_POST_TEMPLATE = """<!DOCTYPE html>
         </div>
         {% endif %}
 
+        <label class="mark-read-label" style="margin-top: var(--spacing-8); margin-bottom: 8px;">
+            <input type="checkbox" class="mark-read-checkbox" data-day-number="{{ day_number }}">
+            Mark as read
+        </label>
+
         <nav class="post-nav">
             {% if prev_day %}<a href="/bible/posts/day-{{ '%03d'|format(prev_day) }}.html">&larr; {{ prev_passage }}</a>{% else %}<span></span>{% endif %}
             {% if next_day %}<div class="next-reading"><span class="label">Next</span><a href="/bible/posts/day-{{ '%03d'|format(next_day) }}.html">{{ next_passage }} &rarr;</a></div>{% endif %}
@@ -150,7 +150,7 @@ BIBLE_POST_TEMPLATE = """<!DOCTYPE html>
         <p>&copy; 2026 Joshua Hou &bull; Scripture linked to the NIV on the YouVersion Bible App</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../app.js?v=4"></script>
+    <script src="../app.js?v=14"></script>
 </body>
 </html>"""
 
