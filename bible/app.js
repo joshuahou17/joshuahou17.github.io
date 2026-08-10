@@ -311,7 +311,8 @@ var HEAT_DOW = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 function dayKey(d) { return d.toLocaleDateString('en-CA'); }
 function longDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
-function heatLevel(n) { return n <= 0 ? 0 : (n >= 4 ? 4 : n); }
+// Three tones: 1 reading, 2 readings, 3-or-more.
+function heatLevel(n) { return n <= 0 ? 0 : (n >= 3 ? 3 : n); }
 
 function drawHeatmap(done) {
     var el = document.getElementById('reading-heatmap');
@@ -367,7 +368,7 @@ function drawHeatmap(done) {
     HEAT_DOW.forEach(function (d) { dows += '<span>' + d + '</span>'; });
 
     var legend = '';
-    for (var L = 0; L <= 4; L++) legend += '<span class="heat-key l' + L + '"></span>';
+    for (var L = 0; L <= 3; L++) legend += '<span class="heat-key l' + L + '"></span>';
 
     var notes = [];
     if (undated) notes.push(undated === 1

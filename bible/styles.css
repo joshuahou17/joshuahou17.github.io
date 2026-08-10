@@ -45,10 +45,9 @@
     /* Reading-heatmap ramp — stepped opacity off --genre-history (#2f7d4f)
        so the green reads as part of the warm palette, not a GitHub transplant. */
     --heat-0: var(--gray-50);
-    --heat-1: rgba(47, 125, 79, 0.22);
-    --heat-2: rgba(47, 125, 79, 0.45);
-    --heat-3: rgba(47, 125, 79, 0.70);
-    --heat-4: rgba(47, 125, 79, 0.95);
+    --heat-1: rgba(47, 125, 79, 0.38);
+    --heat-2: rgba(47, 125, 79, 0.66);
+    --heat-3: rgba(47, 125, 79, 0.96);
     /* 53 columns at 15px + 3px gaps ≈ 951px, which fills the 1100px container
        so the grid carries the same visual weight as the calendar above it. */
     --heat-cell: 15px;
@@ -1097,11 +1096,11 @@ ul.takeaways li:before {
     outline: 1px solid transparent;
 }
 .heat-cell.out { background: none; border-color: transparent; }
+/* Three tones: 1 reading / 2 readings / 3+ readings. */
 .heat-cell.l0, .heat-key.l0 { background: var(--heat-0); }
 .heat-cell.l1, .heat-key.l1 { background: var(--heat-1); }
 .heat-cell.l2, .heat-key.l2 { background: var(--heat-2); }
 .heat-cell.l3, .heat-key.l3 { background: var(--heat-3); }
-.heat-cell.l4, .heat-key.l4 { background: var(--heat-4); }
 .heat-cell.today { outline: 1px solid var(--accent); outline-offset: 1px; }
 .heat-cell:not(.out):hover { outline-color: var(--ink); }
 
