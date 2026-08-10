@@ -263,6 +263,7 @@ async function renderProgressPage() {
 
     if (!calMonth) { calMonth = new Date(today.getFullYear(), today.getMonth(), 1); }
     drawCalendar(byDate, done, current);
+    drawHeatmap(done);
 }
 
 function drawCalendar(byDate, done, current) {
@@ -298,6 +299,96 @@ function drawCalendar(byDate, done, current) {
     el.innerHTML = h;
     document.getElementById('cal-prev').addEventListener('click', function () { calMonth = new Date(year, month - 1, 1); drawCalendar(byDate, done, current); });
     document.getElementById('cal-next').addEventListener('click', function () { calMonth = new Date(year, month + 1, 1); drawCalendar(byDate, done, current); });
+}
+
+// ============ HEATMAP (a year of reading activity) ============
+// GitHub-contributions grid: one tile per day across the plan year, shaded by
+// how many passages were marked read that day. Rendered into its own section so
+// month navigation above (which rewrites #progress-calendar) never wipes it.
+var HEAT_WEEKS = 53;
+var MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var HEAT_DOW = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+function dayKey(d) { return d.toLocaleDateString('en-CA'); }
+function longDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function heatLevel(n) { return n <= 0 ? 0 : (n >= 4 ? 4 : n); }
+
+function drawHeatmap(done) {
+    var el = document.getElementById('reading-heatmap');
+    if (!el) return;
+
+    // 1. Count passages per local calendar date. done[day] is the completed_at
+    // ISO string, or the sentinel `true` for legacy rows saved before timestamps
+    // existed — those have no date to sit on, so they're counted but not placed.
+    var counts = {}, dated = 0, undated = 0;
+    Object.keys(done).forEach(function (d) {
+        var c = done[d];
+        if (c === true) { undated++; return; }
+        var key = dayKey(new Date(c));
+        counts[key] = (counts[key] || 0) + 1;
+        dated++;
+    });
+
+    if (!dated && !hasStarted()) { el.hidden = true; return; }
+
+    // 2. Frame the plan year, padded back to the Sunday before it so the
+    // columns line up as whole weeks. Noon-anchored throughout to dodge DST.
+    var start = getStartDate(); start.setHours(12, 0, 0, 0);
+    var last = new Date(start); last.setDate(last.getDate() + TOTAL_DAYS - 1);
+    var startKey = dayKey(start), lastKey = dayKey(last), todayKey = dayKey(new Date());
+    var gridStart = new Date(start); gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+
+    // 3. Month labels: one per column where the month first turns over.
+    var months = '', prevMonth = -1;
+    for (var c = 0; c < HEAT_WEEKS; c++) {
+        var colStart = new Date(gridStart); colStart.setDate(colStart.getDate() + c * 7);
+        var m = colStart.getMonth();
+        var label = (m !== prevMonth && dayKey(colStart) <= lastKey) ? MONTH_ABBR[m] : '';
+        prevMonth = m;
+        months += '<span class="heat-month">' + label + '</span>';
+    }
+
+    // 4. The grid itself — fills top-to-bottom then left-to-right (see CSS).
+    var cells = '', outside = 0;
+    for (var col = 0; col < HEAT_WEEKS; col++) {
+        for (var row = 0; row < 7; row++) {
+            var d = new Date(gridStart); d.setDate(d.getDate() + col * 7 + row);
+            var key = dayKey(d);
+            if (key < startKey || key > lastKey) { cells += '<span class="heat-cell out"></span>'; continue; }
+            var n = counts[key] || 0;
+            var title = (n ? n + (n === 1 ? ' passage' : ' passages') : 'No reading') + ' · ' + longDate(d);
+            cells += '<span class="heat-cell l' + heatLevel(n) + (key === todayKey ? ' today' : '') +
+                     '" title="' + title + '"></span>';
+        }
+    }
+    Object.keys(counts).forEach(function (k) { if (k < startKey || k > lastKey) outside += counts[k]; });
+
+    var dows = '';
+    HEAT_DOW.forEach(function (d) { dows += '<span>' + d + '</span>'; });
+
+    var legend = '';
+    for (var L = 0; L <= 4; L++) legend += '<span class="heat-key l' + L + '"></span>';
+
+    var notes = [];
+    if (undated) notes.push(undated === 1
+        ? '1 earlier reading has no recorded date'
+        : undated + ' earlier readings have no recorded date');
+    if (outside) notes.push(outside === 1
+        ? '1 reading falls outside the plan year'
+        : outside + ' readings fall outside the plan year');
+
+    el.innerHTML =
+        '<div class="heat-head">' +
+            '<span class="heat-title">Reading activity</span>' +
+            '<span class="heat-legend">Less ' + legend + ' More</span>' +
+        '</div>' +
+        '<div class="heat-scroll"><div class="heat-inner">' +
+            '<div class="heat-months">' + months + '</div>' +
+            '<div class="heat-dows">' + dows + '</div>' +
+            '<div class="heat-grid">' + cells + '</div>' +
+        '</div></div>' +
+        (notes.length ? '<p class="heat-note">' + notes.join(' · ') + ' — not shown above.</p>' : '');
+    el.hidden = false;
 }
 
 // ============ POST PAGE (day-NNN.html) ============

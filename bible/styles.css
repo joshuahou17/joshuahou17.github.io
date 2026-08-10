@@ -42,6 +42,19 @@
     --gray-800: #2a2823;
     --gray-900: var(--ink);
 
+    /* Reading-heatmap ramp — stepped opacity off --genre-history (#2f7d4f)
+       so the green reads as part of the warm palette, not a GitHub transplant. */
+    --heat-0: var(--gray-50);
+    --heat-1: rgba(47, 125, 79, 0.22);
+    --heat-2: rgba(47, 125, 79, 0.45);
+    --heat-3: rgba(47, 125, 79, 0.70);
+    --heat-4: rgba(47, 125, 79, 0.95);
+    /* 53 columns at 15px + 3px gaps ≈ 951px, which fills the 1100px container
+       so the grid carries the same visual weight as the calendar above it. */
+    --heat-cell: 15px;
+    --heat-gap: 3px;
+    --heat-key: 11px;
+
     --serif: 'Newsreader', Georgia, serif;
     --mono:  'Space Mono', ui-monospace, monospace;
     --font-family: var(--serif);
@@ -1005,6 +1018,99 @@ ul.takeaways li:before {
 .cal-cell.done .cal-passage { color: var(--ink); }
 .cal-cell.current { outline: 2px solid var(--accent); outline-offset: -2px; }
 .cal-cell.today .cal-date { font-weight: 700; color: var(--ink); }
+
+/* Reading heatmap (a year of tiles, under the calendar) */
+.heat { margin-top: var(--spacing-12); }
+.heat[hidden] { display: none; }
+
+.heat-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+.heat-title,
+.heat-legend,
+.heat-month,
+.heat-dows span,
+.heat-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+}
+.heat-title { font-size: 12px; letter-spacing: 0.12em; color: var(--muted); }
+.heat-legend { display: flex; align-items: center; gap: 4px; }
+.heat-key {
+    width: var(--heat-key);
+    height: var(--heat-key);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(29, 28, 24, 0.06);
+}
+
+/* 53 columns is wider than a phone — scroll the grid, never the page. */
+.heat-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: var(--spacing-2); }
+.heat-inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--spacing-2) var(--spacing-2);
+    width: max-content;
+}
+.heat-months {
+    grid-area: 1 / 2;
+    display: grid;
+    grid-template-columns: repeat(53, var(--heat-cell));
+    column-gap: var(--heat-gap);
+    /* Month names are wider than one 11px column; let them spill rightward. */
+    overflow: visible;
+}
+.heat-month { white-space: nowrap; line-height: 1; }
+.heat-dows {
+    grid-area: 2 / 1;
+    display: grid;
+    grid-template-rows: repeat(7, var(--heat-cell));
+    row-gap: var(--heat-gap);
+    align-items: center;
+    text-align: right;
+}
+.heat-dows span { line-height: 1; }
+.heat-grid {
+    grid-area: 2 / 2;
+    display: grid;
+    /* Fill top-to-bottom down a week, then across — this is what makes it read
+       as a contributions graph rather than a calendar. */
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, var(--heat-cell));
+    grid-auto-columns: var(--heat-cell);
+    gap: var(--heat-gap);
+}
+.heat-cell {
+    width: var(--heat-cell);
+    height: var(--heat-cell);
+    border-radius: var(--radius-sm);
+    background: var(--heat-0);
+    border: 1px solid rgba(29, 28, 24, 0.06);
+    transition: outline-color var(--transition-fast);
+    outline: 1px solid transparent;
+}
+.heat-cell.out { background: none; border-color: transparent; }
+.heat-cell.l0, .heat-key.l0 { background: var(--heat-0); }
+.heat-cell.l1, .heat-key.l1 { background: var(--heat-1); }
+.heat-cell.l2, .heat-key.l2 { background: var(--heat-2); }
+.heat-cell.l3, .heat-key.l3 { background: var(--heat-3); }
+.heat-cell.l4, .heat-key.l4 { background: var(--heat-4); }
+.heat-cell.today { outline: 1px solid var(--accent); outline-offset: 1px; }
+.heat-cell:not(.out):hover { outline-color: var(--ink); }
+
+.heat-note {
+    margin-top: var(--spacing-3);
+    text-transform: none;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+}
 
 /* "Make this my current day" button (injected on post pages) */
 .make-current-btn {

@@ -27,12 +27,17 @@
         </header>
 
         <div id="progress-calendar"><p class="analysis-sec" style="text-align:center;color:var(--muted)"><em>Loading your calendar…</em></p></div>
+
+        <!-- Filled by drawHeatmap() in app.js. Must stay a SIBLING of
+             #progress-calendar — that container is rewritten on every month
+             nav click, so anything nested inside it would be wiped. -->
+        <section id="reading-heatmap" class="heat" hidden></section>
     </main>
     <footer class="footer">
         <p>&copy; 2026 Joshua Hou &bull; One-year chronological reading plan</p>
         <button class="unsub-link" id="unsubscribe-btn" type="button">Unsubscribe from the daily email</button>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=15"></script>
 </body>
 </html>
