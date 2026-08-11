@@ -180,13 +180,15 @@ async function renderToday(view) {
             h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
             if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
             h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
-            h += '<div class="read-actions" data-day-number="' + day + '">';
+            if (ahead || offTrack) h += '<p class="reading-hint"><a href="#" id="back-today">&larr; Back to today’s reading</a></p>';
+            h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>This analysis is being prepared — check back shortly.</em></p>';
+            // Mark-as-read and day nav sit AFTER the analysis, mirroring the
+            // post pages — you tick the box once you've actually read it.
+            h += '<div class="read-actions at-end" data-day-number="' + day + '">';
             if (day > 1) h += '<button class="read-nav" id="prev-btn" type="button">&larr; Previous day</button>';
             h += '<label class="mark-read-label"><input type="checkbox" class="mark-read-checkbox"' + (done[day] ? ' checked' : '') + '> Mark as read</label>';
             h += '<button class="read-btn" id="continue-btn" type="button" style="display:' + (done[day] ? 'inline-block' : 'none') + ';">Read the next one &rarr;</button>';
             h += '</div>';
-            if (ahead || offTrack) h += '<p class="reading-hint"><a href="#" id="back-today">&larr; Back to today’s reading</a></p>';
-            h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>This analysis is being prepared — check back shortly.</em></p>';
             todays.innerHTML = h;
             var cb = todays.querySelector('.mark-read-checkbox');
             var cont = todays.querySelector('#continue-btn');
