@@ -856,6 +856,9 @@ h1.passage-ref {
 .start-note { font-family: var(--mono); font-size: 11px; color: var(--faint); max-width: 380px; margin: 0 auto; line-height: 1.5; }
 
 .read-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 4px 0 8px; }
+/* Same row, but sitting below the analysis instead of above it — needs room
+   to clear the reading rather than hugging the read buttons. */
+.read-actions.at-end { margin-top: var(--spacing-8); margin-bottom: var(--spacing-10); }
 .read-nav { font-family: var(--mono); font-size: 12px; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; transition: color var(--transition-fast); }
 .read-nav:hover { color: var(--accent); }
 .reading-hint { margin: 10px 0 0; }
