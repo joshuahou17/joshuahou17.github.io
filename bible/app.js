@@ -65,9 +65,73 @@ async function getCompleted() {
     } catch (e) {}
     return done;
 }
-function firstIncomplete(done) {
-    for (var d = 1; d <= TOTAL_DAYS; d++) if (!done[d]) return d;
-    return TOTAL_DAYS;
+
+// --- reading order ---------------------------------------------------------
+// Position in the plan used to be implied by day_number ("next = lowest unread
+// number"), which made reordering impossible. readingOrder() makes it explicit:
+// the list of UNREAD days in the order they'll actually be served. Because it's
+// computed over unread days only, a gospel day read during a jump simply never
+// reappears when the plan comes back round — the skip is free.
+var GOSPEL_BOOKS = { 'Matthew': 1, 'Mark': 1, 'Luke': 1, 'John': 1 };
+
+// Derived from the plan rather than hardcoded to days 274-319, so regenerating
+// reading_plan.json can't silently point this at the wrong passages.
+function gospelDays(p) {
+    var s = {};
+    p.forEach(function (e) {
+        if ((e.segments || []).some(function (g) { return GOSPEL_BOOKS[g.book]; })) s[e.day_number] = true;
+    });
+    return s;
+}
+function getGospelStart() { return localStorage.getItem('bible_gospel_start') || null; }
+function parseDayKey(k) { return new Date(k + 'T12:00:00'); }
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+
+// Where the next unread reading lands on the calendar: today, unless today's
+// reading is already ticked -- then the next one belongs to tomorrow, otherwise
+// it stacks on top of a day that's already done.
+function upcomingBaseDate(done) {
+    var today = new Date(); today.setHours(12, 0, 0, 0);
+    var todayK = dayKey(today);
+    var readToday = Object.keys(done).some(function (d) {
+        var c = done[d];
+        return c && c !== true && dayKey(new Date(c)) === todayK;
+    });
+    var base = new Date(today);
+    if (readToday) base.setDate(base.getDate() + 1);
+    return base;
+}
+
+// Ascending by day number, unless a gospel jump is active -- then the unread
+// gospel block slides in at the position matching its start date, and the rest
+// of the plan closes up around it. Nothing is rewritten; this is order only.
+function readingOrder(p, done, gospelStart, base) {
+    var unread = [];
+    p.forEach(function (e) { if (!done[e.day_number]) unread.push(e.day_number); });
+    unread.sort(function (a, b) { return a - b; });
+    if (!gospelStart) return unread;
+    var gd = gospelDays(p);
+    var gospels = unread.filter(function (d) { return gd[d]; });
+    if (!gospels.length) return unread;   // block finished -- jump is a no-op
+    var rest = unread.filter(function (d) { return !gd[d]; });
+    var offset = Math.max(0, Math.min(daysBetween(base, parseDayKey(gospelStart)), rest.length));
+    return rest.slice(0, offset).concat(gospels, rest.slice(offset));
+}
+
+// Persist the jump: localStorage first so the UI is instant, then through to
+// the subscriber row so the 6am email follows the same order. Returns false if
+// the server leg failed, so the caller can say so instead of drifting silently.
+async function saveGospelStart(dateStr) {
+    if (dateStr) localStorage.setItem('bible_gospel_start', dateStr);
+    else localStorage.removeItem('bible_gospel_start');
+    var uid = getUserId();
+    if (!uid) return true;
+    try {
+        var q = SUPABASE_URL + '/functions/v1/set-gospel-start?subscriber_id=' + encodeURIComponent(uid) +
+                (dateStr ? '&date=' + encodeURIComponent(dateStr) : '&clear=1');
+        var r = await fetch(q);
+        return r.ok;
+    } catch (e) { return false; }
 }
 
 function shortPassage(entry) {
@@ -107,13 +171,16 @@ async function startPlan(email) {
         localStorage.setItem('bible_sub_id', d.id);
         localStorage.setItem('bible_email', email);
         if (d.start_date) localStorage.setItem('bible_start_date', d.start_date);
+        // The jump lives on the subscriber row, so a second device picks it up here.
+        if (d.gospel_start) localStorage.setItem('bible_gospel_start', d.gospel_start);
+        else localStorage.removeItem('bible_gospel_start');
         await renderToday();
         return true;
     } catch (e) { return false; }
 }
 function resetPlan() {
     if (!window.confirm('Start over from Day 1? This clears your progress on this device.')) return;
-    ['bible_started', 'bible_start_date', 'bible_current_day'].forEach(function (k) { localStorage.removeItem(k); });
+    ['bible_started', 'bible_start_date', 'bible_current_day', 'bible_gospel_start'].forEach(function (k) { localStorage.removeItem(k); });
     window.location.reload();
 }
 function buttonsHtml(entry) {
@@ -151,55 +218,69 @@ async function renderToday(view) {
     var p = await loadPlan();
     var done = await getCompleted();
     var sched = scheduledDay();
-    var firstUnread = Object.keys(done).length ? firstIncomplete(done) : 1;
+    var readCount = Object.keys(done).length;
+    var gStart = getGospelStart();
+    var gd = gospelDays(p);
+    var order = readingOrder(p, done, gStart, upcomingBaseDate(done));
+    var nextUp = order.length ? order[0] : TOTAL_DAYS;
     var onboarding = document.getElementById('onboarding'); if (onboarding) onboarding.style.display = 'none';
     var todays = document.getElementById('todays-reading');
-    var stripBase = firstUnread;
+    var stripDays = order.slice(0, 6);
 
     if (todays) {
         todays.style.display = 'block';
-        var caughtUp = (typeof view !== 'number') && (firstUnread > sched);
+        // Count-based, not day-number-based: once days can be reordered,
+        // "my next day number is past the calendar" stops meaning anything.
+        // With in-order reading the two tests are identical.
+        var caughtUp = (typeof view !== 'number') && (readCount >= sched);
         if (caughtUp) {
-            var nextEntry = entryByDay(p, firstUnread);
-            var ch = '<p class="post-meta">' + (firstUnread - 1) + ' of ' + TOTAL_DAYS + ' read · all caught up</p>';
-            ch += '<h1 class="passage-ref">You’re all caught up</h1>';
-            ch += '<p class="post-title">Your next reading' + (nextEntry ? ' — ' + nextEntry.passage : '') + ' arrives tomorrow morning.</p>';
+            var nextEntry = entryByDay(p, nextUp);
+            var ch = '<p class="post-meta">' + readCount + ' of ' + TOTAL_DAYS + ' read \u00b7 all caught up</p>';
+            ch += '<h1 class="passage-ref">You\u2019re all caught up</h1>';
+            ch += '<p class="post-title">Your next reading' + (nextEntry ? ' \u2014 ' + nextEntry.passage : '') + ' arrives tomorrow morning.</p>';
             if (nextEntry) ch += '<div class="read-buttons"><button class="read-btn" id="ahead-btn" type="button">Read ahead &rarr;</button></div>';
             todays.innerHTML = ch;
             var ab = document.getElementById('ahead-btn');
-            if (ab) ab.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(firstUnread); });
-            stripBase = firstUnread - 1;
+            if (ab) ab.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(nextUp); });
         } else {
-            var day = (typeof view === 'number') ? Math.min(Math.max(view, 1), TOTAL_DAYS) : firstUnread;
-            stripBase = day;
+            var day = (typeof view === 'number') ? Math.min(Math.max(view, 1), TOTAL_DAYS) : nextUp;
+            var idx = order.indexOf(day);
+            // Coming-up follows the reading order. A day that isn't in `order`
+            // is one you've already read (back nav), so fall back to plan order.
+            if (idx >= 0) stripDays = order.slice(idx + 1, idx + 7);
+            else { stripDays = []; for (var k = day + 1; k <= Math.min(day + 6, TOTAL_DAYS); k++) stripDays.push(k); }
             var entry = entryByDay(p, day);
             var a = await loadAnalysis(day);
-            var ahead = day > sched;
-            var offTrack = (typeof view === 'number') && day !== firstUnread;
-            var h = '<p class="post-meta">Day ' + day + ' of ' + TOTAL_DAYS + (ahead ? ' · reading ahead' : '') + '</p>';
+            var ahead = idx > 0 || (idx === 0 && readCount >= sched);
+            var offTrack = (typeof view === 'number') && day !== nextUp;
+            // During a jump a gospel day IS today's reading, so don't cry "reading ahead".
+            var tag = (gStart && gd[day] && idx === 0) ? ' \u00b7 gospels, moved up'
+                    : (ahead ? ' \u00b7 reading ahead' : '');
+            var h = '<p class="post-meta">Day ' + day + ' of ' + TOTAL_DAYS + tag + '</p>';
             h += '<h1 class="passage-ref">' + entry.passage + '</h1>';
             if (a && a.title) h += '<p class="post-title">' + a.title + '</p>';
             h += '<div class="read-buttons">' + buttonsHtml(entry) + '</div>';
-            if (ahead || offTrack) h += '<p class="reading-hint"><a href="#" id="back-today">&larr; Back to today’s reading</a></p>';
-            h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>This analysis is being prepared — check back shortly.</em></p>';
+            if (ahead || offTrack) h += '<p class="reading-hint"><a href="#" id="back-today">&larr; Back to today\u2019s reading</a></p>';
+            h += a ? analysisHtml(a) : '<p class="analysis-sec" style="color:var(--muted);"><em>This analysis is being prepared \u2014 check back shortly.</em></p>';
             // Mark-as-read and day nav sit AFTER the analysis, mirroring the
-            // post pages — you tick the box once you've actually read it.
+            // post pages \u2014 you tick the box once you've actually read it.
             h += '<div class="read-actions at-end" data-day-number="' + day + '">';
             if (day > 1) h += '<button class="read-nav" id="prev-btn" type="button">&larr; Previous day</button>';
             h += '<label class="mark-read-label"><input type="checkbox" class="mark-read-checkbox"' + (done[day] ? ' checked' : '') + '> Mark as read</label>';
             h += '<button class="read-btn" id="continue-btn" type="button" style="display:' + (done[day] ? 'inline-block' : 'none') + ';">Read the next one &rarr;</button>';
             h += '</div>';
             todays.innerHTML = h;
+            // "Next" is the next entry in reading order, not day + 1.
+            var nextAfter = (idx >= 0 && idx + 1 < order.length) ? order[idx + 1] : Math.min(day + 1, TOTAL_DAYS);
             var cb = todays.querySelector('.mark-read-checkbox');
             var cont = todays.querySelector('#continue-btn');
             cb.addEventListener('change', async function () {
                 await toggleProgress(day, cb.checked);
-                var nextDay = Math.min(day + 1, TOTAL_DAYS);
-                if (sb) { try { await sb.from('bible_subscribers').update({ current_day: cb.checked ? nextDay : day }).eq('user_id', getUserId()); } catch (e) {} }
-                if (cb.checked) { setCurrentDay(nextDay); if (day < TOTAL_DAYS) cont.style.display = 'inline-block'; }
+                if (sb) { try { await sb.from('bible_subscribers').update({ current_day: cb.checked ? nextAfter : day }).eq('user_id', getUserId()); } catch (e) {} }
+                if (cb.checked) { setCurrentDay(nextAfter); if (day < TOTAL_DAYS) cont.style.display = 'inline-block'; }
                 else { cont.style.display = 'none'; }
             });
-            if (cont) cont.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(day + 1); });
+            if (cont) cont.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(nextAfter); });
             var pv = document.getElementById('prev-btn');
             if (pv) pv.addEventListener('click', function () { window.scrollTo(0, 0); renderToday(day - 1); });
             var bt = document.getElementById('back-today');
@@ -210,10 +291,11 @@ async function renderToday(view) {
     if (strip) {
         strip.style.display = 'block';
         var cards = '';
-        for (var i = 1; i <= 6 && stripBase + i <= TOTAL_DAYS; i++) {
-            var e = entryByDay(p, stripBase + i);
+        stripDays.forEach(function (dn) {
+            var e = entryByDay(p, dn);
+            if (!e) return;
             cards += '<a class="week-day-card" href="' + dayHref(e.day_number) + '"><div class="week-day-label">Day ' + e.day_number + '</div><div class="week-day-passage">' + e.passage + '</div></a>';
-        }
+        });
         strip.innerHTML = cards ? '<h2 class="week-strip-title">Coming up</h2><div class="week-strip-grid">' + cards + '</div>' : '';
     }
     var resetRow = document.getElementById('reset-row');
@@ -226,46 +308,117 @@ var calMonth = null; // Date pointing at first of the displayed month
 async function renderProgressPage() {
     var p = await loadPlan();
     var done = await getCompleted();
-    var current = (Object.keys(done).length || hasStarted()) ? firstIncomplete(done) : 1;
+    var gStart = getGospelStart();
+    var base = upcomingBaseDate(done);
+    var order = readingOrder(p, done, gStart, base);
+    var current = order.length ? order[0] : TOTAL_DAYS;
     var readCount = Object.keys(done).length;
 
     var countEl = document.getElementById('progress-count');
     if (countEl) countEl.textContent = 'Day ' + current + ' of ' + TOTAL_DAYS;
     var readEl = document.getElementById('progress-read');
     if (readEl) {
-        var remaining = TOTAL_DAYS - (current - 1);
-        var finish = new Date(); finish.setHours(12, 0, 0, 0); finish.setDate(finish.getDate() + remaining - 1);
-        readEl.textContent = readCount + ' read · on pace to finish ' +
+        // Finish date = one reading per day through everything still unread.
+        var finish = new Date(base);
+        finish.setDate(finish.getDate() + Math.max(order.length - 1, 0));
+        readEl.textContent = readCount + ' read \u00b7 on pace to finish ' +
             finish.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     // Progress-driven dates: a completed day sits on the date it was read;
-    // upcoming days flow forward one-per-day from the next unread reading.
-    // If today's reading is already done, the next unread reading belongs to
-    // tomorrow — anchor there so it isn't stacked on top of today's completed
-    // day, which used to shift every future reading one day early.
+    // unread days flow forward one-per-day from `base` in READING order. Using
+    // the order index (not day_number - current) is what lets the gospel block
+    // move, and it also stops gaps from out-of-order reading shifting the rest.
     var today = new Date(); today.setHours(12, 0, 0, 0);
-    var todayKey = today.toLocaleDateString('en-CA');
-    var readToday = p.some(function (e) {
-        var c = done[e.day_number];
-        return c && c !== true && new Date(c).toLocaleDateString('en-CA') === todayKey;
-    });
-    var upcomingBase = new Date(today);
-    if (readToday) upcomingBase.setDate(upcomingBase.getDate() + 1);
+    var pos = {};
+    order.forEach(function (d, i) { pos[d] = i; });
     var byDate = {};
     p.forEach(function (e) {
         var c = done[e.day_number];
         var d;
         if (c && c !== true) { d = new Date(c); }
         else if (c === true) { d = new Date(today); }
-        else { d = new Date(upcomingBase); d.setDate(d.getDate() + (e.day_number - current)); }
-        var key = d.toLocaleDateString('en-CA');
+        else { d = new Date(base); d.setDate(d.getDate() + (pos[e.day_number] || 0)); }
+        var key = dayKey(d);
         (byDate[key] = byDate[key] || []).push(e);
     });
 
     if (!calMonth) { calMonth = new Date(today.getFullYear(), today.getMonth(), 1); }
     drawCalendar(byDate, done, current);
+    drawGospelJump(p, done);
     drawHeatmap(done);
+}
+
+// ============ GOSPEL JUMP (under the calendar) ============
+// Pull the gospel block forward without leaving the plan. This writes a single
+// setting -- never a progress row -- so "Go back to original plan" is lossless
+// and anything ticked during the detour stays ticked.
+var gospelPicking = false;
+
+function drawGospelJump(p, done) {
+    var el = document.getElementById('gospel-jump');
+    if (!el) return;
+    if (!hasStarted()) { el.hidden = true; return; }
+    el.hidden = false;
+
+    var gd = gospelDays(p);
+    var all = Object.keys(gd).map(Number);
+    var readN = all.filter(function (d) { return done[d]; }).length;
+    var gStart = getGospelStart();
+
+    // Whole block finished -- the detour is over, so retire the setting rather
+    // than leaving a stale date on the subscriber row.
+    if (gStart && readN === all.length) { saveGospelStart(null); gStart = null; }
+
+    var h = '';
+    if (gStart) {
+        h += '<p class="gospel-line"><span class="gospel-tag">Gospels moved up</span> starting ' +
+             parseDayKey(gStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+             ' \u00b7 ' + readN + ' of ' + all.length + ' read</p>';
+        h += '<button class="gospel-btn" id="gospel-revert" type="button">Go back to original plan</button>';
+    } else if (gospelPicking) {
+        var todayK = dayKey(new Date());
+        h += '<p class="gospel-line">Start the gospels on\u2026</p>';
+        h += '<div class="gospel-panel">' +
+             '<input class="gospel-date" type="date" id="gospel-date" min="' + todayK + '" value="' + todayK + '">' +
+             '<button class="gospel-btn" id="gospel-go" type="button">Move them here</button>' +
+             '<button class="gospel-cancel" id="gospel-cancel" type="button">Cancel</button></div>';
+    } else {
+        h += '<button class="gospel-btn" id="gospel-open" type="button">Read the Gospels now</button>';
+        h += '<p class="gospel-note">Brings the ' + all.length + ' gospel readings (Matthew\u2013John) forward to a date you pick; the rest of the plan shifts back behind them. Reversible \u2014 and anything you\'ve already read stays read.</p>';
+    }
+    el.innerHTML = h;
+
+    var open = document.getElementById('gospel-open');
+    if (open) open.addEventListener('click', function () { gospelPicking = true; drawGospelJump(p, done); });
+    var cancel = document.getElementById('gospel-cancel');
+    if (cancel) cancel.addEventListener('click', function () { gospelPicking = false; drawGospelJump(p, done); });
+
+    var go = document.getElementById('gospel-go');
+    if (go) go.addEventListener('click', async function () {
+        var v = (document.getElementById('gospel-date') || {}).value;
+        if (!v || v < dayKey(new Date())) return;
+        go.disabled = true;
+        gospelPicking = false;
+        var ok = await saveGospelStart(v);
+        await renderProgressPage();
+        if (!ok) warnGospelSync();
+    });
+    var revert = document.getElementById('gospel-revert');
+    if (revert) revert.addEventListener('click', async function () {
+        revert.disabled = true;
+        var ok = await saveGospelStart(null);
+        await renderProgressPage();
+        if (!ok) warnGospelSync();
+    });
+}
+
+// The site follows localStorage, the daily email follows the subscriber row.
+// If the server leg fails, say so rather than letting the two drift in silence.
+function warnGospelSync() {
+    var el = document.getElementById('gospel-jump');
+    if (el) el.insertAdjacentHTML('beforeend',
+        '<p class="gospel-warn">Saved on this device, but we couldn\'t reach the server \u2014 your daily email may still follow the original order.</p>');
 }
 
 function drawCalendar(byDate, done, current) {

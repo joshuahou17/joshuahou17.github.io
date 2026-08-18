@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
   try {
     const { data: existing } = await sb
       .from("bible_subscribers")
-      .select("id, start_date, current_day")
+      .select("id, start_date, current_day, gospel_start")
       .ilike("email", email)
       .maybeSingle();
 
@@ -88,6 +88,9 @@ Deno.serve(async (req) => {
         email,
         start_date: existing.start_date || today,
         current_day: existing.current_day || 1,
+        // Carries the gospel jump to a second device, so the site there shows
+        // the same order the daily email is already following.
+        gospel_start: existing.gospel_start || null,
         returning: true,
       });
     }
@@ -95,11 +98,11 @@ Deno.serve(async (req) => {
     const { data: created, error } = await sb
       .from("bible_subscribers")
       .insert({ email, start_date: today, current_day: 1, unsubscribed: false })
-      .select("id, start_date, current_day")
+      .select("id, start_date, current_day, gospel_start")
       .single();
     if (error) throw error;
     await sendWelcome(email, created.id);  // one-time welcome with Day 1
-    return json({ id: created.id, email, start_date: created.start_date, current_day: created.current_day, returning: false });
+    return json({ id: created.id, email, start_date: created.start_date, current_day: created.current_day, gospel_start: null, returning: false });
   } catch (e) {
     return json({ error: "enroll failed", detail: String(e) }, 500);
   }

@@ -269,31 +269,80 @@ def scheduled_day(sub):
 
 
 def completed_days(sb, user_id):
+    """{day_number: completed_at ISO string (or None)} for every day marked read."""
     if not sb or not user_id:
-        return set()
+        return {}
     try:
-        res = sb.table("bible_reading_progress").select("day_number, completed").eq("user_id", user_id).execute()
-        return {r["day_number"] for r in (res.data or []) if r.get("completed")}
+        res = sb.table("bible_reading_progress").select("day_number, completed, completed_at").eq("user_id", user_id).execute()
+        return {r["day_number"]: r.get("completed_at") for r in (res.data or []) if r.get("completed")}
     except Exception:
-        return set()
+        return {}
 
 
-def first_incomplete(done):
-    d = 1
-    while d in done and d < TOTAL_DAYS:
-        d += 1
-    return d
+# --- Reading order ---------------------------------------------------------
+# Kept deliberately in step with readingOrder() in bible/app.js. Position in the
+# plan used to be implied by day_number; making it explicit is what lets a
+# reader pull the gospel block forward ("Read the Gospels now" on the Progress
+# tab) without the daily email and the website disagreeing about what's next.
+
+GOSPEL_BOOKS = {"Matthew", "Mark", "Luke", "John"}
 
 
-def email_day_for(sb, sub):
-    """The day to email: the reading due today — the oldest unread day, but never
-    ahead of the one-per-day calendar. Returns None if the reader is caught up or
-    has read ahead, so nobody is sent the next day early or more than one new day
-    in a day. (Falling behind still resends the oldest unread day.)"""
+def gospel_days(plan):
+    """Day numbers containing a gospel. Derived from the plan, not hardcoded to
+    274-319, so regenerating reading_plan.json can't quietly break the jump."""
+    return {e["day_number"] for e in plan
+            if any(s.get("book") in GOSPEL_BOOKS for s in e.get("segments", []))}
+
+
+def upcoming_base(done):
+    """The date the next unread reading is due: today, unless today's reading is
+    already ticked — then it belongs to tomorrow. Mirrors upcomingBaseDate()."""
+    today = datetime.now(ET_OFFSET).date()
+    for c in done.values():
+        if not c:
+            continue
+        try:
+            if datetime.fromisoformat(str(c).replace("Z", "+00:00")).astimezone(ET_OFFSET).date() == today:
+                return today + timedelta(days=1)
+        except Exception:
+            pass
+    return today
+
+
+def reading_order(plan, done, gospel_start, base):
+    """Unread day numbers, in the order they'll actually be served. Ascending,
+    unless a gospel jump is active — then the unread gospel block slides in at
+    the position matching its start date. Computed over unread days only, so
+    gospel days already read are skipped when the plan comes back round."""
+    unread = sorted(e["day_number"] for e in plan if e["day_number"] not in done)
+    if not gospel_start:
+        return unread
+    gd = gospel_days(plan)
+    gospels = [d for d in unread if d in gd]
+    if not gospels:
+        return unread          # block finished — the jump is a no-op
+    rest = [d for d in unread if d not in gd]
+    try:
+        start = datetime.strptime(str(gospel_start)[:10], "%Y-%m-%d").date()
+    except Exception:
+        return unread
+    offset = max(0, min((start - base).days, len(rest)))
+    return rest[:offset] + gospels + rest[offset:]
+
+
+def email_day_for(sb, sub, plan):
+    """The day to email: the next reading in this subscriber's own order, unless
+    they're already level with the one-per-day calendar — nobody gets tomorrow's
+    reading early or two new days in a day. (Falling behind still resends the
+    oldest outstanding reading.) Counting readings rather than comparing day
+    numbers is what survives a gospel jump; read in order the two are identical."""
     sched = scheduled_day(sub)
     done = completed_days(sb, sub["id"])
-    fi = first_incomplete(done)
-    return fi if fi <= sched else None
+    if len(done) >= sched:
+        return None
+    order = reading_order(plan, done, sub.get("gospel_start"), upcoming_base(done))
+    return order[0] if order else None
 
 
 # --- Modes ---
@@ -355,7 +404,7 @@ def run_send(plan):
         return
     sent = 0
     for sub in subs:
-        day = email_day_for(sb, sub)
+        day = email_day_for(sb, sub, plan)
         if day is None:
             logger.info(f"{sub.get('email')} is caught up — no email today")
             continue
@@ -416,7 +465,7 @@ def run_reminders(plan, kind):
         return
     sent = 0
     for sub in subs:
-        day = email_day_for(sb, sub)
+        day = email_day_for(sb, sub, plan)
         if day is None:
             continue  # caught up — no nudge needed
         entry, analysis = get_entry_by_day(plan, day), load_analysis(day)

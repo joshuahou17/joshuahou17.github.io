@@ -29,8 +29,15 @@ CREATE TABLE IF NOT EXISTS bible_subscribers (
     subscribed_at TIMESTAMPTZ DEFAULT now(),
     unsubscribed BOOLEAN NOT NULL DEFAULT FALSE,
     preferred_translation TEXT NOT NULL DEFAULT 'NIV',
-    current_day INTEGER NOT NULL DEFAULT 1
+    current_day INTEGER NOT NULL DEFAULT 1,
+    -- Gospel jump: the date the reader wants the gospel block (Matthew-John)
+    -- to start. NULL = the original chronological order. Affects reading ORDER
+    -- only -- progress rows are never touched, so it is freely reversible.
+    gospel_start DATE
 );
+
+-- Migration for an existing database (run this if the table already exists):
+--   ALTER TABLE bible_subscribers ADD COLUMN IF NOT EXISTS gospel_start DATE;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_progress_user_id ON bible_reading_progress(user_id);
