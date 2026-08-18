@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=17">
+    <link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
     <nav class="nav">
@@ -28,6 +28,10 @@
 
         <div id="progress-calendar"><p class="analysis-sec" style="text-align:center;color:var(--muted)"><em>Loading your calendar…</em></p></div>
 
+        <!-- Gospel jump. Also a SIBLING of #progress-calendar, for the same
+             reason as the heatmap below. Filled by drawGospelJump(). -->
+        <section id="gospel-jump" class="gospel-jump" hidden></section>
+
         <!-- Filled by drawHeatmap() in app.js. Must stay a SIBLING of
              #progress-calendar — that container is rewritten on every month
              nav click, so anything nested inside it would be wiped. -->
@@ -38,6 +42,6 @@
         <button class="unsub-link" id="unsubscribe-btn" type="button">Unsubscribe from the daily email</button>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=17"></script>
+    <script src="app.js?v=18"></script>
 </body>
 </html>
