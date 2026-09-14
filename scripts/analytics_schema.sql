@@ -27,8 +27,14 @@ CREATE TABLE IF NOT EXISTS site_page_views (
     path          TEXT NOT NULL,
     -- home | digest | bible | split | calendar-peek | other
     section       TEXT NOT NULL DEFAULT 'other',
-    -- hostname only, never the full referring URL (which can carry queries)
+    -- hostname, for grouping ("HN sent 151 views")
     referrer_host TEXT,
+    -- the full linking page, so "which post linked me" is answerable. Kept
+    -- WITH its query string: for HN and Reddit the identifying part lives
+    -- there (/item?id=123), so stripping it discards the whole point. An
+    -- inbound referrer is a public page, not private data -- unlike a URL on
+    -- our own site, where query strings can carry tokens.
+    referrer_url  TEXT,
     visitor_hash  TEXT NOT NULL,
     country       TEXT,
     -- bots are stored rather than dropped, so the dashboard can show how much
@@ -54,6 +60,9 @@ CREATE INDEX IF NOT EXISTS site_page_views_day_visitor_idx
 CREATE INDEX IF NOT EXISTS site_page_views_day_referrer_idx
     ON site_page_views (day, referrer_host)
     WHERE NOT is_bot AND referrer_host IS NOT NULL;
+
+-- 3b. Migration, if the table already exists from an earlier run:
+ALTER TABLE site_page_views ADD COLUMN IF NOT EXISTS referrer_url TEXT;
 
 -- 4. Row Level Security.
 --    Both tables get RLS enabled with NO policies. That denies the `anon` and
@@ -130,6 +139,11 @@ SELECT jsonb_build_object(
         SELECT jsonb_build_object('host', referrer_host, 'views', COUNT(*)) AS x
         FROM human WHERE referrer_host IS NOT NULL
         GROUP BY referrer_host ORDER BY COUNT(*) DESC LIMIT 25) t),
+    -- the actual linking pages, so a source can be opened and read
+    'linking_pages', (SELECT COALESCE(jsonb_agg(x), '[]'::jsonb) FROM (
+        SELECT jsonb_build_object('url', referrer_url, 'views', COUNT(*)) AS x
+        FROM human WHERE referrer_url IS NOT NULL
+        GROUP BY referrer_url ORDER BY COUNT(*) DESC LIMIT 25) t),
     'sections', (SELECT COALESCE(jsonb_agg(x), '[]'::jsonb) FROM (
         SELECT jsonb_build_object('section', section, 'views', COUNT(*)) AS x
         FROM human GROUP BY section ORDER BY COUNT(*) DESC) t),

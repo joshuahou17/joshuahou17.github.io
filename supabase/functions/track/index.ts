@@ -32,16 +32,22 @@ function sectionFor(path: string): string {
   return "other";
 }
 
-// Keep only the hostname. A full referring URL can carry queries and paths we
-// have no business storing.
-function referrerHost(raw: unknown): string | null {
-  if (typeof raw !== "string" || !raw) return null;
+// An inbound referrer is a PUBLIC page that linked to us, so unlike paths on
+// our own site it is kept whole -- query string included. For HN and Reddit the
+// identifying part is the query (/item?id=123); dropping it would leave only a
+// link to their front page, which answers nothing.
+// Returns [host, full url], both null for internal or unparseable referrers.
+function referrerParts(raw: unknown): [string | null, string | null] {
+  if (typeof raw !== "string" || !raw) return [null, null];
   try {
-    const h = new URL(raw).hostname.replace(/^www\./, "");
-    if (!h || h === "joshhou.com" || h.endsWith(".joshhou.com")) return null; // internal
-    return h.slice(0, 120);
+    const u = new URL(raw);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return [null, null];
+    const h = u.hostname.replace(/^www\./, "");
+    if (!h || h === "joshhou.com" || h.endsWith(".joshhou.com")) return [null, null]; // internal
+    const full = (h + u.pathname + u.search).replace(/\/$/, "");
+    return [h.slice(0, 120), full.slice(0, 500)];
   } catch {
-    return null;
+    return [null, null];
   }
 }
 
@@ -97,6 +103,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    const ref = referrerParts(body?.ref);
     const day = new Date().toISOString().slice(0, 10);
     const salt = await saltForToday(sb, day);
 
@@ -104,7 +111,8 @@ Deno.serve(async (req) => {
       day,
       path,
       section: sectionFor(path),
-      referrer_host: referrerHost(body?.ref),
+      referrer_host: ref[0],
+      referrer_url: ref[1],
       visitor_hash: await sha256(`${salt}|${ip}|${ua}`),
       country: country && country !== "XX" ? country : null,
       is_bot: isBot,

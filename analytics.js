@@ -12,6 +12,31 @@
   if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]' ||
       host.endsWith('.local') || location.protocol === 'file:') return;
 
+  /* Self-exclusion. Visiting any page with ?noanalytics=1 sets a flag in this
+     browser and this browser is never counted again; ?noanalytics=0 clears it.
+     Per-browser and per-device, because there is nothing else stable to key
+     off -- home IPs change, and we deliberately store no identity. */
+  var OPT_OUT = 'joshhou_no_analytics';
+  function flag(v) {
+    try {
+      if (v === null) localStorage.removeItem(OPT_OUT);
+      else localStorage.setItem(OPT_OUT, v);
+    } catch (e) { /* private mode: nothing we can do */ }
+  }
+  var q = location.search;
+  if (q.indexOf('noanalytics=1') !== -1) {
+    flag('1');
+    if (window.console) console.log('[analytics] This browser will no longer be counted.');
+    return;
+  }
+  if (q.indexOf('noanalytics=0') !== -1) {
+    flag(null);
+    if (window.console) console.log('[analytics] This browser is being counted again.');
+  }
+  try {
+    if (localStorage.getItem(OPT_OUT) === '1') return;
+  } catch (e) { /* unreadable storage: fall through and count */ }
+
   var payload = JSON.stringify({
     path: location.pathname,
     ref: document.referrer || null

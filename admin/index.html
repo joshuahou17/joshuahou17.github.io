@@ -100,6 +100,11 @@
       <section><h2>Referrers</h2><div id="refs"></div></section>
     </div>
 
+    <section>
+      <h2>Linking pages — click to see what was said</h2>
+      <div id="linking"></div>
+    </section>
+
     <div class="cols">
       <section><h2>Sections</h2><div id="sections"></div></section>
       <section><h2>Countries</h2><div id="countries"></div></section>
@@ -129,7 +134,7 @@ function renderTable(el, rows, nameKey, label, linkify){
   rows.forEach(function(r){
     var name = esc(r[nameKey] || "—");
     var cell = linkify && r[nameKey]
-      ? '<a href="'+(nameKey === "host" ? "https://"+name : name)+'" target="_blank" rel="noopener">'+name+'</a>'
+      ? '<a href="'+((nameKey === "host" || nameKey === "url") ? "https://"+name : name)+'" target="_blank" rel="noopener">'+name+'</a>'
       : name;
     html += '<tr><td class="name" title="'+name+'">'+cell+'</td>'
          +  '<td class="barcell"><div class="bar" style="width:'+Math.max(2,(r.views/max)*100)+'%"></div></td>'
@@ -204,6 +209,7 @@ function render(d){
   renderChart(d.daily || []);
   renderTable(document.getElementById("pages"),     d.top_pages,     "path",    "Page",    true);
   renderTable(document.getElementById("refs"),      d.top_referrers, "host",    "Source",  true);
+  renderTable(document.getElementById("linking"),   d.linking_pages, "url",     "Linking page", true);
   renderTable(document.getElementById("sections"),  d.sections,      "section", "Section", false);
   renderTable(document.getElementById("countries"), d.countries,     "country", "Country", false);
   bodyEl.hidden = false;
