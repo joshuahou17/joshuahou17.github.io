@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics — joshhou.com</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.png.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f5f0; --ink:#1d1c18; --muted:#6b675c; --faint:#a8a496;
+    --rule:#c8c2b3; --accent:#2f3a8c; --accent-soft:#2f3a8c22;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;
+       -webkit-font-smoothing:antialiased;padding:40px 24px 80px}
+  .wrap{max-width:900px;margin:0 auto}
+  .mono{font-family:'Space Mono',monospace}
+
+  h1{font-size:30px;font-weight:500;margin:0 0 4px}
+  .sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;
+       text-transform:uppercase;color:var(--faint);margin:0 0 28px}
+
+  .keyrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  input[type=password]{font-family:'Space Mono',monospace;font-size:13px;padding:8px 10px;
+       border:1px solid var(--rule);background:#fff;border-radius:3px;min-width:220px;color:var(--ink)}
+  button{font-family:'Space Mono',monospace;font-size:12px;padding:8px 14px;cursor:pointer;
+       border:1px solid var(--rule);background:#fff;border-radius:3px;color:var(--ink)}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .ranges{display:flex;gap:6px;margin:0 0 26px}
+  .msg{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);min-height:18px;margin-bottom:22px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:34px}
+  .tile{border:1px solid var(--rule);border-radius:4px;padding:14px 16px;background:#fffdf9}
+  .tile .n{font-size:30px;font-weight:500;line-height:1.1}
+  .tile .l{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;
+       text-transform:uppercase;color:var(--faint);margin-top:6px}
+  .tile .note{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic}
+
+  section{margin-bottom:38px}
+  h2{font-size:13px;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.14em;
+     text-transform:uppercase;color:var(--muted);margin:0 0 14px;
+     border-bottom:1px solid var(--rule);padding-bottom:8px}
+
+  .chartbox{position:relative}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);
+       font-family:'Space Mono',monospace;font-size:11px;padding:6px 9px;border-radius:3px;
+       white-space:nowrap;opacity:0;transition:opacity .12s;transform:translate(-50%,-100%);z-index:5}
+
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+     color:var(--faint);text-align:left;font-weight:400;padding:0 0 8px}
+  td{padding:7px 0;border-top:1px solid #e8e3d8;vertical-align:middle}
+  td.n{text-align:right;font-family:'Space Mono',monospace;font-size:13px;white-space:nowrap;width:1%;padding-left:14px}
+  td.name{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar{height:6px;background:var(--accent);border-radius:0 3px 3px 0;min-width:2px}
+  .barcell{width:34%;padding-left:14px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+  .empty{color:var(--muted);font-style:italic;font-size:15px}
+  a{color:var(--ink)}
+  @media(max-width:640px){
+    body{padding:28px 18px 60px}
+    .cols{grid-template-columns:1fr;gap:34px}
+    h1{font-size:25px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Analytics</h1>
+  <p class="sub">joshhou.com</p>
+
+  <div class="keyrow">
+    <input id="key" type="password" placeholder="analytics key" autocomplete="off">
+    <button id="load">Load</button>
+  </div>
+  <div class="ranges">
+    <button class="range" data-days="7">7 days</button>
+    <button class="range" data-days="30" aria-pressed="true">30 days</button>
+    <button class="range" data-days="90">90 days</button>
+  </div>
+  <p class="msg mono" id="msg"></p>
+
+  <div id="body" hidden>
+    <div class="tiles" id="tiles"></div>
+
+    <section>
+      <h2>Views per day</h2>
+      <div class="chartbox"><div id="chart"></div><div class="tip" id="tip"></div></div>
+    </section>
+
+    <div class="cols">
+      <section><h2>Top pages</h2><div id="pages"></div></section>
+      <section><h2>Referrers</h2><div id="refs"></div></section>
+    </div>
+
+    <section>
+      <h2>Linking pages — click to see what was said</h2>
+      <div id="linking"></div>
+    </section>
+
+    <div class="cols">
+      <section><h2>Sections</h2><div id="sections"></div></section>
+      <section><h2>Countries</h2><div id="countries"></div></section>
+    </div>
+  </div>
+</div>
+
+<script>
+var FN  = "https://iaspidhmxppsuwydmvym.supabase.co/functions/v1/analytics-summary";
+var keyEl = document.getElementById("key");
+var msg   = document.getElementById("msg");
+var bodyEl= document.getElementById("body");
+var days  = 30;
+
+keyEl.value = localStorage.getItem("site_analytics_key") || "";
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function num(n){ return (n == null ? 0 : n).toLocaleString(); }
+
+/* ---- table with a magnitude bar. One hue; length carries the value, so there
+   is no categorical palette to get wrong and nothing depends on colour alone. */
+function renderTable(el, rows, nameKey, label, linkify){
+  if(!rows || !rows.length){ el.innerHTML = '<p class="empty">Nothing yet.</p>'; return; }
+  var max = Math.max.apply(null, rows.map(function(r){ return r.views; })) || 1;
+  var html = '<table><thead><tr><th>'+label+'</th><th></th><th style="text-align:right">Views</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var name = esc(r[nameKey] || "—");
+    var cell = linkify && r[nameKey]
+      ? '<a href="'+((nameKey === "host" || nameKey === "url") ? "https://"+name : name)+'" target="_blank" rel="noopener">'+name+'</a>'
+      : name;
+    html += '<tr><td class="name" title="'+name+'">'+cell+'</td>'
+         +  '<td class="barcell"><div class="bar" style="width:'+Math.max(2,(r.views/max)*100)+'%"></div></td>'
+         +  '<td class="n">'+num(r.views)+'</td></tr>';
+  });
+  el.innerHTML = html + '</tbody></table>';
+}
+
+/* ---- daily bar chart. Single series, so no legend: the heading names it.
+   Zero-traffic days render as real zeros rather than being dropped, otherwise
+   the chart would quietly compress time. */
+function renderChart(daily){
+  var W = 900, H = 200, padB = 24, padT = 10;
+  var n = daily.length || 1;
+  var max = Math.max.apply(null, daily.map(function(d){ return d.views; }));
+  if(!isFinite(max) || max <= 0) max = 1;
+  var slot = W / n, gap = n > 60 ? 1 : 2, bw = Math.max(1, slot - gap);
+  var plotH = H - padB - padT;
+  var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Daily page views">';
+
+  // recessive gridlines + y ticks
+  [0, 0.5, 1].forEach(function(f){
+    var y = padT + plotH - f*plotH;
+    s += '<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="#e0dacd" stroke-width="1"/>';
+    s += '<text x="0" y="'+(y-4)+'" font-family="Space Mono, monospace" font-size="9" fill="#a8a496">'
+       + Math.round(max*f) + '</text>';
+  });
+
+  daily.forEach(function(d,i){
+    // A zero day gets a 2px stub in the grid colour, so it reads as "nothing
+    // happened" rather than as missing data.
+    var h = d.views ? (d.views/max)*plotH : 2;
+    var x = i*slot + gap/2, y = padT + plotH - h;
+    // 4px rounded data-end, anchored to the baseline
+    var r = Math.min(4, bw/2, h);
+    s += '<path class="bar-mark" data-i="'+i+'" d="M'+x+' '+(padT+plotH)
+       + 'V'+(y+r)+'a'+r+' '+r+' 0 0 1 '+r+' -'+r
+       + 'h'+Math.max(0,(bw-2*r))+'a'+r+' '+r+' 0 0 1 '+r+' '+r
+       + 'V'+(padT+plotH)+'Z" fill="'+(d.views?'#2f3a8c':'#e0dacd')+'"/>';
+    // generous invisible hit target, bigger than the mark
+    s += '<rect data-i="'+i+'" x="'+(i*slot)+'" y="0" width="'+slot+'" height="'+H+'" fill="transparent"/>';
+  });
+
+  // label only the ends, never every bar
+  s += '<text x="0" y="'+(H-6)+'" font-family="Space Mono, monospace" font-size="9" fill="#a8a496">'+daily[0].day+'</text>';
+  s += '<text x="'+W+'" y="'+(H-6)+'" text-anchor="end" font-family="Space Mono, monospace" font-size="9" fill="#a8a496">'+daily[n-1].day+'</text>';
+  s += '</svg>';
+  document.getElementById("chart").innerHTML = s;
+
+  var tip = document.getElementById("tip"), box = document.querySelector(".chartbox");
+  box.querySelectorAll("[data-i]").forEach(function(el){
+    el.addEventListener("mouseenter", function(){
+      var d = daily[+el.getAttribute("data-i")];
+      tip.innerHTML = d.day + " · " + num(d.views) + " views · " + num(d.uniques) + " uniques";
+      var r = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+      tip.style.left = (r.left - b.left + r.width/2) + "px";
+      tip.style.top  = (Math.max(0, r.top - b.top) + 4) + "px";
+      tip.style.opacity = 1;
+    });
+  });
+  box.addEventListener("mouseleave", function(){ tip.style.opacity = 0; });
+}
+
+function render(d){
+  var t = d.totals || {};
+  document.getElementById("tiles").innerHTML =
+      tile(num(t.views), "Page views", "")
+    + tile(num(t.daily_uniques_summed), "Daily uniques", "summed — a repeat visitor counts once per day")
+    + tile(num(t.bot_views), "Bots filtered", "excluded from every number above")
+    + tile(d.window_days + "d", "Window", d.from_day + " → " + d.to_day);
+
+  renderChart(d.daily || []);
+  renderTable(document.getElementById("pages"),     d.top_pages,     "path",    "Page",    true);
+  renderTable(document.getElementById("refs"),      d.top_referrers, "host",    "Source",  true);
+  renderTable(document.getElementById("linking"),   d.linking_pages, "url",     "Linking page", true);
+  renderTable(document.getElementById("sections"),  d.sections,      "section", "Section", false);
+  renderTable(document.getElementById("countries"), d.countries,     "country", "Country", false);
+  bodyEl.hidden = false;
+}
+
+function tile(n, label, note){
+  return '<div class="tile"><div class="n">'+n+'</div><div class="l">'+label+'</div>'
+       + (note ? '<div class="note">'+note+'</div>' : '') + '</div>';
+}
+
+async function load(){
+  var key = keyEl.value.trim();
+  if(!key){ msg.textContent = "Enter the analytics key."; return; }
+  localStorage.setItem("site_analytics_key", key);
+  msg.textContent = "Loading…";
+  try{
+    var r = await fetch(FN + "?key=" + encodeURIComponent(key) + "&days=" + days);
+    if(r.status === 401){ msg.textContent = "Wrong key."; bodyEl.hidden = true; return; }
+    if(!r.ok){ msg.textContent = "Error " + r.status + "."; return; }
+    var d = await r.json();
+    render(d);
+    msg.textContent = "Updated " + new Date(d.generated_at).toLocaleString();
+  }catch(e){ msg.textContent = "Could not reach the server."; }
+}
+
+document.getElementById("load").addEventListener("click", load);
+keyEl.addEventListener("keydown", function(e){ if(e.key === "Enter") load(); });
+document.querySelectorAll(".range").forEach(function(b){
+  b.addEventListener("click", function(){
+    days = +b.getAttribute("data-days");
+    document.querySelectorAll(".range").forEach(function(o){ o.setAttribute("aria-pressed", o === b); });
+    if(keyEl.value) load();
+  });
+});
+if(keyEl.value) load();
+</script>
+</body>
+</html>
