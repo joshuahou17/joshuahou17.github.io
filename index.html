@@ -129,16 +129,34 @@
     border: 1px solid rgba(29, 28, 24, 0.08);
   }
 
+  .mascot {
+    line-height: 0;
+    margin: 0 0 16px -12px;
+  }
+  .mascot button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
   @media (max-width: 520px) {
     body { padding: 32px 20px; }
     .prose { font-size: 19px; text-align: left; }
     .dropcap { font-size: 70px; }
     .photo { margin-top: 28px; }
+    .mascot { margin-bottom: 12px; }
+    .mascot button { width: 92px !important; height: 92px !important; }
   }
 </style>
 </head>
 <body>
   <main class="page">
+    <div class="mascot" data-mascot
+         data-directions="mascots/josh-directions.webp"
+         data-reactions="mascots/josh-reactions.webp"
+         data-size="112"
+         data-label="Josh"></div>
+
     <p class="eyebrow">Josh Hou · New York</p>
 
     <p class="prose">
@@ -163,5 +181,6 @@
       </span>
     </footer>
   </main>
+  <script src="mascot.js?v=1" defer></script>
 </body>
 </html>
