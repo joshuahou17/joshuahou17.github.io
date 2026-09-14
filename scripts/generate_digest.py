@@ -268,6 +268,7 @@ def update_index(digest_data, date_obj):
         <p>&copy; 2026 Joshua Hou. Built with an autonomous agent, GPT-4o, and RSS feeds.</p>
     </footer>
     <script src="main.js"></script>
+    <script src="/analytics.js" defer></script>
 </body>
 </html>"""
 

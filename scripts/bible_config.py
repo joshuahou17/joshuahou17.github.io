@@ -151,6 +151,7 @@ BIBLE_POST_TEMPLATE = """<!DOCTYPE html>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../app.js?v=14"></script>
+    <script src="/analytics.js" defer></script>
 </body>
 </html>"""
 
