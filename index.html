@@ -140,20 +140,39 @@
   }
 
   /* --- Swing -------------------------------------------------------------
-     A pendulum: the whole rig pivots from a point at the very top edge of the
-     window, so the ropes read as coming from somewhere above the screen.
+     A pendulum hanging from a point at the very top edge of the window, so the
+     ropes read as coming from somewhere above the screen.
+
+     It turns on a HORIZONTAL axle, not a vertical one -- which is what a real
+     swing does -- so the rig travels toward the viewer and away rather than
+     sliding side to side. Under perspective that buys the whole effect for
+     free: he grows coming forward, shrinks going back, rises at both ends of
+     the arc, and the two ropes splay and converge. Faking the same thing in 2D
+     would mean animating the rope geometry by hand.
+
      Amplitude lives in --swing-amp so a click can widen the arc without
-     touching the period -- pushing a real swing makes it go wider, not
-     faster, and leaving the period alone is also what stops it stuttering
-     mid-arc when clicked. */
+     touching the period: a pendulum's timing does not depend on how hard you
+     push it, and leaving the duration alone is also what keeps the phase (and
+     so his position and direction) continuous through a click. swing.js eases
+     that value rather than setting it, so the push reads as a shove instead of
+     a jump. */
   @property --swing-amp {
     syntax: '<angle>';
     inherits: true;
-    initial-value: 10deg;
+    initial-value: 16deg;
   }
 
   .swing {
-    --swing-amp: 10deg;
+    --swing-amp: 16deg;
+    /* A swing turns on a horizontal axle, so the rig swings toward the viewer
+       and away rather than side to side. Under perspective that gives the real
+       thing for free: he grows as he comes forward, shrinks going back, rises at
+       both ends of the arc, and the ropes splay and converge. --swing-view turns
+       the whole assembly a little so we see it from the corner, which turns the
+       straight-on approach into an ellipse. */
+    --swing-view: -22deg;
+    perspective: 720px;
+    perspective-origin: 50% 72%;
     position: fixed;
     top: 0;
     right: clamp(56px, 7vw, 140px);
@@ -164,11 +183,10 @@
     border: 0;
     background: none;
     line-height: 0;
-    /* only the drawn shapes take the pointer, so it can never swallow a click
-       meant for the page behind it */
+    /* only the rider takes the pointer, so it can never swallow a click meant
+       for the page behind it */
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
-    transition: --swing-amp 5.5s cubic-bezier(0.25, 0.6, 0.3, 1);
   }
 
   .swing__rig {
@@ -181,31 +199,13 @@
   }
 
   @keyframes swing-arc {
-    from { transform: rotate(calc(var(--swing-amp) * -1)); }
-    to   { transform: rotate(var(--swing-amp)); }
+    from { transform: rotateY(var(--swing-view)) rotateX(calc(var(--swing-amp) * -1)); }
+    to   { transform: rotateY(var(--swing-view)) rotateX(var(--swing-amp)); }
   }
 
-  /* the rider lags a little behind the swing, the way a real one does */
   .swing__hit {
     pointer-events: auto;
     cursor: pointer;
-    transform-origin: 150px 445px;
-    animation: swing-lag 3.6s cubic-bezier(0.4, 0.05, 0.6, 0.95) infinite alternate;
-  }
-
-  @keyframes swing-lag {
-    from { transform: rotate(3.5deg); }
-    to   { transform: rotate(-3.5deg); }
-  }
-
-  .swing__legs {
-    transform-origin: 150px 440px;
-    animation: swing-kick 3.6s ease-in-out infinite alternate;
-  }
-
-  @keyframes swing-kick {
-    from { transform: rotate(-5deg); }
-    to   { transform: rotate(5deg); }
   }
 
   .swing:focus-visible .swing__hit {
@@ -215,10 +215,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .swing__rig,
-    .swing__hit,
-    .swing__legs { animation: none; }
-    .swing__hit { transform: none; }
+    .swing__rig {
+      animation: none;
+      transform: rotateY(var(--swing-view));
+    }
   }
 
   @media (max-width: 900px) {
@@ -277,9 +277,12 @@
   </main>
 
   <!-- Decorative: cartoon Josh on a swing, hung from the top-right of the window.
-       The head is cell 8 ("delighted") of the mascot's reactions atlas, so it is the
-       same drawing as the mascot and costs no extra download; everything else is drawn
-       here to match its measured palette (#26324b shirt, #fec294 skin, black outlines). -->
+       The rider is one drawn illustration (mascots/josh-swing.webp), made from the
+       mascot's own sprite sheet so it is the same character. The ropes are drawn here
+       instead of in the artwork: they have to reach the pivot at the top of the window,
+       and they foreshorten with the rig when it swings. His fists sit at 7.43% and 92.93%
+       of the artwork's width, measured off the art; the image is placed so those
+       land exactly on the two ropes. -->
   <button class="swing" type="button" aria-label="Push the swing">
     <svg class="swing__rig" viewBox="0 0 300 560" width="300" height="560" role="presentation" focusable="false">
       <!-- ropes: black outline + rope core, running off the top edge -->
@@ -289,47 +292,12 @@
         <path d="M40 0V445" stroke="#c9a875" stroke-width="6" fill="none"/>
         <path d="M260 0V445" stroke="#c9a875" stroke-width="6" fill="none"/>
       </g>
-
-      <g class="swing__hit">
-        <!-- arms: drawn before the bust so they read as raised out to the sides -->
-        <g class="swing__arms">
-          <path d="M88 398Q66 372 46 330" stroke="#000" stroke-width="40" fill="none" stroke-linecap="round"/>
-          <path d="M212 398Q234 372 254 330" stroke="#000" stroke-width="40" fill="none" stroke-linecap="round"/>
-          <path d="M88 398Q66 372 46 330" stroke="#fec294" stroke-width="31" fill="none" stroke-linecap="round"/>
-          <path d="M212 398Q234 372 254 330" stroke="#fec294" stroke-width="31" fill="none" stroke-linecap="round"/>
-          <circle cx="42" cy="320" r="20" fill="#fec294" stroke="#000" stroke-width="6"/>
-          <circle cx="258" cy="320" r="20" fill="#fec294" stroke="#000" stroke-width="6"/>
-        </g>
-
-        <!-- head and shoulders: cell (2,2) of the 3x3 reactions atlas -->
-        <svg class="swing__bust" x="30.2" y="242.2" width="235" height="235" viewBox="720 720 360 360">
-          <image href="mascots/josh-reactions.webp" x="0" y="0" width="1080" height="1080"/>
-        </svg>
-
-        <!-- seat: also hides the flat bottom edge of the bust -->
-        <g class="swing__seat">
-          <rect x="36" y="434" width="228" height="23" rx="7" fill="#c08b4e" stroke="#000" stroke-width="6"/>
-          <path d="M42 450h216" stroke="#9a6b36" stroke-width="5" fill="none" stroke-linecap="round"/>
-        </g>
-
-        <!-- legs hang over the front edge of the seat -->
-        <g class="swing__legs">
-          <path d="M126 436C120 470 114 492 113 514" stroke="#000" stroke-width="39" fill="none" stroke-linecap="round"/>
-          <path d="M174 436C180 470 186 492 187 514" stroke="#000" stroke-width="39" fill="none" stroke-linecap="round"/>
-          <path d="M126 436C120 470 114 492 113 514" stroke="#fec294" stroke-width="30" fill="none" stroke-linecap="round"/>
-          <path d="M174 436C180 470 186 492 187 514" stroke="#fec294" stroke-width="30" fill="none" stroke-linecap="round"/>
-          <path d="M127 434C124 452 121 464 120 474" stroke="#000" stroke-width="46" fill="none" stroke-linecap="round"/>
-          <path d="M173 434C176 452 179 464 180 474" stroke="#000" stroke-width="46" fill="none" stroke-linecap="round"/>
-          <path d="M127 434C124 452 121 464 120 474" stroke="#26324b" stroke-width="37" fill="none" stroke-linecap="round"/>
-          <path d="M173 434C176 452 179 464 180 474" stroke="#26324b" stroke-width="37" fill="none" stroke-linecap="round"/>
-          <ellipse cx="109" cy="528" rx="25" ry="17" fill="#2e2e2e" stroke="#000" stroke-width="6"/>
-          <ellipse cx="191" cy="528" rx="25" ry="17" fill="#2e2e2e" stroke="#000" stroke-width="6"/>
-        </g>
-      </g>
+      <!-- the rider, drawn over the ropes so his fists close around them -->
+      <image class="swing__hit" href="mascots/josh-swing.webp" x="20.9" y="149.7" width="257.3" height="406.2"/>
     </svg>
   </button>
   <script src="mascot.js?v=1" defer></script>
-  <script src="swing.js?v=1" defer></script>
+  <script src="swing.js?v=2" defer></script>
   <script src="/analytics.js" defer></script>
 </body>
 </html>
