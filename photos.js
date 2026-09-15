@@ -31,10 +31,9 @@
     { src: 'photos/4570.webp', w: 1189, h: 791,  alt: 'A photo booth picture of two people laughing together.' }
   ];
 
-  var slot, button, img, hint;
+  var slot, button, img;
   var current = 0;
   var queue = [];
-  var seen = 1;
 
   function slotHeight(shot) {
     var maxW = Math.min(MAX_W, window.innerWidth - GUTTER);
@@ -56,7 +55,6 @@
       var t = rest[j]; rest[j] = rest[k]; rest[k] = t;
     }
     queue = rest;
-    seen = 0;
   }
 
   function preload(i) {
@@ -68,13 +66,11 @@
   function show(i) {
     var shot = SHOTS[i];
     current = i;
-    seen++;
     img.src = shot.src;
     img.alt = shot.alt;
     img.width = shot.w;
     img.height = shot.h;
     setHeight();
-    if (hint) hint.textContent = seen + ' / ' + SHOTS.length + ' · shuffle';
     preload(queue[0]);
   }
 
@@ -87,13 +83,10 @@
     slot = document.querySelector('.shots');
     button = document.querySelector('.shot');
     img = document.querySelector('.photo');
-    hint = document.querySelector('.shot-hint');
     if (!slot || !button || !img) return;
 
     refill();
-    seen = 1;
     setHeight();
-    if (hint) hint.textContent = '1 / ' + SHOTS.length + ' · shuffle';
     preload(queue[0]);
 
     button.addEventListener('click', next);
