@@ -232,9 +232,14 @@
     .photo { margin-top: 28px; }
     .mascot { margin-bottom: 12px; }
     .mascot button { width: 92px !important; height: 92px !important; }
-    /* on a phone the text column fills the screen, so the swing would sit on
-       top of the prose rather than beside it */
-    .swing { display: none; }
+    /* On a phone there is very little clear height above the prose, so the
+       pivot is lifted above the screen: more rope falls off-frame and the
+       rider can stay a usable size in the room that is left. */
+    .swing {
+      top: -56px;
+      right: clamp(44px, 16vw, 72px);
+      width: clamp(80px, 26vw, 112px);
+    }
   }
 </style>
 </head>
