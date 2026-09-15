@@ -119,14 +119,76 @@
   }
   .social a:hover { color: var(--accent); }
 
+  /* --- Photo shuffle ------------------------------------------------------
+     Click the photo for another. The set mixes landscape and portrait, and at
+     this width a portrait shot stands about 190px taller than a landscape one,
+     so the slot's height is set from the aspect ratio of whichever photo is
+     showing and eased between them. Without that the footer below jumps by
+     that much on every click. photos.js sets the height; with no JavaScript
+     the slot simply hugs the image as it always did. */
+  .shots {
+    margin: 40px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: height 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shot {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .shot:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 6px;
+    border-radius: 6px;
+  }
+
   .photo {
     display: block;
-    width: 100%;
-    max-width: 380px;
+    width: auto;
     height: auto;
-    margin: 40px auto 0;
+    max-width: min(380px, calc(100vw - 40px));
+    max-height: min(440px, 48vh);
     border-radius: 4px;
     border: 1px solid rgba(29, 28, 24, 0.08);
+  }
+
+  /* Reserved space, so revealing it cannot shift the footer either. */
+  .shot-hint {
+    height: 13px;
+    margin: 10px 0 0;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--faint);
+    opacity: 0;
+    transition: opacity 220ms ease;
+    pointer-events: none;
+  }
+
+  .shots:hover + .shot-hint,
+  .shots:focus-within + .shot-hint {
+    opacity: 1;
+  }
+
+  /* nothing hovers on a touch screen, so say it outright there */
+  @media (hover: none) {
+    .shot-hint { opacity: 0.85; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shots,
+    .shot-hint { transition: none; }
   }
 
   .mascot {
@@ -143,7 +205,7 @@
     body { padding: 32px 20px; }
     .prose { font-size: 19px; text-align: left; }
     .dropcap { font-size: 70px; }
-    .photo { margin-top: 28px; }
+    .shots { margin-top: 28px; }
     .mascot { margin-bottom: 12px; }
     .mascot button { width: 92px !important; height: 92px !important; }
   }
@@ -169,8 +231,13 @@
       Feel free to reach out.
     </p>
 
-    <img class="photo" src="friends.jpg" width="1280" height="831" loading="lazy"
-         alt="Three friends walking down a New York City street at night, seen from behind, wearing backpacks.">
+    <div class="shots">
+      <button class="shot" type="button" aria-label="Show another photo">
+        <img class="photo" src="friends.jpg" width="1280" height="831" loading="lazy"
+             alt="Three friends walking down a New York City street at night, seen from behind, wearing backpacks.">
+      </button>
+    </div>
+    <p class="shot-hint" aria-hidden="true">1 / 10 &middot; shuffle</p>
 
     <footer class="footer">
       <a class="email" href="mailto:joshuahou17@gmail.com">joshuahou17 [at] gmail [dot] com</a>
@@ -183,6 +250,7 @@
   </main>
 
   <script src="mascot.js?v=1" defer></script>
+  <script src="photos.js?v=1" defer></script>
   <script src="/analytics.js" defer></script>
 </body>
 </html>
