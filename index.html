@@ -161,34 +161,8 @@
     border: 1px solid rgba(29, 28, 24, 0.08);
   }
 
-  /* Reserved space, so revealing it cannot shift the footer either. */
-  .shot-hint {
-    height: 13px;
-    margin: 10px 0 0;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--faint);
-    opacity: 0;
-    transition: opacity 220ms ease;
-    pointer-events: none;
-  }
-
-  .shots:hover + .shot-hint,
-  .shots:focus-within + .shot-hint {
-    opacity: 1;
-  }
-
-  /* nothing hovers on a touch screen, so say it outright there */
-  @media (hover: none) {
-    .shot-hint { opacity: 0.85; }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .shots,
-    .shot-hint { transition: none; }
+    .shots { transition: none; }
   }
 
   .mascot {
@@ -237,7 +211,6 @@
              alt="Three friends walking down a New York City street at night, seen from behind, wearing backpacks.">
       </button>
     </div>
-    <p class="shot-hint" aria-hidden="true">1 / 10 &middot; shuffle</p>
 
     <footer class="footer">
       <a class="email" href="mailto:joshuahou17@gmail.com">joshuahou17 [at] gmail [dot] com</a>
@@ -250,7 +223,7 @@
   </main>
 
   <script src="mascot.js?v=1" defer></script>
-  <script src="photos.js?v=1" defer></script>
+  <script src="photos.js?v=2" defer></script>
   <script src="/analytics.js" defer></script>
 </body>
 </html>
