@@ -10,7 +10,8 @@
  * with its origin at 0,0, and zooming about a screen point keeps the world point
  * under it fixed.
  *
- * Taps are detected by hand (pointerdown + pointerup with under 6px of travel and
+ * Dragging a postcard moves it (and it stays put for this browser); dragging
+ * the empty desk pans. Taps are detected by hand (pointerdown + pointerup with under 6px of travel and
  * only ever one finger) rather than with click, so ending a drag or a pinch on a
  * card never opens it.
  */
@@ -67,19 +68,47 @@
     var cellW = CW * 1.18, cellH = CH * 1.3;
     var rand = rng(SEED);
 
+    var saved = loadSpots();
     placed.forEach(function (p) { world.removeChild(p.el); });
     placed = [];
     for (var i = 0; i < n; i++) {
       var c = i % cols, r = Math.floor(i / cols);
-      var x = (c - (cols - 1) / 2) * cellW - CW / 2 + (rand() - 0.5) * CW * 0.16;
+      var inRow = Math.min(cols, n - r * cols);      // centre a short last row
+      var x = (c - (inRow - 1) / 2) * cellW - CW / 2 + (rand() - 0.5) * CW * 0.16;
       var y = (r - (rows - 1) / 2) * cellH - CH / 2 + (rand() - 0.5) * CH * 0.16;
       // alternate the lean so neighbours don't tilt the same way
       var rot = (i % 2 ? 1 : -1) * (2.5 + rand() * 3.5);
+      // wherever this visitor last dropped it, if they moved it
+      var spot = saved[CARDS[i].title];
+      if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
       var el = makeCard(i, x, y, rot);
       world.appendChild(el);
-      placed.push({ el: el, x: x, y: y, rot: rot, card: i });
+      placed.push({ el: el, x: x, y: y, rot: rot, card: i, moved: !!spot });
     }
   }
+
+  /* Dragged postcards stay where they're dropped, per browser. Keyed by title so
+   * adding or reordering postcards doesn't shuffle anyone's arrangement. Storage
+   * can throw (private mode, blocked site data); the page just forgets then. */
+  var SPOTS_KEY = 'joyshua-spots';
+
+  function loadSpots() {
+    try { return JSON.parse(localStorage.getItem(SPOTS_KEY)) || {}; } catch (err) { return {}; }
+  }
+
+  function saveSpots() {
+    var out = {};
+    placed.forEach(function (p) { if (p.moved) out[CARDS[p.card].title] = { x: Math.round(p.x), y: Math.round(p.y) }; });
+    var old = loadSpots();
+    for (var k in old) if (!(k in out) && CARDS.some(function (c) { return c.title === k; })) out[k] = old[k];
+    try { localStorage.setItem(SPOTS_KEY, JSON.stringify(out)); } catch (err) { /* ignore */ }
+  }
+
+  function placeCard(p) {
+    p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rot.toFixed(2) + 'deg)';
+  }
+
+  var zTop = 1;
 
   function makeCard(i, x, y, rot) {
     var c = CARDS[i];
@@ -238,6 +267,7 @@
       last = { t: e.timeStamp };
     } else {
       // a second finger: this is a pinch now, and never a tap
+      dropCard();
       press = null;
       var m = midpoint();
       pinch = { dist: m.dist, mx: m.x, my: m.y };
@@ -267,6 +297,20 @@
       press.moved = true;
       stage.classList.add('dragging');
       dismissHint();
+      // a press that started on a postcard picks the postcard up instead of
+      // panning the desk; it comes to the top of the pile
+      if (press.card) {
+        press.held = placed[+press.card.dataset.card];
+        press.held.el.classList.add('held');
+        press.held.el.style.zIndex = ++zTop;
+      }
+    }
+    if (press.held) {
+      press.held.x += dx / cam.z;
+      press.held.y += dy / cam.z;
+      press.held.moved = true;
+      placeCard(press.held);
+      return;
     }
     if (press.moved) {
       cam.x -= dx / cam.z; cam.y -= dy / cam.z;
@@ -277,6 +321,13 @@
       last = { t: e.timeStamp };
       kick();
     }
+  }
+
+  function dropCard() {
+    if (!press || !press.held) return;
+    press.held.el.classList.remove('held');
+    saveSpots();
+    render();
   }
 
   function onUp(e) {
@@ -297,9 +348,11 @@
     }
 
     var p = press;
+    dropCard();
     press = null;
     stage.classList.remove('dragging');
     if (!p || p.id !== e.pointerId) return;
+    if (p.held) return;
     if (!p.moved) {
       vel.x = vel.y = 0;
       if (p.card && e.type === 'pointerup') openCard(p.card);
@@ -359,7 +412,8 @@
   // ---------- the viewer ----------
 
   var viewer, vCard, vPhoto, vImg, vTitle, vCount, vPrev, vNext, vClose, vBanner, recenter;
-  var openState = null;       // {ci, i, btn}
+  var vGridBtn, vSheet, vSheetTitle, vSheetGrid;
+  var openState = null;       // {ci, i, btn, grid}
   var swipe = null;
 
   /* Scrapbook banners. The style is picked by the photo's position, so no two
@@ -438,9 +492,9 @@
   // The transform that makes the (centred, upright) viewer card sit exactly where
   // the postcard is on the desk, tilted like it -- the start of the open animation
   // and the end of the close one.
-  function fromCardTransform(btn) {
+  function fromCardTransform(btn, panel) {
     var r = btn.getBoundingClientRect();              // axis-aligned box of the tilted card
-    var f = vCard.getBoundingClientRect();
+    var f = panel.getBoundingClientRect();
     var dx = (r.left + r.width / 2) - (f.left + f.width / 2);
     var dy = (r.top + r.height / 2) - (f.top + f.height / 2);
     var s = CW * cam.z / f.width;
@@ -453,8 +507,9 @@
     if (openState) return;
     stop();
     var ci = +btn.dataset.card;
-    openState = { ci: ci, i: 0, btn: btn };
+    openState = { ci: ci, i: 0, btn: btn, grid: false };
     vTitle.textContent = CARDS[ci].title;
+    setGrid(false);
     viewer.hidden = false;
     showPhoto(0, true);
     btn.style.visibility = 'hidden';
@@ -462,7 +517,7 @@
     viewer.classList.add('open');
     if (!reduced && vCard.animate) {
       vCard.animate(
-        [{ transform: fromCardTransform(btn), opacity: 0.4 }, { transform: 'none', opacity: 1 }],
+        [{ transform: fromCardTransform(btn, vCard), opacity: 0.4 }, { transform: 'none', opacity: 1 }],
         { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' }
       );
     }
@@ -474,31 +529,82 @@
     var st = openState;
     st.closing = true;
     viewer.classList.remove('open');
+    var panel = st.grid ? vSheet : vCard;
     function done() {
       viewer.hidden = true;
+      setGrid(false);
       st.btn.style.visibility = '';
       openState = null;
       vImg.removeAttribute('src');
       st.btn.focus({ preventScroll: true });
     }
-    if (!reduced && vCard.animate) {
-      var a = vCard.animate(
-        [{ transform: 'none', opacity: 1 }, { transform: fromCardTransform(st.btn), opacity: 0.4 }],
+    if (!reduced && panel.animate) {
+      var a = panel.animate(
+        [{ transform: 'none', opacity: 1 }, { transform: fromCardTransform(st.btn, panel), opacity: 0.4 }],
         { duration: 340, easing: 'cubic-bezier(.5,0,.75,.3)', fill: 'forwards' }
       );
       a.onfinish = function () { done(); a.cancel(); };
     } else done();
   }
 
-  function step(d) { if (openState) showPhoto(openState.i + d); }
+  function step(d) { if (openState && !openState.grid) showPhoto(openState.i + d); }
+
+  /* The contact sheet: every photo of this postcard at once, four across. Tap
+   * one to go straight to it. Thumbnails are 360px squares made for this, so a
+   * 27-photo sheet costs about 400KB, not the full-size set. */
+  function buildSheet() {
+    var c = CARDS[openState.ci];
+    vSheetTitle.textContent = c.title + ' \u00b7 ' + c.photos.length + (c.photos.length === 1 ? ' photo' : ' photos');
+    vSheetGrid.textContent = '';
+    c.photos.forEach(function (p, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sheet-thumb';
+      b.dataset.i = i;
+      b.setAttribute('aria-label', 'Photo ' + (i + 1) + (p.label ? ': ' + p.label : ''));
+      var img = document.createElement('img');
+      img.src = p.thumb || p.src;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.draggable = false;
+      b.appendChild(img);
+      vSheetGrid.appendChild(b);
+    });
+  }
+
+  function setGrid(on) {
+    if (openState) openState.grid = on;
+    viewer.classList.toggle('grid', on);
+    vCard.hidden = on;
+    vSheet.hidden = !on;
+    vGridBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    vGridBtn.setAttribute('aria-label', on ? 'Back to one photo' : 'See all photos');
+    if (!openState) return;
+    if (on) {
+      buildSheet();
+      var cur = vSheetGrid.children[openState.i];
+      vSheet.scrollTop = 0;
+      if (cur) {
+        cur.classList.add('current');
+        cur.scrollIntoView({ block: 'nearest' });
+        cur.focus({ preventScroll: true });
+      }
+    } else {
+      showPhoto(openState.i, true);
+    }
+  }
 
   function viewerKey(e) {
     if (e.key === 'Escape') { e.preventDefault(); closeViewer(); }
+    else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); setGrid(!openState.grid); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     else if (e.key === 'Tab') {
       // keep focus inside the dialog
-      var f = [vPrev, vNext, vClose].filter(function (b) { return !b.disabled; });
+      var f = Array.prototype.filter.call(viewer.querySelectorAll('button'), function (b) {
+        return !b.disabled && b.offsetParent !== null;
+      });
       var i = f.indexOf(document.activeElement);
       e.preventDefault();
       f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
@@ -530,6 +636,10 @@
     vNext = document.getElementById('viewer-next');
     vBanner = document.getElementById('viewer-banner');
     vClose = viewer.querySelector('.viewer-close');
+    vGridBtn = document.getElementById('viewer-grid');
+    vSheet = document.getElementById('viewer-sheet');
+    vSheetTitle = document.getElementById('sheet-title');
+    vSheetGrid = document.getElementById('sheet-grid');
     recenter = document.getElementById('zoom-fit');
 
     layout();
@@ -559,6 +669,14 @@
       if (e.target.closest('[data-close]')) closeViewer();
     });
     vPrev.addEventListener('click', function () { step(-1); });
+    vGridBtn.addEventListener('click', function () { if (openState) setGrid(!openState.grid); });
+    vSheetGrid.addEventListener('click', function (e) {
+      var t = e.target.closest('.sheet-thumb');
+      if (!t || !openState) return;
+      openState.i = +t.dataset.i;
+      setGrid(false);
+      vGridBtn.focus({ preventScroll: true });
+    });
     vNext.addEventListener('click', function () { step(1); });
     vCard.addEventListener('pointerdown', onSwipeDown);
     vCard.addEventListener('pointerup', onSwipeUp);
