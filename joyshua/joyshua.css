@@ -1,0 +1,437 @@
+/* /joyshua -- postcards on an endless desk you can drag and zoom.
+   Standalone: shares nothing with the homepage's styles. */
+
+:root {
+  --desk: #ece4d3;
+  --desk-dot: #d2c5ab;
+  --card: #fbf6ea;
+  --card-edge: #e6dcc6;
+  --ink: #2b2620;
+  --pen: #27407a;          /* handwriting: blue ballpoint */
+  --muted: #8a8070;
+  --scrim: rgba(38, 30, 20, 0.62);
+
+  /* Card size. canvas.js sets these from the same numbers it lays out with. */
+  --cw: 420px;
+  --ch: 266px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font-family: 'Space Mono', ui-monospace, monospace;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- the desk ---------- */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  /* dot grid; canvas.js sets its size and position from the camera, so it
+     slides and scales with the desk and never runs out */
+  background-image: radial-gradient(var(--desk-dot) 1.3px, transparent 1.7px);
+  background-size: 28px 28px;
+}
+.stage.dragging { cursor: grabbing; }
+
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ---------- a postcard ---------- */
+
+.card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cw);
+  height: var(--ch);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: inherit;
+  -webkit-user-drag: none;
+}
+.card:hover, .card:focus-visible { z-index: 2; }
+.card:focus-visible { outline: none; }
+
+.card-body {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--card);
+  box-shadow:
+    0 1px 1px rgba(60, 45, 25, 0.12),
+    0 10px 22px -6px rgba(60, 45, 25, 0.30);
+  transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease;
+  pointer-events: none;   /* the button is the hit target, never its insides */
+}
+.card-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card:hover .card-body,
+.card:focus-visible .card-body {
+  transform: translateY(-8px) scale(1.025);
+  box-shadow:
+    0 2px 2px rgba(60, 45, 25, 0.10),
+    0 26px 40px -12px rgba(60, 45, 25, 0.42);
+}
+.card:focus-visible .card-body { outline: 3px solid var(--pen); outline-offset: 5px; }
+.stage.dragging .card .card-body { transform: none; }
+
+/* ---------- the label + zoom controls ---------- */
+
+.mast {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: 16px;
+  pointer-events: none;
+  z-index: 5;
+  /* a paper label taped to the desk, so it stays legible over any card */
+  padding: 8px 16px 9px 14px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 2px;
+  box-shadow: 0 6px 16px -6px rgba(60, 45, 25, 0.35);
+  transform: rotate(-2deg);
+}
+.mast-title {
+  margin: 0;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--pen);
+}
+.mast-hint {
+  margin: 4px 0 0 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: opacity 0.8s ease;
+}
+.mast-hint.gone { opacity: 0; }
+
+.zoom {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px -6px rgba(60, 45, 25, 0.35);
+}
+.zoom-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  font: 400 20px/1 'Space Mono', monospace;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.zoom-btn:hover { background: rgba(60, 45, 25, 0.08); }
+.zoom-btn:focus-visible { outline: 2px solid var(--pen); outline-offset: 1px; }
+/* when you've wandered off and no postcard is on screen, the way home lights up */
+#zoom-fit.lost { background: var(--pen); color: #fff; animation: nudge 1.6s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: scale(1.12); } }
+
+/* ---------- the viewer ---------- */
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+}
+.viewer[hidden] { display: none; }
+
+.viewer-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.viewer.open .viewer-scrim { opacity: 1; }
+
+.viewer-card {
+  position: relative;
+  margin: 0;
+  padding: 18px 18px 0;
+  background: var(--card);
+  border-radius: 3px;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.55);
+  transform-origin: 50% 50%;
+  touch-action: pan-y;
+}
+
+.viewer-photo {
+  position: relative;
+  background: #e3d9c4;
+  overflow: hidden;
+  transition: width 0.35s cubic-bezier(.2,.8,.2,1), height 0.35s cubic-bezier(.2,.8,.2,1);
+  cursor: pointer;
+}
+.viewer-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.viewer-photo img.loaded { opacity: 1; }
+
+.viewer-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 2px 12px;
+}
+.viewer-title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--pen);
+}
+.viewer-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.viewer-btn {
+  position: absolute;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(251, 246, 234, 0.92);
+  color: var(--ink);
+  font: 400 20px/1 'Space Mono', monospace;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.15s ease;
+}
+.viewer.open .viewer-btn { opacity: 1; }
+.viewer-btn:hover { transform: scale(1.07); }
+.viewer-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.viewer-btn[disabled] { visibility: hidden; }
+.viewer-prev { left: max(18px, env(safe-area-inset-left)); top: 50%; margin-top: -23px; }
+.viewer-next { right: max(18px, env(safe-area-inset-right)); top: 50%; margin-top: -23px; }
+.viewer-close { right: max(18px, env(safe-area-inset-right)); top: max(18px, env(safe-area-inset-top)); font-size: 26px; }
+
+/* ---------- scrapbook banners ----------
+   .banner places it on the photo and "sticks it on"; the inner span is the
+   paper, tape or sticker itself. Split that way because clip-path would also
+   clip the drop shadow if they were one element. Placement uses the individual
+   `translate` / `rotate` properties so the stick-on animation can own `scale`. */
+
+.banner {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  white-space: nowrap;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
+  animation: stick 0.5s cubic-bezier(.2, 1.5, .4, 1) 0.12s both;
+}
+.banner[hidden] { display: none; }
+.banner > span { display: inline-block; }
+@keyframes stick {
+  from { opacity: 0; scale: 1.3; }
+  to   { opacity: 1; scale: 1; }
+}
+
+/* 1. washi tape across the top edge */
+.banner--tape { top: 2px; left: 50%; translate: -50% 0; rotate: -3deg; }
+.banner--tape > span {
+  padding: 7px 30px 8px;
+  font: 700 26px/1 'Caveat', cursive;
+  color: #4a2f35;
+  background: repeating-linear-gradient(45deg, rgba(244, 178, 192, 0.9) 0 9px, rgba(252, 220, 227, 0.9) 9px 18px);
+  clip-path: polygon(0 0, 100% 0, 97% 16%, 100% 33%, 97% 50%, 100% 66%, 97% 83%, 100% 100%, 0 100%, 3% 83%, 0 66%, 3% 50%, 0 33%, 3% 16%);
+}
+.banner--tape.banner--alt > span {
+  color: #1f4038;
+  background: repeating-linear-gradient(-45deg, rgba(160, 214, 190, 0.9) 0 9px, rgba(214, 238, 226, 0.9) 9px 18px);
+}
+
+/* 2. a strip torn from a typed page, low on the left */
+.banner--torn { bottom: 70px; left: -14px; rotate: -4deg; }
+.banner--torn > span {
+  padding: 12px 22px 13px;
+  font: 400 18px/1 'Special Elite', 'Courier New', monospace;
+  color: #222;
+  background: #fdfbf5;
+  clip-path: polygon(0 8%, 6% 0, 12% 7%, 19% 1%, 27% 8%, 34% 2%, 42% 9%, 50% 1%, 58% 7%, 65% 0, 73% 8%, 81% 2%, 88% 9%, 95% 1%, 100% 6%,
+                     100% 94%, 94% 100%, 87% 92%, 80% 99%, 72% 91%, 64% 100%, 56% 93%, 48% 100%, 40% 92%, 32% 99%, 24% 91%, 16% 100%, 8% 93%, 0 98%);
+}
+.banner--torn.banner--alt > span { background: #d9c29d; color: #3a2a14; }
+
+/* 3. a notched ribbon over the top-left corner */
+.banner--ribbon { top: 26px; left: -20px; rotate: -6deg; }
+.banner--ribbon > span {
+  padding: 9px 34px 10px;
+  font: 400 21px/1 'Abril Fatface', Georgia, serif;
+  letter-spacing: 0.03em;
+  color: #fff5e6;
+  background: linear-gradient(#cf4545, #b23232);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 50%, 100% 100%, 0 100%, 16px 50%);
+}
+.banner--ribbon.banner--alt > span { background: linear-gradient(#34508f, #243a6d); }
+
+/* 4. label-maker tape, embossed capitals */
+.banner--labelmaker { top: 34px; right: -12px; rotate: 4deg; }
+.banner--labelmaker > span {
+  padding: 7px 14px 6px;
+  font: 700 15px/1 'Space Mono', monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f2f2f2;
+  background: #161616;
+  border-radius: 2px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28), 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+.banner--labelmaker.banner--alt > span { background: #b3202c; }
+
+/* 5. an admit-one ticket, bottom right */
+.banner--ticket { bottom: 74px; right: -18px; rotate: 5deg; }
+.banner--ticket > span {
+  padding: 11px 26px 10px;
+  font: 700 14px/1 'Space Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5a3b12;
+  background: #f3d27a;
+  border-radius: 3px;
+  outline: 1.5px dashed rgba(90, 59, 18, 0.45);
+  outline-offset: -6px;
+  /* the two half-moon notches of a ticket stub */
+  -webkit-mask:
+    radial-gradient(circle at 0 50%, transparent 8px, #000 8.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 8px, #000 8.5px) right / 51% 100% no-repeat;
+          mask:
+    radial-gradient(circle at 0 50%, transparent 8px, #000 8.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 8px, #000 8.5px) right / 51% 100% no-repeat;
+}
+.banner--ticket > span::before { content: '\2605\00a0'; }
+.banner--ticket.banner--alt > span { background: #bfe0e8; color: #17414d; outline-color: rgba(23, 65, 77, 0.45); }
+
+/* 6. a sticky note stuck on the top-left corner with a bit of tape */
+.banner--sticky { top: -16px; left: -18px; rotate: -7deg; }
+.banner--sticky > span {
+  position: relative;
+  max-width: 150px;
+  padding: 18px 16px 20px;
+  white-space: normal;
+  font: 700 25px/0.95 'Caveat', cursive;
+  color: #2b2620;
+  background: linear-gradient(170deg, #fff38a 0%, #fbe96a 70%, #f2dc55 100%);
+}
+.banner--sticky > span::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 54px;
+  height: 18px;
+  margin-left: -27px;
+  background: rgba(255, 255, 255, 0.55);
+  rotate: 4deg;
+}
+.banner--sticky.banner--alt > span { background: linear-gradient(170deg, #ffd0dd 0%, #ffbdd0 70%, #f6aac2 100%); }
+
+/* 7. ransom-note letters cut from magazines, bottom centre */
+.banner--clipping { bottom: 70px; left: 50%; translate: -50% 0; rotate: 2deg; }
+.banner--clipping .cut {
+  display: inline-block;
+  margin: 0 1px;
+  padding: 2px 4px 3px;
+  font-size: 22px;
+  line-height: 1;
+}
+.banner--clipping .gap { display: inline-block; width: 8px; }
+.cut0 { font-family: 'Abril Fatface', Georgia, serif; background: #fff; color: #111; }
+.cut1 { font-family: 'Special Elite', monospace; background: #111; color: #fff; }
+.cut2 { font-family: 'Caveat', cursive; font-weight: 700; font-size: 26px !important; background: #ffe45c; color: #222; }
+.cut3 { font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; background: #d33b3b; color: #fff; }
+.cut4 { font-family: Georgia, 'Times New Roman', serif; font-style: italic; background: #ece3cc; color: #2b2620; }
+.banner--alt .cut0 { background: #cfe6ff; }
+.banner--alt .cut3 { background: #2f6d5c; }
+
+/* 8. a die-cut vinyl sticker, top right */
+.banner--sticker { top: -14px; right: -14px; rotate: 8deg; }
+.banner--sticker > span {
+  padding: 7px 18px 8px;
+  font: 700 25px/1 'Caveat', cursive;
+  color: #fff;
+  background: #ff8a3d;
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px #fff;
+}
+.banner--sticker.banner--alt > span { background: #2aa198; }
+
+/* ---------- phones ---------- */
+
+@media (max-width: 640px) {
+  .mast-title { font-size: 34px; }
+  .viewer-card { padding: 12px 12px 0; }
+  .viewer-title { font-size: 26px; }
+  /* on a phone you swipe; the arrows move below the card out of the way */
+  .viewer-prev, .viewer-next { top: auto; bottom: max(22px, env(safe-area-inset-bottom)); margin-top: 0; }
+  .viewer-prev { left: calc(50% - 60px); }
+  .viewer-next { right: calc(50% - 60px); }
+  .banner--torn, .banner--ribbon, .banner--sticky { left: -8px; }
+  .banner--labelmaker, .banner--ticket, .banner--sticker { right: -8px; }
+  .banner--torn, .banner--ticket, .banner--clipping { bottom: 62px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-body, .viewer-photo, .viewer-scrim, .viewer-btn, .viewer-photo img { transition: none; }
+  .banner, #zoom-fit.lost { animation: none; }
+}
