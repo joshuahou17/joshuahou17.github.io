@@ -11,9 +11,9 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Caveat:wght@500;700&family=Special+Elite&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="joyshua.css?v=1">
+<link rel="stylesheet" href="joyshua.css?v=2">
 </head>
 <body>
 
@@ -23,12 +23,19 @@
 
 <header class="mast">
   <h1 class="mast-title">joyshua</h1>
-  <p class="mast-hint" id="hint">drag to wander &middot; tap a postcard</p>
+  <p class="mast-hint" id="hint">drag to wander &middot; pinch to zoom &middot; tap a postcard</p>
 </header>
+
+<nav class="zoom" aria-label="Zoom">
+  <button class="zoom-btn" id="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+  <button class="zoom-btn" id="zoom-fit" type="button" aria-label="Back to the postcards">&#8982;</button>
+  <button class="zoom-btn" id="zoom-in" type="button" aria-label="Zoom in">+</button>
+</nav>
 
 <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-title" hidden>
   <div class="viewer-scrim" data-close></div>
   <figure class="viewer-card" id="viewer-card">
+    <div class="banner" id="viewer-banner" aria-hidden="true"></div>
     <div class="viewer-photo" id="viewer-photo">
       <img id="viewer-img" alt="" decoding="async">
     </div>
@@ -42,8 +49,8 @@
   <button class="viewer-btn viewer-close" type="button" aria-label="Close" data-close>&times;</button>
 </div>
 
-<script src="postcards.js?v=1"></script>
-<script src="canvas.js?v=1"></script>
+<script src="postcards.js?v=2"></script>
+<script src="canvas.js?v=2"></script>
 <script src="/analytics.js" defer></script>
 </body>
 </html>
