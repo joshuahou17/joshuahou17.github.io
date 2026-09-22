@@ -1537,9 +1537,17 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transition: opacity 0.22s ease;
 }
 .spill.open .sp-scrim, .spill.open .viewer-btn { opacity: 1; }
+/* closing: the tabs and buttons go at once; the slips fly home (below) */
+.spill:not(.open) .sp-tabs, .spill:not(.open) .sp-adders { opacity: 0; transition: opacity 0.12s ease; }
+.slip.returning { animation: unspill 0.22s cubic-bezier(.25, .6, .4, 1) forwards; pointer-events: none; }   /* moves off at once */
+@keyframes unspill {
+  from { translate: 0 0; scale: 1; opacity: 1; }
+  55%  { opacity: 0.6; }
+  to   { translate: var(--tx) var(--ty); scale: 0.25; opacity: 0; }
+}
 .sp-sheet {
   position: absolute; inset: 0;
   overflow-y: auto;
@@ -1806,5 +1814,6 @@ body { -webkit-touch-callout: none; }
   .kb-env, .rb-env, .rb-box, .card.envelope.in-box { transition: none; }
   .wiggle, .card.wiggle .card-body, .minus { animation: none; }
   .keepsake.gulp .kb-front { animation: none; }
-  .slip, .slip.spilling, .slip.stamping .slip-stamp, .pl-slip { animation: none; transition: none; }
+  .slip, .slip.spilling, .slip.returning, .slip.stamping .slip-stamp, .pl-slip { animation: none; transition: none; }
+  .slip.returning { opacity: 0; }
 }

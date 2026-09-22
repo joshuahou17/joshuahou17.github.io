@@ -287,14 +287,35 @@
     spillFrom(Array.prototype.slice.call(items));
   }
 
-  function close() {
+  /* Putting them back: every slip flies straight back into the pail as the
+   * rest fades, so nothing sits frozen on screen while the backdrop goes.
+   * Focus only returns to the pail from the keyboard -- focusing it from a tap
+   * would make the desk glide over to it whenever it's near an edge. */
+  function close(fromKey) {
     if (!mode) return;
     mode = null;
     if (window.JoyDesk) JoyDesk.hideMinus();
-    root.classList.remove('open');
-    setTimeout(function () { if (!mode) { root.hidden = true; list.textContent = ''; } }, 280);
     var p = pailEl();
-    if (p) p.focus({ preventScroll: true });
+    var src = p && p.querySelector('.pl-slips');
+    var r = src && src.getBoundingClientRect();
+    var slipsNow = list.querySelectorAll('.slip');
+    if (r && r.width && r.bottom > 0 && r.top < window.innerHeight) {
+      var ox = r.left + r.width / 2, oy = r.top + r.height / 2;
+      slipsNow.forEach(function (s, k) {
+        var b = s.getBoundingClientRect();
+        s.style.setProperty('--tx', (ox - (b.left + b.width / 2)).toFixed(0) + 'px');
+        s.style.setProperty('--ty', (oy - (b.top + b.height / 2)).toFixed(0) + 'px');
+        s.style.animationDelay = Math.min(k * 12, 90) + 'ms';
+      });
+    } else {
+      // the pail is off screen: just sink and fade where they are
+      slipsNow.forEach(function (s) { s.style.setProperty('--tx', '0px'); s.style.setProperty('--ty', '30px'); s.style.animationDelay = '0ms'; });
+    }
+    slipsNow.forEach(function (s) { s.classList.remove('spilling'); s.classList.add('returning'); });
+    root.classList.remove('open');
+    setTimeout(function () { if (!mode) { root.hidden = true; list.textContent = ''; } }, 300);
+    if (fromKey && p) p.focus({ preventScroll: true });
+    else if (root.contains(document.activeElement)) document.activeElement.blur();
   }
 
   function build() {
@@ -353,7 +374,7 @@
       if (c && !c.hidden) return;
       e.preventDefault();
       e.stopPropagation();
-      close();
+      close(true);
     }, true);
 
     if (window.JoyStore) JoyStore.ready.then(paint);
