@@ -60,6 +60,16 @@ function int(v: unknown, lo: number, hi: number): number {
   return n;
 }
 
+// When the picture was taken, as the browser read it out of the file. Anything
+// absurd (or missing) is dropped and the upload time stands in.
+function takenAt(v: unknown): string | null {
+  if (typeof v !== "string" || !v) return null;
+  const t = Date.parse(v);
+  if (!isFinite(t)) return null;
+  if (t < Date.parse("1990-01-01") || t > Date.now() + 864e5) return null;
+  return new Date(t).toISOString();
+}
+
 function author(v: unknown): string {
   if (typeof v !== "string" || !AUTHORS.includes(v)) throw new Bad("unknown author");
   return v;
@@ -209,6 +219,7 @@ Deno.serve(async (req) => {
             w: int(p.w, 1, 4000), h: int(p.h, 1, 4000),
             label: text(p.label, 80),
             author: who,
+            taken_at: takenAt(p.taken),
           };
           if (!(await exists(sb, row.path)) || !(await exists(sb, row.thumb_path))) throw new Bad("upload missing");
           rows.push(row);

@@ -78,16 +78,73 @@
     });
   }
 
+  /* When was this picture taken? Re-drawing a photo through a canvas is what
+   * strips its GPS and camera details, so the date has to be read from the file
+   * first -- out of the JPEG's EXIF block if it's there, otherwise from the
+   * file's own timestamp (what iPhones give a photo picked from the camera
+   * roll). Only the date is kept; nothing else from the file follows it. */
+  function takenAt(file) {
+    return file.slice(0, 256 * 1024).arrayBuffer().then(function (buf) {
+      var iso = exifDate(new DataView(buf));
+      if (iso) return iso;
+      return file.lastModified ? new Date(file.lastModified).toISOString() : null;
+    }).catch(function () { return null; });
+  }
+
+  // The smallest possible EXIF reader: find APP1, walk the IFDs, take
+  // DateTimeOriginal (0x9003), or DateTime (0x0132) if that's all there is.
+  function exifDate(v) {
+    try {
+      if (v.getUint16(0) !== 0xffd8) return null;                 // not a JPEG
+      var off = 2, len = v.byteLength;
+      while (off + 4 < len) {
+        if (v.getUint8(off) !== 0xff) return null;
+        var marker = v.getUint8(off + 1), size = v.getUint16(off + 2);
+        if (marker === 0xe1 && v.getUint32(off + 4) === 0x45786966) {   // 'Exif'
+          var tiff = off + 10;
+          var le = v.getUint16(tiff) === 0x4949;
+          var ifd = tiff + v.getUint32(tiff + 4, le);
+          var best = null;
+          for (var pass = 0; pass < 2 && ifd && ifd + 2 < len; pass++) {
+            var count = v.getUint16(ifd, le);
+            var next = 0;
+            for (var i = 0; i < count; i++) {
+              var e = ifd + 2 + i * 12, tag = v.getUint16(e, le);
+              if (tag === 0x8769) next = tiff + v.getUint32(e + 8, le);  // the EXIF sub-IFD
+              if (tag === 0x9003 || (tag === 0x0132 && !best)) {
+                var at = tiff + v.getUint32(e + 8, le), str = '';
+                for (var k = 0; k < 19 && at + k < len; k++) str += String.fromCharCode(v.getUint8(at + k));
+                var m = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(str);
+                if (m) {
+                  var d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+                  if (!isNaN(d)) { if (tag === 0x9003) return d.toISOString(); best = d.toISOString(); }
+                }
+              }
+            }
+            ifd = next;
+          }
+          return best;
+        }
+        if (marker === 0xda) return null;                          // image data: no EXIF
+        off += 2 + size;
+      }
+    } catch (err) { /* not readable: fall back to the file's timestamp */ }
+    return null;
+  }
+
   function prepare(file, max) {
     if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
       return Promise.reject(new Error(file.name + ' isn\u2019t a picture.'));
     }
-    return createImageBitmap(file, { imageOrientation: 'from-image' })
-      .catch(function () { throw new Error('This browser can\u2019t open ' + file.name + '. Try a JPEG or PNG.'); })
-      .then(function (bmp) {
-        return Promise.all([redraw(bmp, max, false), redraw(bmp, 360, true)])
-          .then(function (out) { bmp.close && bmp.close(); return { full: out[0], thumb: out[1] }; });
-      });
+    return Promise.all([
+      createImageBitmap(file, { imageOrientation: 'from-image' })
+        .catch(function () { throw new Error('This browser can\u2019t open ' + file.name + '. Try a JPEG or PNG.'); }),
+      takenAt(file)
+    ]).then(function (both) {
+      var bmp = both[0];
+      return Promise.all([redraw(bmp, max, false), redraw(bmp, 360, true)])
+        .then(function (out) { bmp.close && bmp.close(); return { full: out[0], thumb: out[1], taken: both[1] }; });
+    });
   }
 
   function put(url, blob) {
@@ -117,7 +174,7 @@
         });
         return up.then(function () {
           return res.slots.map(function (slot, i) {
-            return { path: slot.path, thumb: slot.thumb, w: prepared[i].full.w, h: prepared[i].full.h };
+            return { path: slot.path, thumb: slot.thumb, w: prepared[i].full.w, h: prepared[i].full.h, taken: prepared[i].taken };
           });
         });
       });
@@ -193,7 +250,7 @@
         onProgress && onProgress('Saving\u2026');
         return call('add-photos', {
           postcard: postcardKey, author: author,
-          photos: ups.map(function (u, i) { return { path: u.path, thumb: u.thumb, w: u.w, h: u.h, label: labels[i] || '' }; })
+          photos: ups.map(function (u, i) { return { path: u.path, thumb: u.thumb, w: u.w, h: u.h, label: labels[i] || '', taken: u.taken }; })
         });
       }).then(function (r) { added.photos = added.photos.concat(r.photos); return r.photos; });
     },
