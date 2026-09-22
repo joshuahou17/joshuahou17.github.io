@@ -736,7 +736,7 @@
     clearTimeout(shuffleDesk.timer);
     shuffleDesk.timer = setTimeout(function () {
       items.forEach(function (p) { p.el.classList.remove('flying'); p.el.style.transitionDelay = ''; });
-      glideTo(fitCam());
+      glideTo(fitCam(true));
     }, 950 + n * 55);
   }
 
@@ -1082,7 +1082,9 @@
   }
 
   // The camera that fits everything on the desk on screen with room to breathe.
-  function fitCam() {
+  // `whole` fits the lot even on a phone -- after a shuffle you want to see the
+  // whole arrangement, not the usual readable-sized column.
+  function fitCam(whole) {
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     placed.forEach(function (p) {
       if (p.inBox || p.gone) return;
@@ -1091,7 +1093,7 @@
     });
     var vw = window.innerWidth, vh = window.innerHeight;
     var padX = small ? 28 : 120, padY = 150;   // leaves room for the label + controls
-    if (portrait && small) {
+    if (portrait && small && !whole) {
       // A phone stacks the postcards in one column. Fitting them all would make
       // each one stamp-sized, so fit the width instead and start at the top: the
       // next card peeking in at the bottom says "drag up for more".
