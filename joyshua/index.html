@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Caveat:wght@500;700&family=Special+Elite&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="joyshua.css?v=8">
+<link rel="stylesheet" href="joyshua.css?v=9">
 </head>
 <body>
 
@@ -26,6 +26,11 @@
   <h1 class="mast-title">joyshua</h1>
   <p class="mast-hint" id="hint">drag to wander &middot; pinch to zoom &middot; move the postcards &middot; tap one to open</p>
 </header>
+
+<nav class="adders" aria-label="Add to the desk">
+  <button class="adder adder--josh" type="button" data-add="josh"><span aria-hidden="true">+</span> Josh</button>
+  <button class="adder adder--joyce" type="button" data-add="joyce"><span aria-hidden="true">+</span> Joyce</button>
+</nav>
 
 <nav class="zoom" aria-label="Zoom">
   <button class="zoom-btn" id="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
@@ -74,10 +79,11 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="store.js?v=8"></script>
-<script src="postcards.js?v=8"></script>
-<script src="letters.js?v=8"></script>
-<script src="canvas.js?v=8"></script>
+<script src="store.js?v=9"></script>
+<script src="postcards.js?v=9"></script>
+<script src="letters.js?v=9"></script>
+<script src="canvas.js?v=9"></script>
+<script src="compose.js?v=9"></script>
 <script src="/analytics.js" defer></script>
 </body>
 </html>

@@ -37,9 +37,90 @@
       });
   }
 
-  var ready = get('joyshua_state', 'select=key,value')
-    .then(function (rows) { rows.forEach(function (r) { state[r.key] = r.value; }); })
-    .catch(function (err) { if (window.console) console.warn('[joyshua] edits unavailable:', err.message); });
+  var added = { postcards: [], photos: [], letters: [] };   // rows added from the page
+
+  function soft(p) {
+    return p.catch(function (err) { if (window.console) console.warn('[joyshua] couldn\u2019t load:', err.message); return []; });
+  }
+
+  var ready = Promise.all([
+    soft(get('joyshua_state', 'select=key,value')),
+    soft(get('joyshua_postcards', 'select=*&order=created_at')),
+    soft(get('joyshua_photos', 'select=*&order=created_at')),
+    soft(get('joyshua_letters', 'select=*&order=created_at'))
+  ]).then(function (r) {
+    r[0].forEach(function (row) { state[row.key] = row.value; });
+    added.postcards = r[1]; added.photos = r[2]; added.letters = r[3];
+  });
+
+  /* A picture, ready for upload: re-drawn through a canvas at most `max` px on
+   * its long side. Re-encoding is also what strips the metadata -- phones put
+   * GPS in every photo, and none of it survives this. `square` makes a centre
+   * crop instead (the grid's thumbnails). */
+  function redraw(bitmap, max, square) {
+    var w = bitmap.width, h = bitmap.height, sx = 0, sy = 0, sw = w, sh = h;
+    if (square) {
+      var side = Math.min(w, h);
+      sx = (w - side) / 2; sy = (h - side) * 0.4; sw = sh = side;
+      w = h = Math.min(max, side);
+    } else {
+      var k = Math.min(1, max / Math.max(w, h));
+      w = Math.round(w * k); h = Math.round(h * k);
+    }
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var g = c.getContext('2d');
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(bitmap, sx, sy, sw, sh, 0, 0, w, h);
+    return new Promise(function (res, rej) {
+      c.toBlob(function (b) { b ? res({ blob: b, w: w, h: h }) : rej(new Error('Couldn\u2019t read that picture.')); }, 'image/jpeg', square ? 0.8 : 0.86);
+    });
+  }
+
+  function prepare(file, max) {
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
+      return Promise.reject(new Error(file.name + ' isn\u2019t a picture.'));
+    }
+    return createImageBitmap(file, { imageOrientation: 'from-image' })
+      .catch(function () { throw new Error('This browser can\u2019t open ' + file.name + '. Try a JPEG or PNG.'); })
+      .then(function (bmp) {
+        return Promise.all([redraw(bmp, max, false), redraw(bmp, 360, true)])
+          .then(function (out) { bmp.close && bmp.close(); return { full: out[0], thumb: out[1] }; });
+      });
+  }
+
+  function put(url, blob) {
+    return fetch(url, { method: 'PUT', headers: { 'content-type': 'image/jpeg', 'x-upsert': 'false' }, body: blob })
+      .then(function (r) { if (!r.ok) throw new Error('Upload failed (' + r.status + ').'); });
+  }
+
+  // files -> signed slots -> uploaded; resolves to [{path, thumb, w, h}]
+  function upload(files, max, onProgress) {
+    var prepared = [];
+    var chain = Promise.resolve();
+    files.forEach(function (f, i) {
+      chain = chain.then(function () {
+        onProgress && onProgress('Getting photo ' + (i + 1) + ' of ' + files.length + ' ready\u2026');
+        return prepare(f, max).then(function (x) { prepared.push(x); });
+      });
+    });
+    return chain
+      .then(function () { return call('sign-upload', { count: files.length }); })
+      .then(function (res) {
+        var up = Promise.resolve();
+        res.slots.forEach(function (slot, i) {
+          up = up.then(function () {
+            onProgress && onProgress('Uploading ' + (i + 1) + ' of ' + files.length + '\u2026');
+            return put(slot.url, prepared[i].full.blob).then(function () { return put(slot.thumbUrl, prepared[i].thumb.blob); });
+          });
+        });
+        return up.then(function () {
+          return res.slots.map(function (slot, i) {
+            return { path: slot.path, thumb: slot.thumb, w: prepared[i].full.w, h: prepared[i].full.h };
+          });
+        });
+      });
+  }
 
   window.JoyStore = {
     ready: ready,
@@ -62,6 +143,30 @@
         function (res) { state[key] = res.value; return res.value; },
         function (err) { if (before) state[key] = before; else delete state[key]; throw err; }
       );
+    },
+
+    // what's been added from the page (filled once `ready` resolves)
+    added: added,
+
+    addLetter: function (letter) {
+      return call('add-letter', letter).then(function (r) { added.letters.push(r.letter); return r.letter; });
+    },
+
+    addPhotos: function (postcardKey, author, files, labels, onProgress) {
+      return upload(files, 1400, onProgress).then(function (ups) {
+        onProgress && onProgress('Saving\u2026');
+        return call('add-photos', {
+          postcard: postcardKey, author: author,
+          photos: ups.map(function (u, i) { return { path: u.path, thumb: u.thumb, w: u.w, h: u.h, label: labels[i] || '' }; })
+        });
+      }).then(function (r) { added.photos = added.photos.concat(r.photos); return r.photos; });
+    },
+
+    addPostcard: function (title, author, file, onProgress) {
+      return upload([file], 1600, onProgress).then(function (ups) {
+        onProgress && onProgress('Saving\u2026');
+        return call('add-postcard', { title: title, author: author, path: ups[0].path, w: ups[0].w, h: ups[0].h });
+      }).then(function (r) { added.postcards.push(r.postcard); return r.postcard; });
     },
 
     call: call,
