@@ -139,15 +139,6 @@ body {
   line-height: 1;
   color: var(--pen);
 }
-.mast-hint {
-  margin: 4px 0 0 2px;
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  transition: opacity 0.8s ease;
-}
-.mast-hint.gone { opacity: 0; }
 
 .zoom {
   position: fixed;
@@ -631,13 +622,18 @@ body {
   pointer-events: none;
 }
 .env-label {
+  /* written across the middle of the envelope; canvas.js shrinks the type
+     until the whole title fits this area */
   position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: 10%;
-  font: 700 29px/1.02 'Caveat', cursive;
+  inset: 20% 8% 16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font: 700 40px/1.04 'Caveat', cursive;
   color: var(--env-ink);
   text-align: center;
+  overflow-wrap: break-word;
   rotate: -2deg;
   mix-blend-mode: multiply;  /* ink sits in the paper, not on top of it */
 }
@@ -880,10 +876,10 @@ body {
   transition-delay: calc(var(--i) * 25ms);
 }
 .kb-env .env-body { display: block; width: 100%; height: 100%; border-radius: 3px; overflow: hidden; }
-.kb-tab {                       /* index tab with the letter's label */
+.kb-tab {                       /* index tab with the letter's label, all of it */
   position: absolute;
   left: var(--tab); top: -15px;
-  max-width: 56%;
+  max-width: calc(97% - var(--tab));
   padding: 2px 9px 3px;
   border-radius: 4px 4px 0 0;
   background-color: #fff;
@@ -894,7 +890,6 @@ body {
   color: #33302a;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 .author-joyce .kb-tab, .kb-env.author-joyce .kb-tab { background-image: var(--grain), linear-gradient(#f4e9d2, #e8dabb); }
 /* hover: the files part... */
@@ -947,7 +942,8 @@ body {
 }
 .rb-arc.dragging .rb-env { transition: none; }
 .rb-env .env-body { display: block; width: 100%; height: 100%; border-radius: 3px; overflow: hidden; }
-.rb-env .kb-tab { font-size: 18px; top: -19px; left: 8%; max-width: 84%; }
+.kb-env .env-label { display: none; }            /* in the box, the tab says it */
+.rb-env .kb-tab { display: none; }                /* out of it, the envelope does */
 .rb-env.top { filter: drop-shadow(0 16px 20px rgba(0, 0, 0, 0.45)); }
 .rb-env:focus-visible { outline: none; }
 .rb-env:focus-visible .env-body { outline: 3px solid #fff; outline-offset: 3px; }
@@ -965,20 +961,6 @@ body {
 .rb-box .kb-back { top: 0; height: 40%; }
 .rb-box .kb-side { height: 100%; }
 .rb-box .kb-front { height: 100%; }
-.rb-hint {
-  position: absolute;
-  left: 0; right: 0; top: max(22px, env(safe-area-inset-top));
-  margin: 0;
-  text-align: center;
-  font: 700 10.5px/1.3 'Space Mono', monospace;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 250, 240, 0.8);
-  opacity: 0;
-  transition: opacity 0.4s ease 0.3s;
-  pointer-events: none;
-}
-.rainbow.open .rb-hint { opacity: 1; }
 
 /* an envelope that's in the box: gone from the desk */
 .card.envelope.in-box {
@@ -1109,8 +1091,6 @@ body {
   text-transform: uppercase;
   opacity: 0.7;
 }
-.c-hint { display: block; margin-top: 4px; font: 400 11px/1.4 'Space Mono', monospace; opacity: 0.6; }
-.c-hint--block { margin: 10px 0 0; }
 .c-form { display: flex; flex-direction: column; gap: 14px; }
 .c-field { display: flex; flex-direction: column; gap: 6px; }
 .c-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

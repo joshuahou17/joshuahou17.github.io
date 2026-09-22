@@ -114,6 +114,7 @@
     put(makeBox(), bs.x, bs.y + 10, -1.5, 'box', 0, BW, BH, 'keepsake-box');
     boxItem = placed[placed.length - 1];
     renderBox();
+    fitAll(world);
   }
 
   function isBoxed(j) { return !!(window.JoyStore && JoyStore.inBox(letterKey(j))); }
@@ -196,15 +197,16 @@
     b.className = cls + ' author-' + (L.author || 'josh');
     b.dataset.letter = j;
     b.setAttribute('aria-label', 'Read: ' + L.label);
-    b.innerHTML = '<span class="env-body"><span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span></span><span class="kb-tab"></span>';
+    b.innerHTML = '<span class="env-body"><span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span><span class="env-label" data-max="34" data-min="11"></span></span><span class="kb-tab" data-max="15" data-min="8"></span>';
     b.querySelector('.kb-tab').textContent = L.label;
+    b.querySelector('.env-label').textContent = L.label;
     return b;
   }
 
   function renderBox() {
     if (!boxItem) return;
     var el = boxItem.el, inside = boxedItems(), n = inside.length;
-    el.querySelector('.kb-count').textContent = n ? n + (n === 1 ? ' letter' : ' letters') : 'drop letters in';
+    el.querySelector('.kb-count').textContent = n ? n + (n === 1 ? ' letter' : ' letters') : '';
     el.setAttribute('aria-label', 'Keepsake box, ' + (n ? n + (n === 1 ? ' letter' : ' letters') : 'empty') + '. Press to look through them.');
     el.classList.toggle('empty', !n);
 
@@ -226,6 +228,7 @@
       f.style.setProperty('--dim', (0.82 + 0.18 * (n > 1 ? k / (n - 1) : 1)).toFixed(3));
       files.appendChild(f);
     });
+    fitAll(files);
   }
 
   // Mouse hover: the files part a little, ready for one to be lifted.
@@ -244,7 +247,7 @@
 
   function openRainbow() {
     var inside = boxedItems();
-    if (!inside.length) { toast('The box is empty — drag a letter in'); return; }
+    if (!inside.length) return;
     if (rb || letterState || openState) return;
     stop();
     openBox(false);
@@ -262,6 +265,7 @@
     el.hidden = false;
     // start tucked into the box, then rise out one after another
     placeArc(true);
+    fitAll(arc);                    // measurable only once it's showing, at its real size
     void el.offsetWidth;
     el.classList.add('open');
     items.forEach(function (b, k) { b.style.transitionDelay = (k * 45) + 'ms'; });
@@ -436,6 +440,25 @@
     return p;
   }
 
+  /* Envelope labels are written to fit: centred across the envelope, and the
+   * type shrinks until the whole title sits inside its area (wrapping to a
+   * second or third line first). Tabs are one line, shrunk the same way. Sizes
+   * are measured unscaled, so desk zoom doesn't matter; re-run once the
+   * handwriting font has loaded, since the fallback font measures differently. */
+  function fitLabel(el) {
+    if (!el || !el.isConnected) return;
+    var max = +el.dataset.max || 40, min = +el.dataset.min || 11, size = max;
+    el.style.fontSize = size + 'px';
+    while (size > min && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+  }
+
+  function fitAll(root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll('.env-label, .kb-tab'), fitLabel);
+  }
+
   function letterKey(j) { return 'letter:' + (LETTERS[j].key || LETTERS[j].label); }
 
   /* ---------- things added from the page ----------
@@ -493,6 +516,7 @@
       last = putItem(saved, makeEnvelope(j), cx - EW / 2 + k * 40, cy - EH / 2 + k * 30, (k % 2 ? -1 : 1) * 5, 'letter', j, EW, EH, letterKey(j));
       k++;
     });
+    fitAll(world);
     if (last) {
       last.el.style.zIndex = ++zTop;
       last.el.classList.add('arrived');
@@ -567,6 +591,8 @@
     body.innerHTML = '<span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span>';
     var label = document.createElement('span');
     label.className = 'env-label';
+    label.dataset.max = 44;
+    label.dataset.min = 14;
     label.textContent = LETTERS[j].label;
     body.appendChild(label);
     b.appendChild(body);
@@ -1087,7 +1113,6 @@
     vBanner.appendChild(span);
     editing = { src: p.key || p.src, before: before, span: span, count: vCount.textContent };
     viewer.classList.add('editing');
-    vCount.textContent = 'enter to save';
     span.focus();
     var range = document.createRange();
     range.selectNodeContents(span);
@@ -1505,7 +1530,6 @@
     vBanner.addEventListener('pointermove', onBannerMove);
     vBanner.addEventListener('pointerup', onBannerUp);
     vBanner.addEventListener('pointercancel', onBannerUp);
-    vBanner.title = 'Tap to edit \u00b7 drag to move';
     if (window.JoyStore) JoyStore.ready.then(function () { if (openState && !openState.grid && !editing) renderBanner(); });
     vCard.addEventListener('pointerup', onSwipeUp);
     vCard.addEventListener('pointercancel', function () { swipe = null; });
@@ -1529,6 +1553,8 @@
     }, { passive: true });
 
     setTimeout(dismissHint, 9000);
+    // the handwriting face measures differently from its fallback
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitAll(document); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
