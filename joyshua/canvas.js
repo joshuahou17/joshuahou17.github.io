@@ -628,7 +628,7 @@
    * and within it the tilts, gaps, overlaps and sizes all vary, so the desk
    * never looks the same twice. Spots (with tilt and size) are this browser's,
    * like a drag. */
-  var SHAPES = ['scatter', 'pile', 'arc', 'row', 'grid', 'clusters'];
+  var SHAPES = ['scatter', 'pile', 'arc', 'row', 'grid', 'clusters', 'circle'];
   var lastShape = null;
 
   function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
@@ -708,6 +708,23 @@
       for (k = 0; k < n; k++) {
         var col = k % cols, row = Math.floor(k / cols);
         out.push({ x: cx + (col - (cols - 1) / 2) * gw, y: cy + (row - (rows - 1) / 2) * gh, rot: rand(-3, 3), scale: size(0.95, 1.05), z: k + 1 });
+      }
+    } else if (shape === 'circle') {
+      // a ring, each one turned to face outwards, like numbers on a clock face
+      var need = 0;
+      for (k = 0; k < n; k++) need += itemW(items[k]) * 0.62;
+      R = Math.max(360, need / (2 * Math.PI) * 2.1) * rand(0.95, 1.15);
+      var turn = Math.random() * Math.PI * 2;
+      var squashX = tall ? 0.72 : 1.18, squashY = tall ? 1.1 : 0.66;
+      for (k = 0; k < n; k++) {
+        ang = turn + (k / n) * Math.PI * 2;
+        out.push({
+          x: cx + Math.cos(ang) * R * squashX,
+          y: cy + Math.sin(ang) * R * squashY,
+          rot: (ang * 180 / Math.PI + 90) % 360,
+          scale: size(0.88, 1.08),
+          z: k + 1
+        });
       }
     } else if (shape === 'clusters') {
       var groups = Math.min(n, 2 + Math.floor(Math.random() * 2));
