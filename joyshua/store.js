@@ -145,6 +145,18 @@
       );
     },
 
+    // Is this letter in the keepsake box? (`key` is the desk key, 'letter:...')
+    inBox: function (key) { var v = state['box:' + key]; return !!(v && v.in === true); },
+
+    setBox: function (key, on) {
+      var k = 'box:' + key, before = state[k];
+      state[k] = { in: !!on };
+      return call('set-box', { letter: key, in: !!on }).then(
+        function (res) { state[k] = res.value; return res.value; },
+        function (err) { if (before) state[k] = before; else delete state[k]; throw err; }
+      );
+    },
+
     // what's been added from the page (filled once `ready` resolves)
     added: added,
 

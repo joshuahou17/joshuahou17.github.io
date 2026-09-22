@@ -22,6 +22,7 @@
   var LETTERS = window.LETTERS || [];
   if (!CARDS.length) return;
   var EW = 360, EH = 226;     // an envelope on the desk
+  var BW = 300, BH = 210;     // the keepsake box
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -87,14 +88,42 @@
 
     // The envelopes get a row of their own under the postcards (on a phone, they
     // just carry on down the column).
-    var m = LETTERS.length;
-    for (var j = 0; j < m; j++) {
-      var er = rows + (portrait ? j : 0), ec = portrait ? 0 : j, eIn = portrait ? 1 : m;
-      var ex = (ec - (eIn - 1) / 2) * cellW - EW / 2 + (rand() - 0.5) * EW * 0.2;
-      var ey = (er - (rows - 1) / 2) * cellH - EH / 2 + (rand() - 0.5) * EH * 0.16;
-      var erot = (j % 2 ? -1 : 1) * (3 + rand() * 4);
-      put(makeEnvelope(j), ex, ey, erot, 'letter', j, EW, EH, letterKey(j));
+    // The envelopes share a row with the keepsake box (on a phone they all carry
+    // on down the column). Letters already in the box don't take a spot.
+    var m = LETTERS.length, slot = 0;
+    var slots = LETTERS.filter(function (L, j) { return !isBoxed(j); }).length + 1;
+    function spot(w, h) {
+      var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
+      slot++;
+      return {
+        x: (ec - (eIn - 1) / 2) * cellW - w / 2 + (rand() - 0.5) * w * 0.2,
+        y: (er - (rows - 1) / 2) * cellH - h / 2 + (rand() - 0.5) * h * 0.16
+      };
     }
+    for (var j = 0; j < m; j++) {
+      var erot = (j % 2 ? -1 : 1) * (3 + rand() * 4);
+      if (isBoxed(j)) {
+        put(makeEnvelope(j), 0, 0, erot, 'letter', j, EW, EH, letterKey(j));
+        stowed(placed[placed.length - 1], true);
+      } else {
+        var sp = spot(EW, EH);
+        put(makeEnvelope(j), sp.x, sp.y, erot, 'letter', j, EW, EH, letterKey(j));
+      }
+    }
+    var bs = spot(BW, BH);
+    put(makeBox(), bs.x, bs.y + 10, -1.5, 'box', 0, BW, BH, 'keepsake-box');
+    boxItem = placed[placed.length - 1];
+    renderBox();
+  }
+
+  function isBoxed(j) { return !!(window.JoyStore && JoyStore.inBox(letterKey(j))); }
+
+  // In the box, an envelope stays in `placed` (every index stays valid) but is
+  // invisible and ignored until it's taken out again.
+  function stowed(p, on) {
+    p.inBox = on;
+    p.el.classList.toggle('in-box', on);
+    p.el.tabIndex = on ? -1 : 0;
   }
 
   function putItem(saved, el, x, y, rot, kind, idx, w, h, key) {
@@ -107,6 +136,144 @@
     placed.push(p);
     placeCard(p);
     world.appendChild(el);
+    return p;
+  }
+
+  /* ---------- the keepsake box ----------
+   * A lidded kraft box on the desk. Drag an envelope over it and the lid lifts;
+   * let go and it drops in. Hover over it (or tap it, on a phone) and the lid
+   * opens and its letters fan out above it: tap one to read it, or drag it out to
+   * put it back on the desk. What's in the box is saved for everyone. */
+  var boxItem = null, boxTimer = 0;
+
+  function makeBox() {
+    var b = document.createElement('div');
+    b.className = 'card keepsake';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-expanded', 'false');
+    b.innerHTML =
+      '<span class="kb-inside"></span>' +
+      '<span class="kb-peeks"></span>' +
+      '<span class="kb-body"><span class="kb-ribbon"></span><span class="kb-label">our letters</span><span class="kb-count"></span></span>' +
+      '<span class="kb-lid"><span class="kb-ribbon"></span><span class="kb-bow"></span></span>' +
+      '<span class="kb-fan"></span>';
+    b.addEventListener('pointerenter', function (e) {
+      if (e.pointerType !== 'mouse' || pointers.size) return;
+      clearTimeout(boxTimer);
+      boxTimer = setTimeout(function () { openBox(true); }, 90);
+    });
+    b.addEventListener('pointerleave', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      clearTimeout(boxTimer);
+      boxTimer = setTimeout(function () { if (!letterState && !(press && press.fan)) openBox(false); }, 380);
+    });
+    b.addEventListener('keydown', function (e) {
+      if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      openBox(!b.classList.contains('open'));
+      var first = b.querySelector('.kb-env');
+      if (first && b.classList.contains('open')) first.focus({ preventScroll: true });
+    });
+    return b;
+  }
+
+  function boxedItems() {
+    return placed.filter(function (p) { return p.kind === 'letter' && p.inBox; });
+  }
+
+  function renderBox() {
+    if (!boxItem) return;
+    var el = boxItem.el, inside = boxedItems(), n = inside.length;
+    el.querySelector('.kb-count').textContent = n ? n + (n === 1 ? ' letter' : ' letters') : 'drop letters in';
+    el.setAttribute('aria-label', 'Keepsake box, ' + (n ? n + (n === 1 ? ' letter' : ' letters') : 'empty') + '. Open to choose a letter.');
+    el.classList.toggle('empty', !n);
+
+    // tops of envelopes, standing in the box, seen when the lid lifts
+    var peeks = el.querySelector('.kb-peeks');
+    peeks.textContent = '';
+    inside.slice(0, 4).forEach(function (p, k) {
+      var s = document.createElement('span');
+      s.className = 'kb-peek author-' + (LETTERS[p.idx].author || 'josh');
+      s.style.left = (8 + k * 22) + '%';
+      s.style.rotate = ((k % 2 ? 1 : -1) * (2 + k * 1.5)) + 'deg';
+      peeks.appendChild(s);
+    });
+
+    // the fan: every letter, spread in an arc above the box
+    var fan = el.querySelector('.kb-fan');
+    fan.textContent = '';
+    // side by side in a gentle arc: wide enough apart that every label reads,
+    // tighter as the box fills up
+    var gap = n > 1 ? Math.min(200, 820 / (n - 1 + 1)) : 0;
+    inside.forEach(function (p, k) {
+      var L = LETTERS[p.idx];
+      var off = k - (n - 1) / 2;
+      var a = off * Math.min(9, 36 / Math.max(1, n - 1));
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kb-env author-' + (L.author || 'josh');
+      b.dataset.letter = p.idx;
+      b.dataset.rot = a.toFixed(1);
+      b.setAttribute('aria-label', 'Read: ' + L.label);
+      b.style.setProperty('--fx', (off * gap).toFixed(1) + 'px');
+      b.style.setProperty('--fy', (-205 + Math.abs(off) * gap * 0.16).toFixed(1) + 'px');
+      b.style.setProperty('--fr', a.toFixed(1) + 'deg');
+      b.style.setProperty('--i', k);
+      b.innerHTML = '<span class="env-body"><span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span><span class="env-label"></span></span>';
+      b.querySelector('.env-label').textContent = L.label;
+      fan.appendChild(b);
+    });
+  }
+
+  function openBox(on) {
+    if (!boxItem) return;
+    var el = boxItem.el;
+    if (on && !boxedItems().length) on = false;       // nothing to fan out; the hover peek still shows
+    el.classList.toggle('open', on);
+    el.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (on) el.style.zIndex = ++zTop;
+  }
+
+  function overBox(clientX, clientY) {
+    if (!boxItem) return false;
+    var r = boxItem.el.getBoundingClientRect();
+    return clientX > r.left && clientX < r.right && clientY > r.top - 30 && clientY < r.bottom;
+  }
+
+  function putInBox(p) {
+    stowed(p, true);
+    p.moved = false;
+    saveSpots();
+    renderBox();
+    var el = boxItem.el;
+    el.classList.remove('drop-target');
+    el.classList.remove('gulp');
+    void el.offsetWidth;
+    el.classList.add('gulp');                          // the lid bounces shut on it
+    if (window.JoyStore) {
+      JoyStore.setBox(p.key, true).then(
+        function () { toast('in the box'); },
+        function (err) { toast(err.message, true); stowed(p, false); renderBox(); }
+      );
+    }
+  }
+
+  // Lift a letter out of the fan and put it under the finger, mid-drag.
+  function takeOut(fanBtn, clientX, clientY) {
+    var j = +fanBtn.dataset.letter;
+    var p = placed.filter(function (q) { return q.kind === 'letter' && q.idx === j; })[0];
+    if (!p) return null;
+    stowed(p, false);
+    p.x = cam.x + clientX / cam.z - EW / 2;
+    p.y = cam.y + clientY / cam.z - EH / 2;
+    p.moved = true;
+    placeCard(p);
+    openBox(false);
+    renderBox();
+    if (window.JoyStore) {
+      JoyStore.setBox(p.key, false).catch(function (err) { toast(err.message, true); });
+    }
     return p;
   }
 
@@ -179,7 +346,9 @@
   function refreshAdded() {
     var fresh = mergeAdded();
     if (openState && openState.grid) buildSheet();
-    return dropNew(fresh);
+    var last = dropNew(fresh);
+    renderBox();
+    return last;
   }
 
   /* Dragged postcards stay where they're dropped, per browser. Keyed by title so
@@ -249,6 +418,7 @@
   function fitCam() {
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     placed.forEach(function (p) {
+      if (p.inBox) return;
       x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y);
       x1 = Math.max(x1, p.x + p.w); y1 = Math.max(y1, p.y + p.h);
     });
@@ -285,6 +455,7 @@
   function mod(a, b) { return ((a % b) + b) % b; }
 
   function onScreen(p) {
+    if (p.inBox) return false;
     var r = p.el.getBoundingClientRect();
     return r.right > 0 && r.bottom > 0 && r.left < window.innerWidth && r.top < window.innerHeight;
   }
@@ -381,8 +552,11 @@
 
     if (pointers.size === 1) {
       press = { id: e.pointerId, sx: e.clientX, sy: e.clientY, moved: false,
-                card: e.target.closest ? e.target.closest('.card') : null };
+                card: e.target.closest ? e.target.closest('.card') : null,
+                fan: e.target.closest ? e.target.closest('.kb-env') : null };
       last = { t: e.timeStamp };
+      // a tap anywhere else closes an open box (phones have no hover-out)
+      if (boxItem && press.card !== boxItem.el) openBox(false);
     } else {
       // a second finger: this is a pinch now, and never a tap
       dropCard();
@@ -417,8 +591,14 @@
       dismissHint();
       // a press that started on a postcard picks the postcard up instead of
       // panning the desk; it comes to the top of the pile
-      if (press.card) {
+      if (press.fan) {
+        press.held = takeOut(press.fan, e.clientX, e.clientY);
+        press.fan = null;
+      } else if (press.card) {
         press.held = placed[+press.card.dataset.p];
+        if (press.held.kind === 'box') openBox(false);
+      }
+      if (press.held) {
         press.held.el.classList.add('held');
         press.held.el.style.zIndex = ++zTop;
       }
@@ -428,6 +608,10 @@
       press.held.y += dy / cam.z;
       press.held.moved = true;
       placeCard(press.held);
+      if (press.held.kind === 'letter' && boxItem) {
+        press.overBox = overBox(e.clientX, e.clientY);
+        boxItem.el.classList.toggle('drop-target', press.overBox);
+      }
       return;
     }
     if (press.moved) {
@@ -444,7 +628,9 @@
   function dropCard() {
     if (!press || !press.held) return;
     press.held.el.classList.remove('held');
-    saveSpots();
+    if (press.held.kind === 'letter' && press.overBox) putInBox(press.held);
+    else saveSpots();
+    if (boxItem) boxItem.el.classList.remove('drop-target');
     render();
   }
 
@@ -473,7 +659,11 @@
     if (p.held) return;
     if (!p.moved) {
       vel.x = vel.y = 0;
-      if (p.card && e.type === 'pointerup') openItem(p.card);
+      if (e.type !== 'pointerup') return;
+      if (p.fan) openLetter(p.fan);
+      // with a mouse the box is already open from hovering; a click keeps it so
+      else if (p.card && p.card.classList.contains('keepsake') && e.pointerType === 'mouse') openBox(true);
+      else if (p.card) openItem(p.card);
       return;
     }
     // a drag that stopped before letting go shouldn't fling
@@ -499,7 +689,7 @@
   }
 
   function onKey(e) {
-    if (letterState) return letterKey(e);
+    if (letterState) return letterViewKey(e);
     if (openState) return viewerKey(e);
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var step = e.shiftKey ? 480 : 180;
@@ -524,8 +714,10 @@
   // Enter / Space on a focused card. Pointer taps are handled in onUp.
   function onClick(e) {
     if (e.detail !== 0) return;
+    var f = e.target.closest && e.target.closest('.kb-env');
+    if (f) { openLetter(f); return; }
     var b = e.target.closest && e.target.closest('.card');
-    if (b) openItem(b);
+    if (b && !b.classList.contains('keepsake')) openItem(b);
   }
 
   // ---------- the viewer ----------
@@ -773,14 +965,16 @@
     var f = panel.getBoundingClientRect();
     var dx = (r.left + r.width / 2) - (f.left + f.width / 2);
     var dy = (r.top + r.height / 2) - (f.top + f.height / 2);
-    var s = placed[+btn.dataset.p].w * cam.z / f.width;
+    var item = btn.dataset.p != null ? placed[+btn.dataset.p] : null;
+    var s = (item ? item.w : btn.offsetWidth) * cam.z / f.width;
     return 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (+btn.dataset.rot || 0) + 'deg) scale(' + s + ')';
   }
 
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function openItem(btn) {
-    if (btn.classList.contains('envelope')) openLetter(btn);
+    if (btn.classList.contains('keepsake')) openBox(!btn.classList.contains('open'));
+    else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
   }
 
@@ -1009,6 +1203,7 @@
       st.btn.style.visibility = '';
       letterState = null;
       st.btn.focus({ preventScroll: true });
+      if (boxItem && st.btn.closest('.keepsake') && !boxItem.el.matches(':hover')) openBox(false);
     }
     if (!reduced && panel.animate) {
       var a = panel.animate(
@@ -1019,7 +1214,7 @@
     } else done();
   }
 
-  function letterKey(e) {
+  function letterViewKey(e) {
     if (e.key === 'Escape') { e.preventDefault(); closeLetter(); }
     else if (e.key === 'Tab') {
       // only two stops in here: the letter (so it can be scrolled) and close
