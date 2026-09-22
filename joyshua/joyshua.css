@@ -154,6 +154,8 @@ body {
   box-shadow: 0 6px 16px -6px rgba(60, 45, 25, 0.35);
 }
 .zoom-btn {
+  display: inline-grid;
+  place-items: center;
   width: 40px;
   height: 40px;
   border: 0;
@@ -200,7 +202,7 @@ body {
   border-radius: 3px;
   box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.55);
   transform-origin: 50% 50%;
-  touch-action: pan-y;
+  touch-action: none;           /* swipes are ours, never a page scroll */
 }
 
 .viewer-photo {
@@ -742,6 +744,9 @@ body {
   --letter: #f0e7d5;
 }
 
+/* dealt to a new spot by the shuffle */
+.card.flying { transition: transform 0.8s cubic-bezier(.2, 1.15, .35, 1); }
+
 /* something just added, landing on the desk */
 .card.arrived .card-body { animation: land 0.7s cubic-bezier(.2, 1.4, .4, 1); }
 @keyframes land {
@@ -834,15 +839,6 @@ body {
   -webkit-mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
           mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
   filter: drop-shadow(0 2px 1px rgba(40, 25, 10, 0.45));
-}
-.kb-count {
-  position: absolute;
-  left: 0; right: 0; bottom: 8%;
-  text-align: center;
-  font: 700 9.5px/1 'Space Mono', monospace;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(48, 30, 12, 0.6);
 }
 
 /* the files: standing in the box, only their tops showing */
