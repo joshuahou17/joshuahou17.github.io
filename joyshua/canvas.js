@@ -134,8 +134,13 @@
   function putItem(saved, el, x, y, rot, kind, idx, w, h, key) {
     // wherever this visitor last dropped it, if they moved it
     var spot = saved[key];
-    if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; if (isFinite(spot.r)) rot = spot.r; }
-    var p = { el: el, x: x, y: y, rot: rot, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
+    var scale = 1;
+    if (spot && isFinite(spot.x) && isFinite(spot.y)) {
+      x = spot.x; y = spot.y;
+      if (isFinite(spot.r)) rot = spot.r;
+      if (isFinite(spot.s)) scale = Math.max(0.5, Math.min(1.6, spot.s));
+    }
+    var p = { el: el, x: x, y: y, rot: rot, scale: scale, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
     el.dataset.p = placed.length;
     el.dataset.rot = rot.toFixed(2);
     placed.push(p);
@@ -607,28 +612,49 @@
    * dealt into fresh random spots around where you're looking -- one per cell
    * of a loose grid, so nothing lands on anything else -- with fresh tilts, and
    * glides there. Like a drag, the new spots are this browser's. */
+  /* Shuffle: every press picks a different arrangement -- spread out, heaped
+   * up, swept into an arc, lined up, squared off, or in a few tight clusters --
+   * and within it the tilts, gaps, overlaps and sizes all vary, so the desk
+   * never looks the same twice. Spots (with tilt and size) are this browser's,
+   * like a drag. */
+  var SHAPES = ['scatter', 'pile', 'arc', 'row', 'grid', 'clusters'];
+  var lastShape = null;
+
+  function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
+
   function shuffleDesk() {
     if (openState || letterState || rb) return;
     var items = placed.filter(function (p) { return !p.inBox && !p.gone; });
     var n = items.length;
     if (!n) return;
     stop();
-    var cellW = 520, cellH = 380;
-    var cols = portrait ? 2 : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
-    var rows = Math.ceil(n * 1.35 / cols);
-    var cells = [];
-    for (var c = 0; c < cols * rows; c++) cells.push(c);
-    for (var i = cells.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = cells[i]; cells[i] = cells[j]; cells[j] = t; }
+    hideMinus();
+
+    // don't repeat the last arrangement
+    var choices = SHAPES.filter(function (s) { return s !== lastShape; });
+    var shape = choices[Math.floor(Math.random() * choices.length)];
+    lastShape = shape;
+    shuffleDesk.shape = shape;
+    window.__shape = shape;                       // for the tests
+
+    // deal them in a random order, so the same postcard isn't always first
+    var order = items.slice();
+    for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
+
     var cx = cam.x + window.innerWidth / 2 / cam.z, cy = cam.y + window.innerHeight / 2 / cam.z;
-    var x0 = cx - cols * cellW / 2, y0 = cy - rows * cellH / 2;
-    items.forEach(function (p, k) {
-      var cell = cells[k], col = cell % cols, row = Math.floor(cell / cols);
-      p.x = Math.round(x0 + col * cellW + (cellW - p.w) * (0.1 + 0.8 * Math.random()));
-      p.y = Math.round(y0 + row * cellH + (cellH - p.h) * (0.1 + 0.8 * Math.random()));
-      p.rot = (Math.random() - 0.5) * (p.kind === 'box' ? 6 : 14);
-      p.el.dataset.rot = p.rot.toFixed(2);
+    var tall = window.innerHeight > window.innerWidth;
+    var spots = layoutShape(shape, order, cx, cy, tall);
+
+    order.forEach(function (p, k) {
+      var s = spots[k];
+      p.x = Math.round(s.x - itemW(p) / 2);
+      p.y = Math.round(s.y - itemH(p) / 2);
+      p.rot = s.rot;
+      p.scale = s.scale;
       p.moved = true;
-      p.el.style.transitionDelay = (k * 35) + 'ms';
+      p.el.dataset.rot = p.rot.toFixed(2);
+      p.el.style.zIndex = s.z;
+      p.el.style.transitionDelay = (k * rand(25, 55)) + 'ms';
       p.el.classList.add('flying');
       placeCard(p);
     });
@@ -637,7 +663,69 @@
     shuffleDesk.timer = setTimeout(function () {
       items.forEach(function (p) { p.el.classList.remove('flying'); p.el.style.transitionDelay = ''; });
       glideTo(fitCam());
-    }, 900 + n * 35);
+    }, 950 + n * 55);
+  }
+
+  // Each shape returns a centre, tilt, size and stacking order per item.
+  function layoutShape(shape, items, cx, cy, tall) {
+    var n = items.length, out = [];
+    var size = function (lo, hi) { return rand(lo, hi); };
+    var k, ang, R;
+
+    if (shape === 'pile') {
+      var spread = rand(160, 300);
+      for (k = 0; k < n; k++) {
+        ang = Math.random() * Math.PI * 2;
+        var d = Math.pow(Math.random(), 0.6) * spread;
+        out.push({ x: cx + Math.cos(ang) * d * 1.3, y: cy + Math.sin(ang) * d, rot: rand(-22, 22), scale: size(0.85, 1.2), z: k + 1 });
+      }
+    } else if (shape === 'arc') {
+      R = rand(420, 700) * (tall ? 0.8 : 1);
+      var span = rand(1.1, 2.1), start = -span / 2, dip = Math.random() < 0.5 ? 1 : -1;
+      for (k = 0; k < n; k++) {
+        ang = start + span * (n === 1 ? 0.5 : k / (n - 1));
+        out.push({ x: cx + Math.sin(ang) * R, y: cy - dip * (Math.cos(ang) - 0.75) * R * 0.55, rot: dip * ang * 22, scale: size(0.85, 1.15), z: k + 1 });
+      }
+    } else if (shape === 'row') {
+      var gap = rand(260, 460), lift = rand(40, 130);
+      for (k = 0; k < n; k++) {
+        out.push({ x: cx + (k - (n - 1) / 2) * gap, y: cy + Math.sin(k * 1.7) * lift, rot: rand(-12, 12), scale: size(0.8, 1.25), z: k + 1 });
+      }
+    } else if (shape === 'grid') {
+      var cols = tall ? Math.max(1, Math.round(Math.sqrt(n * 0.6))) : Math.ceil(Math.sqrt(n));
+      var rows = Math.ceil(n / cols), gw = rand(470, 540), gh = rand(330, 380);
+      for (k = 0; k < n; k++) {
+        var col = k % cols, row = Math.floor(k / cols);
+        out.push({ x: cx + (col - (cols - 1) / 2) * gw, y: cy + (row - (rows - 1) / 2) * gh, rot: rand(-3, 3), scale: size(0.95, 1.05), z: k + 1 });
+      }
+    } else if (shape === 'clusters') {
+      var groups = Math.min(n, 2 + Math.floor(Math.random() * 2));
+      var centres = [];
+      for (var g = 0; g < groups; g++) {
+        ang = (g / groups) * Math.PI * 2 + Math.random();
+        R = rand(420, 700);
+        centres.push({ x: cx + Math.cos(ang) * R * (tall ? 0.5 : 1), y: cy + Math.sin(ang) * R * (tall ? 1 : 0.55) });
+      }
+      for (k = 0; k < n; k++) {
+        var c = centres[k % groups];
+        out.push({ x: c.x + rand(-170, 170), y: c.y + rand(-140, 140), rot: rand(-16, 16), scale: size(0.85, 1.15), z: k + 1 });
+      }
+    } else {                     // scatter: loose cells, big jitter
+      var sc = tall ? 2 : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
+      var sr = Math.ceil(n * 1.4 / sc), cw = rand(520, 640), ch = rand(380, 460);
+      var cells = [];
+      for (var q = 0; q < sc * sr; q++) cells.push(q);
+      for (var m = cells.length - 1; m > 0; m--) { var r2 = Math.floor(Math.random() * (m + 1)), tt = cells[m]; cells[m] = cells[r2]; cells[r2] = tt; }
+      for (k = 0; k < n; k++) {
+        var cell = cells[k];
+        out.push({
+          x: cx + ((cell % sc) - (sc - 1) / 2) * cw + rand(-cw * 0.22, cw * 0.22),
+          y: cy + (Math.floor(cell / sc) - (sr - 1) / 2) * ch + rand(-ch * 0.22, ch * 0.22),
+          rot: rand(-16, 16), scale: size(0.8, 1.25), z: k + 1
+        });
+      }
+    }
+    return out;
   }
 
   /* ---------- deleting ----------
@@ -692,7 +780,7 @@
     // corner of the box around the tilt
     if (target.dataset.p != null && target.dataset.rot != null) {
       var it = placed[+target.dataset.p], a = (+target.dataset.rot || 0) * Math.PI / 180;
-      var hw = it.w * cam.z / 2, hh = it.h * cam.z / 2;
+      var hw = itemW(it) * cam.z / 2, hh = itemH(it) * cam.z / 2;
       var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       mx = cx + (-hw) * Math.cos(a) - (-hh) * Math.sin(a);
       my = cy + (-hw) * Math.sin(a) + (-hh) * Math.cos(a);
@@ -843,13 +931,19 @@
 
   function saveSpots() {
     var out = {};
-    placed.forEach(function (p) { if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y), r: Math.round(p.rot * 100) / 100 }; });
+    placed.forEach(function (p) {
+      if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y), r: Math.round(p.rot * 100) / 100, s: Math.round((p.scale || 1) * 1000) / 1000 };
+    });
     try { localStorage.setItem(SPOTS_KEY, JSON.stringify(out)); } catch (err) { /* ignore */ }
   }
 
   function placeCard(p) {
-    p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rot.toFixed(2) + 'deg)';
+    p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + p.rot.toFixed(2) + 'deg)' +
+      (p.scale && p.scale !== 1 ? ' scale(' + p.scale.toFixed(3) + ')' : '');
   }
+
+  function itemW(p) { return p.w * (p.scale || 1); }
+  function itemH(p) { return p.h * (p.scale || 1); }
 
   var zTop = 1;
 
@@ -903,7 +997,7 @@
     placed.forEach(function (p) {
       if (p.inBox || p.gone) return;
       x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y);
-      x1 = Math.max(x1, p.x + p.w); y1 = Math.max(y1, p.y + p.h);
+      x1 = Math.max(x1, p.x + itemW(p)); y1 = Math.max(y1, p.y + itemH(p));
     });
     var vw = window.innerWidth, vh = window.innerHeight;
     var padX = small ? 28 : 120, padY = 150;   // leaves room for the label + controls
@@ -1501,7 +1595,7 @@
     var dx = (r.left + r.width / 2) - (f.left + f.width / 2);
     var dy = (r.top + r.height / 2) - (f.top + f.height / 2);
     var item = btn.dataset.p != null ? placed[+btn.dataset.p] : null;
-    var s = (item ? item.w * cam.z : btn.offsetWidth * (btn.dataset.screen ? 1 : cam.z)) / f.width;
+    var s = (item ? itemW(item) * cam.z : btn.offsetWidth * (btn.dataset.screen ? 1 : cam.z)) / f.width;
     return 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (+btn.dataset.rot || 0) + 'deg) scale(' + s + ')';
   }
 
@@ -1890,6 +1984,11 @@
     });
     window.JoyDesk = {
       cards: function () { return CARDS; },
+      // topics.js hangs its own cards off the same press-and-hold + confirm
+      holdMs: HOLD_MS,
+      showMinus: showMinus,
+      hideMinus: hideMinus,
+      confirm: askConfirm,
       refresh: refreshAdded,
       toast: toast,
       // glide to something just added so you can see it land
