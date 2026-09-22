@@ -130,7 +130,7 @@
   function putItem(saved, el, x, y, rot, kind, idx, w, h, key) {
     // wherever this visitor last dropped it, if they moved it
     var spot = saved[key];
-    if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
+    if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; if (isFinite(spot.r)) rot = spot.r; }
     var p = { el: el, x: x, y: y, rot: rot, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
     el.dataset.p = placed.length;
     el.dataset.rot = rot.toFixed(2);
@@ -194,7 +194,7 @@
       '<span class="kb-files"></span>' + SHELL_FRONT +
       '<span class="kb-front">' +
         '<span class="kb-plate"><span class="kb-label">our letters</span></span>' +
-        '<span class="kb-pull"></span><span class="kb-count"></span></span>';
+        '<span class="kb-pull"></span></span>';
     b.addEventListener('pointerenter', function (e) {
       if (e.pointerType !== 'mouse' || pointers.size) return;
       clearTimeout(boxTimer);
@@ -233,7 +233,6 @@
   function renderBox() {
     if (!boxItem) return;
     var el = boxItem.el, inside = boxedItems(), n = inside.length;
-    el.querySelector('.kb-count').textContent = n ? n + (n === 1 ? ' letter' : ' letters') : '';
     el.setAttribute('aria-label', 'Keepsake box, ' + (n ? n + (n === 1 ? ' letter' : ' letters') : 'empty') + '. Press to look through them.');
     el.classList.toggle('empty', !n);
 
@@ -406,11 +405,12 @@
     rb.arc.classList.remove('dragging');
     try { rb.el.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     if (!d.moved) {
-      if (d.env && e.type === 'pointerup') {
+      if (e.type !== 'pointerup') return;
+      if (d.env) {
         // tapping a letter off to the side brings it round first; the top one opens
         if (d.env.classList.contains('top')) openLetter(d.env);
         else { rb.target = rb.items.indexOf(d.env); settleArc(); }
-      }
+      } else closeRainbow();          // a tap on the background: back to the desk
       return;
     }
     var g = arcGeometry(), perLetter = g.R * g.step * Math.PI / 180;
@@ -564,6 +564,43 @@
     return last;
   }
 
+  /* Shuffle: everything on the desk (postcards, loose envelopes, the box) is
+   * dealt into fresh random spots around where you're looking -- one per cell
+   * of a loose grid, so nothing lands on anything else -- with fresh tilts, and
+   * glides there. Like a drag, the new spots are this browser's. */
+  function shuffleDesk() {
+    if (openState || letterState || rb) return;
+    var items = placed.filter(function (p) { return !p.inBox; });
+    var n = items.length;
+    if (!n) return;
+    stop();
+    var cellW = 520, cellH = 380;
+    var cols = portrait ? 2 : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
+    var rows = Math.ceil(n * 1.35 / cols);
+    var cells = [];
+    for (var c = 0; c < cols * rows; c++) cells.push(c);
+    for (var i = cells.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = cells[i]; cells[i] = cells[j]; cells[j] = t; }
+    var cx = cam.x + window.innerWidth / 2 / cam.z, cy = cam.y + window.innerHeight / 2 / cam.z;
+    var x0 = cx - cols * cellW / 2, y0 = cy - rows * cellH / 2;
+    items.forEach(function (p, k) {
+      var cell = cells[k], col = cell % cols, row = Math.floor(cell / cols);
+      p.x = Math.round(x0 + col * cellW + (cellW - p.w) * (0.1 + 0.8 * Math.random()));
+      p.y = Math.round(y0 + row * cellH + (cellH - p.h) * (0.1 + 0.8 * Math.random()));
+      p.rot = (Math.random() - 0.5) * (p.kind === 'box' ? 6 : 14);
+      p.el.dataset.rot = p.rot.toFixed(2);
+      p.moved = true;
+      p.el.style.transitionDelay = (k * 35) + 'ms';
+      p.el.classList.add('flying');
+      placeCard(p);
+    });
+    saveSpots();
+    clearTimeout(shuffleDesk.timer);
+    shuffleDesk.timer = setTimeout(function () {
+      items.forEach(function (p) { p.el.classList.remove('flying'); p.el.style.transitionDelay = ''; });
+      glideTo(fitCam());
+    }, 900 + n * 35);
+  }
+
   /* Dragged postcards stay where they're dropped, per browser. Keyed by title so
    * adding or reordering postcards doesn't shuffle anyone's arrangement. Storage
    * can throw (private mode, blocked site data); the page just forgets then. */
@@ -575,7 +612,7 @@
 
   function saveSpots() {
     var out = {};
-    placed.forEach(function (p) { if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y) }; });
+    placed.forEach(function (p) { if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y), r: Math.round(p.rot * 100) / 100 }; });
     try { localStorage.setItem(SPOTS_KEY, JSON.stringify(out)); } catch (err) { /* ignore */ }
   }
 
@@ -1348,15 +1385,60 @@
     }
   }
 
-  function onSwipeDown(e) { swipe = { id: e.pointerId, x: e.clientX, y: e.clientY }; }
-  function onSwipeUp(e) {
+  /* Swiping between photos: the picture follows the finger (or a mouse drag)
+   * and, let go far enough, slides off and the next one slides in from the
+   * other side. A tap on the photo still turns to the next one. The card has
+   * touch-action: none, so the browser never claims the gesture as a scroll. */
+  function onSwipeDown(e) {
+    if (!openState || openState.grid || editing || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, moved: false, onPhoto: !!e.target.closest('.viewer-photo') };
+    try { vCard.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  }
+
+  function onSwipeMove(e) {
     if (!swipe || e.pointerId !== swipe.id) return;
     var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    if (!swipe.moved) {
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
+      swipe.moved = true;
+      vImg.style.transition = 'none';
+    }
+    swipe.dx = dx;
+    vImg.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 60).toFixed(2) + 'deg)';
+  }
+
+  function slideTo(dir) {
+    var w = openState.box.w;
+    vImg.style.transition = 'transform 0.18s ease-in, opacity 0.18s ease-in';
+    vImg.style.transform = 'translateX(' + (-dir * w) + 'px) rotate(' + (-dir * 4) + 'deg)';
+    vImg.style.opacity = '0';
+    setTimeout(function () {
+      if (!openState) return;
+      step(dir);
+      vImg.style.transition = 'none';
+      vImg.style.transform = 'translateX(' + (dir * w * 0.5) + 'px)';
+      void vImg.offsetWidth;
+      vImg.style.transition = 'transform 0.32s cubic-bezier(.2, .9, .3, 1), opacity 0.25s ease';
+      vImg.style.transform = '';
+      vImg.style.opacity = '';
+    }, 170);
+  }
+
+  function onSwipeUp(e) {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    var sw = swipe;
     swipe = null;
+    try { vCard.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     // the tap that finished editing a banner shouldn't also turn the page
     if (editing || Date.now() - editEndedAt < 450) return;
-    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
-    else if (Math.hypot(dx, dy) < TAP_SLOP && e.target.closest('.viewer-photo')) step(1);
+    var n = CARDS[openState.ci].photos.length;
+    if (sw.moved) {
+      if (e.type === 'pointerup' && Math.abs(sw.dx) > 50 && n > 1) { slideTo(sw.dx < 0 ? 1 : -1); return; }
+      vImg.style.transition = 'transform 0.3s cubic-bezier(.2, 1.3, .4, 1)';
+      vImg.style.transform = '';                     // not far enough: spring back
+      return;
+    }
+    if (e.type === 'pointerup' && sw.onPhoto && n > 1) slideTo(1);
   }
 
   // ---------- the letters ----------
@@ -1559,6 +1641,7 @@
     document.getElementById('zoom-in').addEventListener('click', function () { zoomGlide(1.4); });
     document.getElementById('zoom-out').addEventListener('click', function () { zoomGlide(1 / 1.4); });
     recenter.addEventListener('click', function () { glideTo(fitCam()); });
+    document.getElementById('shuffle').addEventListener('click', shuffleDesk);
 
     viewer.addEventListener('click', function (e) {
       if (e.target.closest('[data-close]')) closeViewer();
@@ -1590,7 +1673,8 @@
     vBanner.addEventListener('pointercancel', onBannerUp);
     if (window.JoyStore) JoyStore.ready.then(function () { if (openState && !openState.grid && !editing) renderBanner(); });
     vCard.addEventListener('pointerup', onSwipeUp);
-    vCard.addEventListener('pointercancel', function () { swipe = null; });
+    vCard.addEventListener('pointermove', onSwipeMove);
+    vCard.addEventListener('pointercancel', onSwipeUp);
 
     var pending = false;
     window.addEventListener('resize', function () {
