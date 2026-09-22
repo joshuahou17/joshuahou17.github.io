@@ -142,7 +142,6 @@
     if (spot && isFinite(spot.x) && isFinite(spot.y)) {
       x = spot.x; y = spot.y;
       if (isFinite(spot.r)) rot = spot.r;
-      if (isFinite(spot.s)) scale = Math.max(0.5, Math.min(1.6, spot.s));
     }
     var p = { el: el, x: x, y: y, rot: rot, scale: scale, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
     el.dataset.p = placed.length;
@@ -683,9 +682,10 @@
    * glides there. Like a drag, the new spots are this browser's. */
   /* Shuffle: every press picks a different arrangement -- spread out, heaped
    * up, swept into an arc, lined up, squared off, or in a few tight clusters --
-   * and within it the tilts, gaps, overlaps and sizes all vary, so the desk
-   * never looks the same twice. Spots (with tilt and size) are this browser's,
-   * like a drag. */
+   * and within it the tilts, gaps and overlaps vary, so the desk never looks
+   * the same twice. Everything keeps its own size, and nothing is ever tipped
+   * past a readable lean (MAX_TILT). Spots are this browser's, like a drag. */
+  var MAX_TILT = 22;
   var SHAPES = ['scatter', 'pile', 'arc', 'row', 'grid', 'clusters', 'circle'];
   var lastShape = null;
 
@@ -718,8 +718,8 @@
       var s = spots[k];
       p.x = Math.round(s.x - itemW(p) / 2);
       p.y = Math.round(s.y - itemH(p) / 2);
-      p.rot = s.rot;
-      p.scale = s.scale;
+      p.rot = Math.max(-MAX_TILT, Math.min(MAX_TILT, s.rot));   // always readable
+      p.scale = 1;
       p.moved = true;
       p.el.dataset.rot = p.rot.toFixed(2);
       p.el.style.zIndex = s.z;
@@ -738,7 +738,6 @@
   // Each shape returns a centre, tilt, size and stacking order per item.
   function layoutShape(shape, items, cx, cy, tall) {
     var n = items.length, out = [];
-    var size = function (lo, hi) { return rand(lo, hi); };
     var k, ang, R;
 
     if (shape === 'pile') {
@@ -746,26 +745,26 @@
       for (k = 0; k < n; k++) {
         ang = Math.random() * Math.PI * 2;
         var d = Math.pow(Math.random(), 0.6) * spread;
-        out.push({ x: cx + Math.cos(ang) * d * 1.3, y: cy + Math.sin(ang) * d, rot: rand(-22, 22), scale: size(0.85, 1.2), z: k + 1 });
+        out.push({ x: cx + Math.cos(ang) * d * 1.3, y: cy + Math.sin(ang) * d, rot: rand(-22, 22), scale: 1, z: k + 1 });
       }
     } else if (shape === 'arc') {
       R = rand(420, 700) * (tall ? 0.8 : 1);
       var span = rand(1.1, 2.1), start = -span / 2, dip = Math.random() < 0.5 ? 1 : -1;
       for (k = 0; k < n; k++) {
         ang = start + span * (n === 1 ? 0.5 : k / (n - 1));
-        out.push({ x: cx + Math.sin(ang) * R, y: cy - dip * (Math.cos(ang) - 0.75) * R * 0.55, rot: dip * ang * 22, scale: size(0.85, 1.15), z: k + 1 });
+        out.push({ x: cx + Math.sin(ang) * R, y: cy - dip * (Math.cos(ang) - 0.75) * R * 0.55, rot: dip * ang * 22, scale: 1, z: k + 1 });
       }
     } else if (shape === 'row') {
       var gap = rand(260, 460), lift = rand(40, 130);
       for (k = 0; k < n; k++) {
-        out.push({ x: cx + (k - (n - 1) / 2) * gap, y: cy + Math.sin(k * 1.7) * lift, rot: rand(-12, 12), scale: size(0.8, 1.25), z: k + 1 });
+        out.push({ x: cx + (k - (n - 1) / 2) * gap, y: cy + Math.sin(k * 1.7) * lift, rot: rand(-12, 12), scale: 1, z: k + 1 });
       }
     } else if (shape === 'grid') {
       var cols = tall ? Math.max(1, Math.round(Math.sqrt(n * 0.6))) : Math.ceil(Math.sqrt(n));
       var rows = Math.ceil(n / cols), gw = rand(470, 540), gh = rand(330, 380);
       for (k = 0; k < n; k++) {
         var col = k % cols, row = Math.floor(k / cols);
-        out.push({ x: cx + (col - (cols - 1) / 2) * gw, y: cy + (row - (rows - 1) / 2) * gh, rot: rand(-3, 3), scale: size(0.95, 1.05), z: k + 1 });
+        out.push({ x: cx + (col - (cols - 1) / 2) * gw, y: cy + (row - (rows - 1) / 2) * gh, rot: rand(-3, 3), scale: 1, z: k + 1 });
       }
     } else if (shape === 'circle') {
       // a ring, each one turned to face outwards, like numbers on a clock face
@@ -779,8 +778,8 @@
         out.push({
           x: cx + Math.cos(ang) * R * squashX,
           y: cy + Math.sin(ang) * R * squashY,
-          rot: (ang * 180 / Math.PI + 90) % 360,
-          scale: size(0.88, 1.08),
+          rot: Math.sin(ang) * 15,            // a gentle lean around the ring
+          scale: 1,
           z: k + 1
         });
       }
@@ -794,7 +793,7 @@
       }
       for (k = 0; k < n; k++) {
         var c = centres[k % groups];
-        out.push({ x: c.x + rand(-170, 170), y: c.y + rand(-140, 140), rot: rand(-16, 16), scale: size(0.85, 1.15), z: k + 1 });
+        out.push({ x: c.x + rand(-170, 170), y: c.y + rand(-140, 140), rot: rand(-16, 16), scale: 1, z: k + 1 });
       }
     } else {                     // scatter: loose cells, big jitter
       var sc = tall ? 2 : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
@@ -807,7 +806,7 @@
         out.push({
           x: cx + ((cell % sc) - (sc - 1) / 2) * cw + rand(-cw * 0.22, cw * 0.22),
           y: cy + (Math.floor(cell / sc) - (sr - 1) / 2) * ch + rand(-ch * 0.22, ch * 0.22),
-          rot: rand(-16, 16), scale: size(0.8, 1.25), z: k + 1
+          rot: rand(-16, 16), scale: 1, z: k + 1
         });
       }
     }
@@ -1018,7 +1017,7 @@
   function saveSpots() {
     var out = {};
     placed.forEach(function (p) {
-      if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y), r: Math.round(p.rot * 100) / 100, s: Math.round((p.scale || 1) * 1000) / 1000 };
+      if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y), r: Math.round(p.rot * 100) / 100 };
     });
     try { localStorage.setItem(SPOTS_KEY, JSON.stringify(out)); } catch (err) { /* ignore */ }
   }
