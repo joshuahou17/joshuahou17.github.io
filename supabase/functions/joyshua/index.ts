@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
       // it's marked gone (and logged), so it can always be brought back.
       case "remove": {
         const key = typeof body.key === "string" ? body.key : "";
-        if (!/^(card|photo|letter):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
+        if (!/^(card|photo|letter|topic):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
         return json(await setState(sb, visitor, action, "gone:" + key, { gone: body.gone !== false }));
       }
 
@@ -231,6 +231,28 @@ Deno.serve(async (req) => {
         const { data, error } = await sb.from("joyshua_postcards").insert(row).select().single();
         if (error) throw new Error(error.message);
         return json({ postcard: data });
+      }
+
+      // A conversation topic, and ticking one off once it's been talked about.
+      case "add-topic": {
+        const row = { text: text(body.text, 280, { multiline: true, required: true }), author: author(body.author) };
+        await log(sb, visitor, action, row.text.slice(0, 60), null, row);
+        const { data, error } = await sb.from("joyshua_topics").insert(row).select().single();
+        if (error) throw new Error(error.message);
+        return json({ topic: data });
+      }
+
+      case "set-topic": {
+        const id = typeof body.id === "string" ? body.id : "";
+        if (!/^[0-9a-f-]{36}$/.test(id)) throw new Bad("bad id");
+        const done = body.done === true;
+        const { data: cur } = await sb.from("joyshua_topics").select("done_at").eq("id", id).maybeSingle();
+        if (!cur) throw new Bad("no such topic");
+        await log(sb, visitor, action, id, cur, { done_at: done ? "now" : null });
+        const { data, error } = await sb.from("joyshua_topics")
+          .update({ done_at: done ? new Date().toISOString() : null }).eq("id", id).select().single();
+        if (error) throw new Error(error.message);
+        return json({ topic: data });
       }
 
       case "add-letter": {

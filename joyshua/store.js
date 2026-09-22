@@ -37,7 +37,7 @@
       });
   }
 
-  var added = { postcards: [], photos: [], letters: [] };   // rows added from the page
+  var added = { postcards: [], photos: [], letters: [], topics: [] };   // rows added from the page
 
   function soft(p) {
     return p.catch(function (err) { if (window.console) console.warn('[joyshua] couldn\u2019t load:', err.message); return []; });
@@ -47,10 +47,11 @@
     soft(get('joyshua_state', 'select=key,value')),
     soft(get('joyshua_postcards', 'select=*&order=created_at')),
     soft(get('joyshua_photos', 'select=*&order=created_at')),
-    soft(get('joyshua_letters', 'select=*&order=created_at'))
+    soft(get('joyshua_letters', 'select=*&order=created_at')),
+    soft(get('joyshua_topics', 'select=*&order=created_at'))
   ]).then(function (r) {
     r[0].forEach(function (row) { state[row.key] = row.value; });
-    added.postcards = r[1]; added.photos = r[2]; added.letters = r[3];
+    added.postcards = r[1]; added.photos = r[2]; added.letters = r[3]; added.topics = r[4];
   });
 
   /* A picture, ready for upload: re-drawn through a canvas at most `max` px on
@@ -171,6 +172,17 @@
 
     // what's been added from the page (filled once `ready` resolves)
     added: added,
+
+    addTopic: function (text, author) {
+      return call('add-topic', { text: text, author: author }).then(function (r) { added.topics.push(r.topic); return r.topic; });
+    },
+
+    setTopicDone: function (id, done) {
+      return call('set-topic', { id: id, done: !!done }).then(function (r) {
+        added.topics = added.topics.map(function (t) { return t.id === id ? r.topic : t; });
+        return r.topic;
+      });
+    },
 
     addLetter: function (letter) {
       return call('add-letter', letter).then(function (r) { added.letters.push(r.letter); return r.letter; });

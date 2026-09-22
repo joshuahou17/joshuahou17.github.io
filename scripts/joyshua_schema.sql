@@ -94,3 +94,19 @@ values ('joyshua', 'joyshua', true, 12582912, array['image/jpeg', 'image/webp', 
 on conflict (id) do update set public = excluded.public,
                                file_size_limit = excluded.file_size_limit,
                                allowed_mime_types = excluded.allowed_mime_types;
+
+-- Conversation topics: index cards Josh and Joyce fill in during the week and
+-- tick off once they've talked about them. Added 2026-09-22.
+create table if not exists public.joyshua_topics (
+  id          uuid primary key default gen_random_uuid(),
+  text        text not null check (char_length(text) between 1 and 280),
+  author      text not null check (author in ('josh', 'joyce')),
+  created_at  timestamptz not null default now(),
+  done_at     timestamptz,                -- null until it's been discussed
+  hidden      boolean not null default false
+);
+create index if not exists joyshua_topics_open on public.joyshua_topics (done_at, created_at);
+
+alter table public.joyshua_topics enable row level security;
+drop policy if exists "joyshua read topics" on public.joyshua_topics;
+create policy "joyshua read topics" on public.joyshua_topics for select to anon, authenticated using (not hidden);
