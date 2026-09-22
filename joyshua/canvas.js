@@ -140,10 +140,18 @@
   }
 
   /* ---------- the keepsake box ----------
-   * A lidded kraft box on the desk. Drag an envelope over it and the lid lifts;
-   * let go and it drops in. Hover over it (or tap it, on a phone) and the lid
-   * opens and its letters fan out above it: tap one to read it, or drag it out to
-   * put it back on the desk. What's in the box is saved for everyone. */
+   * A kraft card-file box, drawn in 2.5D (front panel, a side face, the dark
+   * inside), with every letter in it standing upright so its top -- and a paper
+   * tab with its label -- sticks up out of the box, like files in a drawer.
+   *
+   *  - Drag an envelope over it and the files part to make room; let go and it
+   *    drops in.
+   *  - Mouse: hovering the box spreads the files a little; the one under the
+   *    cursor rises up out of the box. Click it to read it, or drag it out.
+   *  - Tap (or click the box itself, or Enter): the letters come out in a
+   *    rainbow arc over the whole screen, which you swipe through; tap one to
+   *    read it.
+   * What's in the box is saved for everyone. */
   var boxItem = null, boxTimer = 0;
 
   function makeBox() {
@@ -151,29 +159,28 @@
     b.className = 'card keepsake';
     b.tabIndex = 0;
     b.setAttribute('role', 'button');
-    b.setAttribute('aria-expanded', 'false');
     b.innerHTML =
-      '<span class="kb-inside"></span>' +
-      '<span class="kb-peeks"></span>' +
-      '<span class="kb-body"><span class="kb-ribbon"></span><span class="kb-label">our letters</span><span class="kb-count"></span></span>' +
-      '<span class="kb-lid"><span class="kb-ribbon"></span><span class="kb-bow"></span></span>' +
-      '<span class="kb-fan"></span>';
+      '<span class="kb-shadow"></span>' +
+      '<span class="kb-back"></span>' +
+      '<span class="kb-files"></span>' +
+      '<span class="kb-side"></span>' +
+      '<span class="kb-front"><span class="kb-rim"></span>' +
+        '<span class="kb-plate"><span class="kb-label">our letters</span></span>' +
+        '<span class="kb-pull"></span><span class="kb-count"></span></span>';
     b.addEventListener('pointerenter', function (e) {
       if (e.pointerType !== 'mouse' || pointers.size) return;
       clearTimeout(boxTimer);
-      boxTimer = setTimeout(function () { openBox(true); }, 90);
+      boxTimer = setTimeout(function () { openBox(true); }, 60);
     });
     b.addEventListener('pointerleave', function (e) {
       if (e.pointerType !== 'mouse') return;
       clearTimeout(boxTimer);
-      boxTimer = setTimeout(function () { if (!letterState && !(press && press.fan)) openBox(false); }, 380);
+      boxTimer = setTimeout(function () { if (!letterState && !(press && press.fan)) openBox(false); }, 260);
     });
     b.addEventListener('keydown', function (e) {
       if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
       e.preventDefault();
-      openBox(!b.classList.contains('open'));
-      var first = b.querySelector('.kb-env');
-      if (first && b.classList.contains('open')) first.focus({ preventScroll: true });
+      openRainbow();
     });
     return b;
   }
@@ -182,57 +189,209 @@
     return placed.filter(function (p) { return p.kind === 'letter' && p.inBox; });
   }
 
+  function miniEnvelope(cls, j) {
+    var L = LETTERS[j];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls + ' author-' + (L.author || 'josh');
+    b.dataset.letter = j;
+    b.setAttribute('aria-label', 'Read: ' + L.label);
+    b.innerHTML = '<span class="env-body"><span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span></span><span class="kb-tab"></span>';
+    b.querySelector('.kb-tab').textContent = L.label;
+    return b;
+  }
+
   function renderBox() {
     if (!boxItem) return;
     var el = boxItem.el, inside = boxedItems(), n = inside.length;
     el.querySelector('.kb-count').textContent = n ? n + (n === 1 ? ' letter' : ' letters') : 'drop letters in';
-    el.setAttribute('aria-label', 'Keepsake box, ' + (n ? n + (n === 1 ? ' letter' : ' letters') : 'empty') + '. Open to choose a letter.');
+    el.setAttribute('aria-label', 'Keepsake box, ' + (n ? n + (n === 1 ? ' letter' : ' letters') : 'empty') + '. Press to look through them.');
     el.classList.toggle('empty', !n);
 
-    // tops of envelopes, standing in the box, seen when the lid lifts
-    var peeks = el.querySelector('.kb-peeks');
-    peeks.textContent = '';
-    inside.slice(0, 4).forEach(function (p, k) {
-      var s = document.createElement('span');
-      s.className = 'kb-peek author-' + (LETTERS[p.idx].author || 'josh');
-      s.style.left = (8 + k * 22) + '%';
-      s.style.rotate = ((k % 2 ? 1 : -1) * (2 + k * 1.5)) + 'deg';
-      peeks.appendChild(s);
-    });
-
-    // the fan: every letter, spread in an arc above the box
-    var fan = el.querySelector('.kb-fan');
-    fan.textContent = '';
-    // side by side in a gentle arc: wide enough apart that every label reads,
-    // tighter as the box fills up
-    var gap = n > 1 ? Math.min(200, 820 / (n - 1 + 1)) : 0;
+    // Files stand in the box back to front: the first is furthest back, so it
+    // sits highest. Their tabs step across so every label shows.
+    var files = el.querySelector('.kb-files');
+    files.textContent = '';
+    var stepY = n > 1 ? Math.min(13, 56 / (n - 1)) : 0;
+    var spread = n > 1 ? Math.min(34, 150 / (n - 1)) : 0;
     inside.forEach(function (p, k) {
-      var L = LETTERS[p.idx];
+      var f = miniEnvelope('kb-env', p.idx);
       var off = k - (n - 1) / 2;
-      var a = off * Math.min(9, 36 / Math.max(1, n - 1));
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'kb-env author-' + (L.author || 'josh');
-      b.dataset.letter = p.idx;
-      b.dataset.rot = a.toFixed(1);
-      b.setAttribute('aria-label', 'Read: ' + L.label);
-      b.style.setProperty('--fx', (off * gap).toFixed(1) + 'px');
-      b.style.setProperty('--fy', (-205 + Math.abs(off) * gap * 0.16).toFixed(1) + 'px');
-      b.style.setProperty('--fr', a.toFixed(1) + 'deg');
-      b.style.setProperty('--i', k);
-      b.innerHTML = '<span class="env-body"><span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span><span class="env-label"></span></span>';
-      b.querySelector('.env-label').textContent = L.label;
-      fan.appendChild(b);
+      f.dataset.rot = '0';
+      f.style.setProperty('--by', (k * stepY).toFixed(1) + 'px');
+      f.style.setProperty('--sx', (off * spread).toFixed(1) + 'px');
+      f.style.setProperty('--sr', (off * Math.min(3, 10 / Math.max(1, n - 1))).toFixed(2) + 'deg');
+      f.style.setProperty('--i', k);
+      f.style.setProperty('--tab', (6 + ((k * 29) % 58)) + '%');
+      f.style.setProperty('--dim', (0.82 + 0.18 * (n > 1 ? k / (n - 1) : 1)).toFixed(3));
+      files.appendChild(f);
     });
   }
 
+  // Mouse hover: the files part a little, ready for one to be lifted.
   function openBox(on) {
     if (!boxItem) return;
     var el = boxItem.el;
-    if (on && !boxedItems().length) on = false;       // nothing to fan out; the hover peek still shows
-    el.classList.toggle('open', on);
-    el.setAttribute('aria-expanded', on ? 'true' : 'false');
+    el.classList.toggle('open', !!on && boxedItems().length > 0);
     if (on) el.style.zIndex = ++zTop;
+  }
+
+  /* ---------- the rainbow ----------
+   * Every letter in the box, full size, on a half circle above the box at the
+   * bottom of the screen. Swipe (or scroll, or use the arrow keys) to turn the
+   * arc; the letter at the top is the one in focus. */
+  var rb = null;              // {el, arc, items, off, target, drag, raf}
+
+  function openRainbow() {
+    var inside = boxedItems();
+    if (!inside.length) { toast('The box is empty — drag a letter in'); return; }
+    if (rb || letterState || openState) return;
+    stop();
+    openBox(false);
+    var el = document.getElementById('rainbow');
+    var arc = el.querySelector('.rb-arc');
+    arc.textContent = '';
+    var items = inside.map(function (p) {
+      var b = miniEnvelope('rb-env', p.idx);
+      b.dataset.screen = '1';
+      arc.appendChild(b);
+      return b;
+    });
+    // the middle letter starts at the top (the first, when there are two)
+    rb = { el: el, arc: arc, items: items, off: Math.floor((items.length - 1) / 2), target: null, drag: null, raf: 0 };
+    el.hidden = false;
+    // start tucked into the box, then rise out one after another
+    placeArc(true);
+    void el.offsetWidth;
+    el.classList.add('open');
+    items.forEach(function (b, k) { b.style.transitionDelay = (k * 45) + 'ms'; });
+    placeArc(false);
+    setTimeout(function () { if (rb) rb.items.forEach(function (b) { b.style.transitionDelay = ''; }); }, 700);
+    var focus = items[rb.off];
+    if (focus) focus.focus({ preventScroll: true });
+  }
+
+  function arcGeometry() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var w = Math.min(300, vw * 0.44);
+    return {
+      w: w,
+      cx: vw / 2,
+      cy: vh - Math.min(150, vh * 0.2),
+      R: Math.min(vw * 0.62, vh * 0.52, 420),
+      step: 26                                  // degrees between letters
+    };
+  }
+
+  function placeArc(tucked) {
+    if (!rb) return;
+    var g = arcGeometry();
+    rb.arc.style.setProperty('--rbw', g.w + 'px');
+    rb.items.forEach(function (b, k) {
+      var t = (k - rb.off) * g.step;               // 0 = top of the arc
+      var rad = t * Math.PI / 180;
+      var x = g.cx + Math.sin(rad) * g.R, y = g.cy - Math.cos(rad) * g.R;
+      var near = Math.max(0, 1 - Math.abs(t) / g.step);
+      var s = tucked ? 0.3 : 0.9 + 0.14 * near;
+      if (tucked) { x = g.cx; y = g.cy + 40; }
+      b.style.transform = 'translate(' + (x - g.w / 2).toFixed(1) + 'px,' + (y - g.w * 0.315).toFixed(1) + 'px) rotate(' + (tucked ? 0 : t).toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
+      b.style.opacity = tucked ? 0 : (Math.abs(t) > 105 ? 0 : 1);
+      b.style.zIndex = 100 - Math.round(Math.abs(t));
+      b.dataset.rot = t.toFixed(1);
+      b.classList.toggle('top', Math.abs(t) < g.step / 2);
+      b.tabIndex = Math.abs(t) > 105 ? -1 : 0;
+    });
+  }
+
+  // ease the arc toward a whole letter after a swipe
+  function settleArc() {
+    if (!rb) return;
+    cancelAnimationFrame(rb.raf);
+    var goal = Math.max(0, Math.min(rb.items.length - 1, Math.round(rb.target != null ? rb.target : rb.off)));
+    (function tickArc() {
+      if (!rb) return;
+      rb.off += (goal - rb.off) * 0.22;
+      if (Math.abs(goal - rb.off) < 0.004) rb.off = goal;
+      placeArc(false);
+      if (rb.off !== goal) rb.raf = requestAnimationFrame(tickArc);
+      else rb.target = null;
+    })();
+  }
+
+  function turnArc(by) {
+    if (!rb) return;
+    rb.target = Math.max(0, Math.min(rb.items.length - 1, Math.round(rb.off) + by));
+    settleArc();
+  }
+
+  function closeRainbow() {
+    if (!rb || letterState) return;
+    var r = rb;
+    rb = null;
+    cancelAnimationFrame(r.raf);
+    r.el.classList.remove('open');
+    var g = arcGeometry();
+    r.items.forEach(function (b, k) {
+      b.style.transitionDelay = ((r.items.length - 1 - k) * 30) + 'ms';
+      b.style.transform = 'translate(' + (g.cx - g.w / 2) + 'px,' + (g.cy + 40 - g.w * 0.315) + 'px) scale(0.3)';
+      b.style.opacity = 0;
+    });
+    setTimeout(function () { r.el.hidden = true; r.arc.textContent = ''; }, 520);
+    if (boxItem) boxItem.el.focus({ preventScroll: true });
+  }
+
+  function rainbowDown(e) {
+    if (!rb || letterState) return;
+    var env = e.target.closest('.rb-env');
+    if (!env && !e.target.closest('.rb-arc')) return;
+    cancelAnimationFrame(rb.raf);
+    rb.drag = { id: e.pointerId, sx: e.clientX, x: e.clientX, off0: rb.off, env: env, moved: false, v: 0, t: e.timeStamp };
+    try { rb.el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    rb.arc.classList.add('dragging');
+  }
+
+  function rainbowMove(e) {
+    if (!rb || !rb.drag || e.pointerId !== rb.drag.id) return;
+    var d = rb.drag, g = arcGeometry();
+    var dx = e.clientX - d.sx;
+    if (!d.moved && Math.abs(dx) > TAP_SLOP) d.moved = true;
+    if (!d.moved) return;
+    // one letter per arc-step of travel along the rim
+    var perLetter = g.R * g.step * Math.PI / 180;
+    var dt = Math.max(e.timeStamp - d.t, 1);
+    d.v = d.v * 0.6 + ((e.clientX - d.x) / dt) * 0.4;
+    d.x = e.clientX; d.t = e.timeStamp;
+    rb.off = Math.max(-0.4, Math.min(rb.items.length - 0.6, d.off0 - dx / perLetter));
+    placeArc(false);
+  }
+
+  function rainbowUp(e) {
+    if (!rb || !rb.drag || e.pointerId !== rb.drag.id) return;
+    var d = rb.drag;
+    rb.drag = null;
+    rb.arc.classList.remove('dragging');
+    try { rb.el.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    if (!d.moved) {
+      if (d.env && e.type === 'pointerup') {
+        // tapping a letter off to the side brings it round first; the top one opens
+        if (d.env.classList.contains('top')) openLetter(d.env);
+        else { rb.target = rb.items.indexOf(d.env); settleArc(); }
+      }
+      return;
+    }
+    var g = arcGeometry(), perLetter = g.R * g.step * Math.PI / 180;
+    rb.target = rb.off - d.v * 260 / perLetter;         // a flick carries on a little
+    settleArc();
+  }
+
+  function rainbowKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeRainbow(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); turnArc(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); turnArc(-1); }
+    else if (e.key === 'Enter' || e.key === ' ') {
+      var b = document.activeElement && document.activeElement.closest && document.activeElement.closest('.rb-env');
+      if (b) { e.preventDefault(); if (b.classList.contains('top')) openLetter(b); else { rb.target = rb.items.indexOf(b); settleArc(); } }
+    }
   }
 
   function overBox(clientX, clientY) {
@@ -544,7 +703,7 @@
   }
 
   function onDown(e) {
-    if (openState || letterState || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (openState || letterState || rb || (e.pointerType === 'mouse' && e.button !== 0)) return;
     if (pointers.size >= 2) return;
     stop();
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -661,8 +820,6 @@
       vel.x = vel.y = 0;
       if (e.type !== 'pointerup') return;
       if (p.fan) openLetter(p.fan);
-      // with a mouse the box is already open from hovering; a click keeps it so
-      else if (p.card && p.card.classList.contains('keepsake') && e.pointerType === 'mouse') openBox(true);
       else if (p.card) openItem(p.card);
       return;
     }
@@ -673,7 +830,7 @@
 
   function onWheel(e) {
     e.preventDefault();
-    if (openState || letterState) return;
+    if (openState || letterState || rb) return;
     stop();
     var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
     var dx = e.deltaX * unit, dy = e.deltaY * unit;
@@ -690,6 +847,7 @@
 
   function onKey(e) {
     if (letterState) return letterViewKey(e);
+    if (rb) return rainbowKey(e);
     if (openState) return viewerKey(e);
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var step = e.shiftKey ? 480 : 180;
@@ -722,6 +880,7 @@
 
   // ---------- the viewer ----------
 
+  var vWho;
   var viewer, vCard, vPhoto, vImg, vTitle, vCount, vPrev, vNext, vClose, vBanner, recenter;
   var vGridBtn, vSheet, vSheetTitle, vSheetGrid;
   var openState = null;       // {ci, i, btn, grid}
@@ -801,6 +960,11 @@
 
     vCount.textContent = n > 1 ? (i + 1) + ' / ' + n : '';
     vPrev.disabled = vNext.disabled = n < 2;
+    // who added it: everything that was on the page to begin with is Josh's
+    var who = p.author === 'joyce' ? 'joyce' : 'josh';
+    vWho.textContent = who === 'joyce' ? 'Joyce' : 'Josh';
+    vWho.className = 'who-chip author-' + who;
+    vWho.setAttribute('aria-label', 'Added by ' + vWho.textContent);
 
     if (n > 1) { var pre = new Image(); pre.src = c.photos[(i + 1) % n].src; }
   }
@@ -966,14 +1130,14 @@
     var dx = (r.left + r.width / 2) - (f.left + f.width / 2);
     var dy = (r.top + r.height / 2) - (f.top + f.height / 2);
     var item = btn.dataset.p != null ? placed[+btn.dataset.p] : null;
-    var s = (item ? item.w : btn.offsetWidth) * cam.z / f.width;
+    var s = (item ? item.w * cam.z : btn.offsetWidth * (btn.dataset.screen ? 1 : cam.z)) / f.width;
     return 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (+btn.dataset.rot || 0) + 'deg) scale(' + s + ')';
   }
 
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function openItem(btn) {
-    if (btn.classList.contains('keepsake')) openBox(!btn.classList.contains('open'));
+    if (btn.classList.contains('keepsake')) openRainbow();
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
   }
@@ -1042,7 +1206,8 @@
       b.type = 'button';
       b.className = 'sheet-thumb';
       b.dataset.i = i;
-      b.setAttribute('aria-label', 'Photo ' + (i + 1) + (p.label ? ': ' + p.label : ''));
+      var who = p.author === 'joyce' ? 'joyce' : 'josh';
+      b.setAttribute('aria-label', 'Photo ' + (i + 1) + (p.label ? ': ' + p.label : '') + ', added by ' + (who === 'joyce' ? 'Joyce' : 'Josh'));
       var img = document.createElement('img');
       img.src = p.thumb || p.src;
       img.alt = '';
@@ -1050,6 +1215,11 @@
       img.decoding = 'async';
       img.draggable = false;
       b.appendChild(img);
+      var chip = document.createElement('span');
+      chip.className = 'who-chip who-chip--small author-' + who;
+      chip.setAttribute('aria-hidden', 'true');
+      chip.textContent = who === 'joyce' ? 'Joyce' : 'Josh';
+      b.appendChild(chip);
       vSheetGrid.appendChild(b);
     });
     var add = document.createElement('button');
@@ -1057,7 +1227,7 @@
     add.className = 'sheet-add';
     add.innerHTML = '<span aria-hidden="true">+</span>add photos';
     add.addEventListener('click', function () {
-      if (window.JoyCompose) JoyCompose.open('photos', { card: openState.ci });
+      if (window.JoyCompose) JoyCompose.open('who', { card: openState.ci });
     });
     vSheetGrid.appendChild(add);
   }
@@ -1235,6 +1405,7 @@
     vImg = document.getElementById('viewer-img');
     vTitle = document.getElementById('viewer-title');
     vCount = document.getElementById('viewer-count');
+    vWho = document.getElementById('viewer-who');
     vPrev = document.getElementById('viewer-prev');
     vNext = document.getElementById('viewer-next');
     vBanner = document.getElementById('viewer-banner');
@@ -1254,6 +1425,20 @@
     lv.addEventListener('click', function (e) {
       if (e.target.closest('[data-lclose]')) closeLetter();
     });
+    var rbEl = document.getElementById('rainbow');
+    rbEl.addEventListener('pointerdown', rainbowDown);
+    rbEl.addEventListener('pointermove', rainbowMove);
+    rbEl.addEventListener('pointerup', rainbowUp);
+    rbEl.addEventListener('pointercancel', rainbowUp);
+    rbEl.addEventListener('click', function (e) { if (e.target.closest('[data-rbclose]')) closeRainbow(); });
+    rbEl.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      if (!rb || letterState) return;
+      rb.off = Math.max(0, Math.min(rb.items.length - 1, rb.off + (e.deltaX || e.deltaY) / 120));
+      placeArc(false);
+      clearTimeout(rbEl.wheelTimer);
+      rbEl.wheelTimer = setTimeout(settleArc, 120);
+    }, { passive: false });
 
     function firstPaint() {
       mergeAdded();
@@ -1338,6 +1523,7 @@
         }
         small = window.innerWidth < 640;
         if (openState) showPhoto(openState.i, true);
+        if (rb) placeArc(false);
         render();
       });
     }, { passive: true });
