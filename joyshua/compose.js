@@ -166,6 +166,7 @@
     body.appendChild(heading('Which postcard?'));
     var grid = el('div', 'c-cards');
     (window.JoyDesk ? JoyDesk.cards() : []).forEach(function (c, i) {
+      if (c.gone) return;
       var b = el('button', 'c-card');
       b.type = 'button';
       var img = el('img');
