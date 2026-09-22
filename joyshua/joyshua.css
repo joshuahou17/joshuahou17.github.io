@@ -480,49 +480,79 @@ body {
 }
 .banner--sticker.banner--alt > span { background: #2aa198; }
 
-/* ---------- envelopes on the desk ----------
-   Back side up: the pale bottom fold, the darker top flap, the label written
-   across the bottom. All grey, like the real ones. */
+/* ---------- envelopes ----------
+   Built like the real thing, back side up: the side flaps (the envelope body),
+   the bottom flap folded over them, and the top flap over everything. Each
+   flap is its own sheet with a soft shadow on the paper beneath, every sheet
+   carries the same fine paper grain, and a wash of light falls from the top
+   left. The desk envelopes and the one that opens use the same pieces. */
 
 :root {
-  --env: #b9b9b5;
-  --env-fold: #c6c6c2;
-  --env-flap: #a8a8a4;
-  --env-ink: #36363a;
-  --letter: #dededa;
+  --env-side: #aeaeac;
+  --env-bottom: linear-gradient(to top, #c3c3c1, #bcbcba 70%, #b6b6b4);
+  --env-top: linear-gradient(to bottom, #b3b3b1, #acacaa 80%, #a7a7a5);
+  --env-inside: linear-gradient(to bottom, #8e8e8c, #9d9d9b 60%, #a4a4a2);
+  --env-ink: rgba(38, 38, 42, 0.86);
+  --letter: #dededc;
+  /* fractal-noise paper grain, tiled */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+.fold { position: absolute; inset: 0; display: block; pointer-events: none; }
+.fold > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-blend-mode: multiply;
+}
+.fold--sides > i {           /* the pocket, open in a V at the top */
+  background-image: var(--grain), linear-gradient(var(--env-side), var(--env-side));
+  clip-path: polygon(0 0, 44.5% 52%, 47.5% 54.4%, 50% 55%, 52.5% 54.4%, 55.5% 52%, 100% 0, 100% 100%, 0 100%);
+}
+.fold--bottom { filter: drop-shadow(0 -0.6px 0 rgba(255, 255, 255, 0.45)) drop-shadow(0 -1px 1.4px rgba(0, 0, 0, 0.15)); }  /* a lit crease, then its shadow */
+.fold--bottom > i {
+  background-image: var(--grain), var(--env-bottom);
+  clip-path: polygon(0 100%, 0 97%, 44% 47.5%, 47.5% 44.8%, 50% 44.2%, 52.5% 44.8%, 56% 47.5%, 100% 97%, 100% 100%);
+}
+.fold--top { filter: drop-shadow(0 1.2px 1.2px rgba(0, 0, 0, 0.24)) drop-shadow(0 5px 8px rgba(0, 0, 0, 0.09)); }
+.fold--top > i {
+  background-image: var(--grain), var(--env-top);
+  clip-path: polygon(0 0, 100% 0, 100% 2%, 55.5% 56.5%, 52.6% 59.6%, 50% 60.4%, 47.4% 59.6%, 44.5% 56.5%, 0 2%);
+}
+
+/* on the desk */
 .card.envelope { width: 360px; height: 226px; }
 .env-body {
   position: relative;
-  background: var(--env);
-  border-radius: 4px;
+  border-radius: 3px;
+  /* the base colour matters: blend-mode multiplies the grain into it too, so
+     it must be white (neutral) -- the postcards' cream base tinted it olive */
+  background-color: #fff;
+  background-image: var(--grain), linear-gradient(var(--env-side), var(--env-side));
+  background-blend-mode: multiply;
+  box-shadow:
+    0 1px 1px rgba(40, 35, 25, 0.14),
+    0 9px 18px -8px rgba(40, 35, 25, 0.38),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
-.env-body::before {                 /* the bottom fold */
+.env-body::after {           /* light from the top left */
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--env-fold);
-  clip-path: polygon(0 100%, 50% 42%, 100% 100%);
-}
-.env-flap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 56%;
-  background: linear-gradient(var(--env-flap), #a1a19d);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: radial-gradient(130% 110% at 18% 0%, rgba(255, 255, 255, 0.2), transparent 55%),
+              linear-gradient(to top, rgba(0, 0, 0, 0.05), transparent 30%);
+  pointer-events: none;
 }
 .env-label {
   position: absolute;
-  left: 10%;
-  right: 10%;
-  bottom: 11%;
+  left: 12%;
+  right: 12%;
+  bottom: 10%;
   font: 700 29px/1.02 'Caveat', cursive;
   color: var(--env-ink);
   text-align: center;
   rotate: -2deg;
+  mix-blend-mode: multiply;  /* ink sits in the paper, not on top of it */
 }
 
 /* ---------- opening a letter ---------- */
@@ -548,10 +578,11 @@ body {
 }
 .lv-env.gone { opacity: 0; transform: translateY(70px); }
 .lv-env > span { position: absolute; display: block; }
-.lv-back {
+.lv-back {                   /* the inside of the envelope, in its own shade */
   inset: 0;
-  background: #a9a9a5;
-  border-radius: 5px;
+  border-radius: 4px;
+  background-image: var(--grain), var(--env-inside);
+  background-blend-mode: multiply;
   box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55);
 }
 .lv-slip {
@@ -560,34 +591,25 @@ body {
   top: 6%;
   bottom: 8%;
   z-index: 1;
-  background: var(--letter);
-  border-radius: 3px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  background-image: var(--grain), linear-gradient(var(--letter), var(--letter));
+  background-blend-mode: multiply;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
   transition: transform 0.55s cubic-bezier(.2, .8, .2, 1);
 }
 .lv-env.out .lv-slip { transform: translateY(-62%); }
-.lv-front {                         /* the pocket: everything but the V at the top */
-  inset: 0;
-  z-index: 2;
-  background: var(--env);
-  border-radius: 5px;
-  clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
-}
-.lv-front::before {                 /* its bottom fold */
+.lv-front { inset: 0; z-index: 2; border-radius: 4px; overflow: hidden; }
+.lv-front::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--env-fold);
-  clip-path: polygon(0 100%, 50% 42%, 100% 100%);
+  background: radial-gradient(130% 110% at 18% 0%, rgba(255, 255, 255, 0.16), transparent 55%);
+  clip-path: polygon(0 0, 44.5% 52%, 50% 55%, 55.5% 52%, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
 }
 .lv-flap {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 56%;
+  inset: 0;
   z-index: 3;
-  background: linear-gradient(var(--env-flap), #a1a19d);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: 50% 0;
   /* the flap passes behind the card exactly as it goes edge-on */
   transition: transform 0.44s ease-in-out, z-index 0s linear 0.22s;
@@ -603,7 +625,8 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 30px 40px 36px;
-  background: var(--letter);
+  background-image: var(--grain), linear-gradient(var(--letter), var(--letter));
+  background-blend-mode: multiply;
   color: #2e2e31;
   border-radius: 3px;
   box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.55);
