@@ -231,6 +231,19 @@
     var mast = document.querySelector('.mast');
     (mast && mast.parentNode ? mast.parentNode : document.body).insertBefore(stackEl, mast ? mast.nextSibling : null);
 
+    // the stack is the same size as the joyshua label above it, whatever the
+    // handwriting measures once its font has loaded
+    function sizeStack() {
+      if (!mast) return;
+      var r = mast.getBoundingClientRect();
+      if (!r.width) return;
+      stackEl.style.width = Math.round(r.width) + 'px';
+      stackEl.style.height = Math.round(r.height) + 'px';
+    }
+    sizeStack();
+    window.addEventListener('resize', sizeStack, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeStack);
+
     boardEl = el('div', 'board');
     boardEl.id = 'topic-board';
     boardEl.hidden = true;
@@ -276,14 +289,16 @@
       if (single) { nextSingle(); return; }
       nextSingle();
     });
-    boardEl.addEventListener('keydown', function (e) {
+    boardEl.addEventListener('keydown', function (e) { e.stopPropagation(); });
+    // Escape works wherever focus happens to be (writing a card replaces the
+    // element focus was on, so a listener on the board alone would miss it)
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !open) return;
+      e.preventDefault();
       e.stopPropagation();
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        if (single) { single = null; oneEl.hidden = true; boardEl.classList.remove('one'); }
-        else closeBoard();
-      }
-    });
+      if (single) { single = null; oneEl.hidden = true; boardEl.classList.remove('one'); }
+      else closeBoard();
+    }, true);
     boardEl.querySelectorAll('[data-topic-add]').forEach(function (b) {
       b.addEventListener('click', function () {
         if (single) { single = null; oneEl.hidden = true; boardEl.classList.remove('one'); }

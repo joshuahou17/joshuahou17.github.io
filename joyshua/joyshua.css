@@ -1236,8 +1236,8 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   top: calc(max(16px, env(safe-area-inset-top)) + 62px);
   left: 16px;
   z-index: 5;
-  width: 208px;
-  height: 92px;
+  width: 135px;                  /* topics.js keeps this matched to the label */
+  height: 64px;
   padding: 0;
   border: 0;
   background: none;
@@ -1253,29 +1253,29 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   box-shadow: 0 2px 2px rgba(60, 45, 25, 0.12), 0 8px 16px -8px rgba(60, 45, 25, 0.4);
   transition: transform 0.25s cubic-bezier(.2, 1.3, .4, 1);
 }
-.stack-card--3 { transform: rotate(-3.5deg) translate(-5px, 4px); }
-.stack-card--2 { transform: rotate(2.5deg) translate(4px, 2px); }
+.stack-card--3 { transform: rotate(-3.5deg) translate(-4px, 3px); }
+.stack-card--2 { transform: rotate(2.5deg) translate(3px, 2px); }
 .stack-card--1 {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 12px 12px 10px 18px;
+  gap: 5px;
+  padding: 7px 7px 6px 13px;
   transform: rotate(-0.8deg);
-  /* the ruled lines and the red margin */
+  /* the ruled lines and the red margin, to the smaller card's scale */
   background-image:
     var(--grain),
-    linear-gradient(to right, transparent 12px, var(--index-margin) 12px, var(--index-margin) 13px, transparent 13px),
-    repeating-linear-gradient(to bottom, transparent 0 21px, var(--index-rule) 21px 22px),
+    linear-gradient(to right, transparent 8px, var(--index-margin) 8px, var(--index-margin) 9px, transparent 9px),
+    repeating-linear-gradient(to bottom, transparent 0 13px, var(--index-rule) 13px 14px),
     linear-gradient(var(--index), var(--index));
 }
 .topic-stack:hover .stack-card--1, .topic-stack:focus-visible .stack-card--1 { transform: rotate(-0.8deg) translateY(-4px); }
-.topic-stack:hover .stack-card--3 { transform: rotate(-6deg) translate(-10px, 5px); }
-.topic-stack:hover .stack-card--2 { transform: rotate(5deg) translate(9px, 3px); }
+.topic-stack:hover .stack-card--3 { transform: rotate(-6deg) translate(-7px, 4px); }
+.topic-stack:hover .stack-card--2 { transform: rotate(5deg) translate(6px, 3px); }
 .topic-stack:focus-visible { outline: none; }
 .topic-stack:focus-visible .stack-card--1 { outline: 2px solid var(--pen); outline-offset: 3px; }
 .stack-text {
   flex: 1;
-  font: 500 19px/22px 'Caveat', cursive;
+  font: 500 14px/14px 'Caveat', cursive;
   color: #33302a;
   text-align: left;
   display: -webkit-box;
@@ -1284,14 +1284,14 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   overflow: hidden;
 }
 .stack-count {
-  min-width: 22px;
-  height: 22px;
+  min-width: 17px;
+  height: 17px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   background: var(--pen);
   color: #fff;
-  font: 700 11px/1 'Space Mono', monospace;
+  font: 700 9px/1 'Space Mono', monospace;
 }
 .stack-count:empty { display: none; }
 .topic-stack.empty .stack-card--1 { opacity: 0.55; }
@@ -1439,8 +1439,7 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 .board-done:not(.showing) .done-list { display: none; }
 
 @media (max-width: 640px) {
-  .topic-stack { width: 168px; height: 82px; }
-  .stack-text { font-size: 17px; line-height: 20px; }
+  .stack-text { font-size: 13px; line-height: 13px; }
   .board-card { padding: 12px 14px 16px; }
   .board-list, .done-list { grid-template-columns: 1fr 1fr; gap: 8px; }
   .topic-text { font-size: 21px; line-height: 22px; }
