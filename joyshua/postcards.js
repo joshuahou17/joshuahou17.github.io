@@ -107,12 +107,12 @@
       title: 'Brooklyn',
       front: { src: '/joyshua/photos/brooklyn-postcard.webp', w: 1489, h: 954, alt: 'A vintage illustrated postcard reading "Greetings from Brooklyn, NY", with the Brooklyn Bridge, a pizzeria and the Manhattan skyline.' },
       photos: set('brooklyn', [
-        [P[0], P[1], 'first bite',          'Her biting into a pastry on the sidewalk.'],
-        [P[0], P[1], 'skewer season',       'Her grinning behind a cup of meat skewers at an outdoor market.'],
+        [P[0], P[1], 'radio bakery!',       'Her biting into a pastry on the sidewalk.'],
+        [P[0], P[1], 'Smorgasburg',         'Her grinning behind a cup of meat skewers at an outdoor market.'],
         [P[0], P[1], 'peach please',        'Her taking a bite of a peach in a leafy backyard.'],
-        [P[0], P[1], 'counter seats',       'A selfie of the two of them at a restaurant counter.'],
-        [1400, 1050, 'skyline sunset',      'Dinner on a rooftop with the sun setting over the Manhattan skyline.'],
-        [P[0], P[1], 'dumbo',               'Her posing on a bridge walkway by a DUMBO sign.'],
+        [P[0], P[1], 'Laser Wolf',          'A selfie of the two of them at a restaurant counter.'],
+        [1400, 1050, 'One of our favorite dinners','Dinner on a rooftop with the sun setting over the Manhattan skyline.'],
+        [P[0], P[1], "who's the real dumbo?",'Her posing on a bridge walkway by a DUMBO sign.'],
         [1400, 1050, 'picnic in the park',  'A kiss on a picnic blanket in the grass, food spread out beside them.']
       ])
     },
@@ -129,14 +129,14 @@
         [P[0], P[1], 'in bloom',             'The two of them under trees of pink bougainvillea.'],
         [P[0], P[1], 'garden walk',          'A selfie of the two of them on a shady garden path.'],
         [P[0], P[1], 'secret garden',        'Her looking up under a leafy arch in a garden.'],
-        [P[0], P[1], 'under the arbor',      'The two of them standing under a vine-covered arbor.'],
+        [P[0], P[1], 'Newport Beach',        'The two of them standing under a vine-covered arbor.'],
         [1400, 788,  'blue skies',           'A selfie of the two of them against a bright blue sky.'],
         [P[0], P[1], 'cotton candy sky',     'Her on a path by the green at sunset under pink clouds.'],
-        [P[0], P[1], 'road trip',            'Her driving, smiling out the windshield.'],
-        [1400, 788,  'sunday best',          'Him hugging her from behind in front of a stone house.'],
+        [P[0], P[1], 'drivedrivedrive',      'Her driving, smiling out the windshield.'],
+        [1400, 788,  'Country club couple',  'Him hugging her from behind in front of a stone house.'],
         [P[0], P[1], 'marina mornings',      'Her walking along a marina boardwalk past the boats.'],
         [P[0], P[1], "airport mcd's",        'Her by the McDonald\'s at the airport with her suitcase.'],
-        [P[0], P[1], 'red-eye home',         'The two of them in sleep masks on a plane.']
+        [P[0], P[1], 'matching eye masks',   'The two of them in sleep masks on a plane.']
       ])
     }
   ];
