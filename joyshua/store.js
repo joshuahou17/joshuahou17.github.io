@@ -145,6 +145,18 @@
       );
     },
 
+    // Deleted from the page (for everyone)? Keys: 'card:', 'photo:', 'letter:'.
+    isGone: function (key) { var v = state['gone:' + key]; return !!(v && v.gone === true); },
+
+    remove: function (key) {
+      var k = 'gone:' + key, before = state[k];
+      state[k] = { gone: true };
+      return call('remove', { key: key }).then(
+        function (res) { state[k] = res.value; return res.value; },
+        function (err) { if (before) state[k] = before; else delete state[k]; throw err; }
+      );
+    },
+
     // Is this letter in the keepsake box? (`key` is the desk key, 'letter:...')
     inBox: function (key) { var v = state['box:' + key]; return !!(v && v.in === true); },
 

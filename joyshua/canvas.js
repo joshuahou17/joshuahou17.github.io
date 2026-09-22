@@ -65,8 +65,10 @@
     document.documentElement.style.setProperty('--cw', CW + 'px');
     document.documentElement.style.setProperty('--ch', CH + 'px');
 
-    var n = CARDS.length;
-    var cols = portrait ? 1 : Math.ceil(Math.sqrt(n));
+    var shown = [];
+    CARDS.forEach(function (c, i) { if (!c.gone) shown.push(i); });
+    var n = shown.length;
+    var cols = portrait ? 1 : Math.max(1, Math.ceil(Math.sqrt(n)));
     var rows = Math.ceil(n / cols);
     var cellW = CW * 1.18, cellH = CH * 1.3;
     var rand = rng(SEED);
@@ -76,14 +78,15 @@
     placed = [];
     function put(el, x, y, rot, kind, idx, w, h, key) { putItem(saved, el, x, y, rot, kind, idx, w, h, key); }
 
-    for (var i = 0; i < n; i++) {
-      var c = i % cols, r = Math.floor(i / cols);
+    for (var k = 0; k < n; k++) {
+      var i = shown[k];
+      var c = k % cols, r = Math.floor(k / cols);
       var inRow = Math.min(cols, n - r * cols);      // centre a short last row
       var x = (c - (inRow - 1) / 2) * cellW - CW / 2 + (rand() - 0.5) * CW * 0.16;
       var y = (r - (rows - 1) / 2) * cellH - CH / 2 + (rand() - 0.5) * CH * 0.16;
       // alternate the lean so neighbours don't tilt the same way
-      var rot = (i % 2 ? 1 : -1) * (2.5 + rand() * 3.5);
-      put(makeCard(i), x, y, rot, 'card', i, CW, CH, CARDS[i].title);
+      var rot = (k % 2 ? 1 : -1) * (2.5 + rand() * 3.5);
+      put(makeCard(i), x, y, rot, 'card', i, CW, CH, CARDS[i].key || CARDS[i].title);
     }
 
     // The envelopes get a row of their own under the postcards (on a phone, they
@@ -91,7 +94,7 @@
     // The envelopes share a row with the keepsake box (on a phone they all carry
     // on down the column). Letters already in the box don't take a spot.
     var m = LETTERS.length, slot = 0;
-    var slots = LETTERS.filter(function (L, j) { return !isBoxed(j); }).length + 1;
+    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 1;
     function spot(w, h) {
       var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
       slot++;
@@ -102,6 +105,7 @@
     }
     for (var j = 0; j < m; j++) {
       var erot = (j % 2 ? -1 : 1) * (3 + rand() * 4);
+      if (LETTERS[j].gone) continue;
       if (isBoxed(j)) {
         put(makeEnvelope(j), 0, 0, erot, 'letter', j, EW, EH, letterKey(j));
         stowed(placed[placed.length - 1], true);
@@ -214,7 +218,7 @@
   }
 
   function boxedItems() {
-    return placed.filter(function (p) { return p.kind === 'letter' && p.inBox; });
+    return placed.filter(function (p) { return p.kind === 'letter' && p.inBox && !p.gone; });
   }
 
   function miniEnvelope(cls, j) {
@@ -357,6 +361,17 @@
     settleArc();
   }
 
+  // close at once (a letter was just deleted from it)
+  function closeRainbowNow() {
+    if (!rb) return;
+    var r = rb;
+    rb = null;
+    cancelAnimationFrame(r.raf);
+    r.el.classList.remove('open');
+    r.el.hidden = true;
+    r.arc.textContent = '';
+  }
+
   function closeRainbow() {
     if (!rb || letterState) return;
     var r = rb;
@@ -378,7 +393,13 @@
     var env = e.target.closest('.rb-env');
     if (!env && !e.target.closest('.rb-arc')) return;
     cancelAnimationFrame(rb.raf);
-    rb.drag = { id: e.pointerId, sx: e.clientX, x: e.clientX, off0: rb.off, env: env, moved: false, v: 0, t: e.timeStamp };
+    hideMinus();
+    var d = rb.drag = { id: e.pointerId, sx: e.clientX, x: e.clientX, off0: rb.off, env: env, moved: false, v: 0, t: e.timeStamp };
+    if (env) d.hold = holdTimer(function () {
+      if (!rb || rb.drag !== d || d.moved) return;
+      d.longPress = true;
+      showMinus(env, deleteLetterWhat(+env.dataset.letter));
+    });
     try { rb.el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     rb.arc.classList.add('dragging');
   }
@@ -387,7 +408,7 @@
     if (!rb || !rb.drag || e.pointerId !== rb.drag.id) return;
     var d = rb.drag, g = arcGeometry();
     var dx = e.clientX - d.sx;
-    if (!d.moved && Math.abs(dx) > TAP_SLOP) d.moved = true;
+    if (!d.moved && Math.abs(dx) > TAP_SLOP) { if (d.longPress) return; d.moved = true; clearTimeout(d.hold); }
     if (!d.moved) return;
     // one letter per arc-step of travel along the rim
     var perLetter = g.R * g.step * Math.PI / 180;
@@ -402,7 +423,9 @@
     if (!rb || !rb.drag || e.pointerId !== rb.drag.id) return;
     var d = rb.drag;
     rb.drag = null;
+    clearTimeout(d.hold);
     rb.arc.classList.remove('dragging');
+    if (d.longPress) return;
     try { rb.el.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     if (!d.moved) {
       if (e.type !== 'pointerup') return;
@@ -496,6 +519,21 @@
    * each. Static postcards are keyed by title, added ones by id. */
   var merged = {};
 
+  function cardKey(c) { return 'card:' + (c.key || c.title); }
+  function photoKey(p) { return 'photo:' + (p.key || p.src); }
+
+  // Anything deleted from the page is dropped here (postcards and letters are
+  // flagged, so every index stays put; a postcard's photos are filtered).
+  function applyGone() {
+    var S = window.JoyStore;
+    if (!S || !S.isGone) return;
+    CARDS.forEach(function (c) {
+      if (S.isGone(cardKey(c))) c.gone = true;
+      c.photos = c.photos.filter(function (p) { return !S.isGone(photoKey(p)); });
+    });
+    LETTERS.forEach(function (L, j) { if (S.isGone(letterKey(j))) L.gone = true; });
+  }
+
   function mergeAdded() {
     var S = window.JoyStore;
     var fresh = { cards: [], letters: [] };
@@ -558,6 +596,7 @@
 
   function refreshAdded() {
     var fresh = mergeAdded();
+    applyGone();
     if (openState && openState.grid) buildSheet();
     var last = dropNew(fresh);
     renderBox();
@@ -570,7 +609,7 @@
    * glides there. Like a drag, the new spots are this browser's. */
   function shuffleDesk() {
     if (openState || letterState || rb) return;
-    var items = placed.filter(function (p) { return !p.inBox; });
+    var items = placed.filter(function (p) { return !p.inBox && !p.gone; });
     var n = items.length;
     if (!n) return;
     stop();
@@ -599,6 +638,198 @@
       items.forEach(function (p) { p.el.classList.remove('flying'); p.el.style.transitionDelay = ''; });
       glideTo(fitCam());
     }, 900 + n * 35);
+  }
+
+  /* ---------- deleting ----------
+   * Press and hold anything -- a postcard, a letter (on the desk, in the box or
+   * in the rainbow), a photo, a banner -- and it wiggles with a minus in its
+   * corner. The minus asks first; confirmed, it's gone for everyone. (It's only
+   * marked gone on the server, and logged, so it can always be brought back.) */
+  var HOLD_MS = 550;
+  var minusEl = null, minusFor = null, wiggling = null, minusTarget = null;
+
+  function holdTimer(fn) { return setTimeout(fn, HOLD_MS); }
+
+  function hideMinus() {
+    if (minusEl) minusEl.hidden = true;
+    if (wiggling) wiggling.classList.remove('wiggle');
+    minusFor = wiggling = minusTarget = null;
+  }
+
+  // Show the minus at the top-left corner of `target` (an element on screen).
+  function showMinus(target, what) {
+    if (!minusEl) {
+      minusEl = document.createElement('button');
+      minusEl.type = 'button';
+      minusEl.className = 'minus';
+      minusEl.innerHTML = '<span aria-hidden="true">\u2212</span>';
+      minusEl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+      minusEl.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var w = minusFor;
+        hideMinus();
+        if (w) confirmDelete(w);
+      });
+      document.body.appendChild(minusEl);
+    }
+    hideMinus();
+    minusTarget = target;
+    positionMinus();
+    minusEl.setAttribute('aria-label', 'Delete ' + what.name);
+    minusEl.hidden = false;
+    minusFor = what;
+    wiggling = what.wiggle || target;
+    wiggling.classList.add('wiggle');
+    if (navigator.vibrate) navigator.vibrate(12);
+  }
+
+  // keeps the minus on its item's corner, even as the desk glides or zooms
+  function positionMinus() {
+    if (!minusEl || !minusTarget) return;
+    var target = minusTarget;
+    var r = target.getBoundingClientRect(), mx = r.left, my = r.top;
+    // a tilted desk item: put it on the card's real top-left corner, not the
+    // corner of the box around the tilt
+    if (target.dataset.p != null && target.dataset.rot != null) {
+      var it = placed[+target.dataset.p], a = (+target.dataset.rot || 0) * Math.PI / 180;
+      var hw = it.w * cam.z / 2, hh = it.h * cam.z / 2;
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      mx = cx + (-hw) * Math.cos(a) - (-hh) * Math.sin(a);
+      my = cy + (-hw) * Math.sin(a) + (-hh) * Math.cos(a);
+    }
+    minusEl.style.left = Math.max(8, Math.min(window.innerWidth - 44, mx - 14)) + 'px';
+    minusEl.style.top = Math.max(8, Math.min(window.innerHeight - 44, my - 14)) + 'px';
+  }
+
+  var confirmEl = null;
+  function askConfirm(title, detail) {
+    if (!confirmEl) {
+      confirmEl = document.createElement('div');
+      confirmEl.className = 'confirm';
+      confirmEl.setAttribute('role', 'alertdialog');
+      confirmEl.setAttribute('aria-modal', 'true');
+      confirmEl.innerHTML =
+        '<div class="confirm-scrim"></div>' +
+        '<div class="confirm-card"><p class="confirm-title" id="confirm-title"></p><p class="confirm-detail"></p>' +
+        '<div class="confirm-actions"><button type="button" class="c-btn c-btn--quiet" data-no>Cancel</button>' +
+        '<button type="button" class="c-btn confirm-yes" data-yes>Delete</button></div></div>';
+      confirmEl.setAttribute('aria-labelledby', 'confirm-title');
+      document.body.appendChild(confirmEl);
+    }
+    confirmEl.querySelector('.confirm-title').textContent = title;
+    confirmEl.querySelector('.confirm-detail').textContent = detail;
+    confirmEl.hidden = false;
+    void confirmEl.offsetWidth;
+    confirmEl.classList.add('open');
+    var no = confirmEl.querySelector('[data-no]');
+    no.focus({ preventScroll: true });
+    return new Promise(function (resolve) {
+      function done(yes) {
+        confirmEl.classList.remove('open');
+        setTimeout(function () { confirmEl.hidden = true; }, 200);
+        confirmEl.removeEventListener('click', onClick, true);
+        document.removeEventListener('keydown', onKeyC, true);
+        resolve(yes);
+      }
+      function onClick(e) {
+        if (e.target.closest('[data-yes]')) done(true);
+        else if (e.target.closest('[data-no]') || e.target.classList.contains('confirm-scrim')) done(false);
+      }
+      function onKeyC(e) {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(false); }
+      }
+      confirmEl.addEventListener('click', onClick, true);
+      document.addEventListener('keydown', onKeyC, true);
+    });
+  }
+
+  function confirmDelete(what) {
+    askConfirm(what.title, what.detail).then(function (yes) {
+      if (!yes) return;
+      Promise.resolve(what.run()).then(
+        function () { toast('deleted'); },
+        function (err) { toast(err && err.message || 'Couldn\u2019t delete that.', true); }
+      );
+    });
+  }
+
+  function poof(p) {
+    p.gone = true;
+    p.el.classList.add('poof');
+    setTimeout(function () { p.el.hidden = true; p.el.classList.remove('poof'); render(); }, 380);
+  }
+
+  function deleteCardWhat(p) {
+    var c = CARDS[p.idx];
+    return {
+      name: 'the ' + c.title + ' postcard',
+      title: 'Delete the ' + c.title + ' postcard?',
+      detail: 'Its photos go with it. This removes it for everyone.',
+      run: function () {
+        c.gone = true; poof(p);
+        return JoyStore.remove(cardKey(c)).catch(function (err) { c.gone = false; p.gone = false; p.el.hidden = false; render(); throw err; });
+      }
+    };
+  }
+
+  function deleteLetterWhat(j) {
+    var L = LETTERS[j];
+    var p = placed.filter(function (q) { return q.kind === 'letter' && q.idx === j; })[0];
+    return {
+      name: 'the letter \u201c' + L.label + '\u201d',
+      title: 'Delete the letter \u201c' + L.label + '\u201d?',
+      detail: 'This removes it for everyone.',
+      run: function () {
+        L.gone = true;
+        if (p) poof(p);
+        if (rb) { closeRainbowNow(); }
+        renderBox();
+        return JoyStore.remove(letterKey(j)).catch(function (err) { L.gone = false; if (p) { p.gone = false; p.el.hidden = false; } renderBox(); throw err; });
+      }
+    };
+  }
+
+  function deletePhotoWhat(ci, i) {
+    var c = CARDS[ci], ph = c.photos[i];
+    return {
+      name: 'this photo',
+      title: 'Delete this photo?',
+      detail: 'It comes off ' + c.title + ' for everyone.',
+      run: function () {
+        var at = c.photos.indexOf(ph);
+        if (at < 0) return;
+        c.photos.splice(at, 1);
+        afterPhotosChanged(ci, at);
+        return JoyStore.remove(photoKey(ph)).catch(function (err) {
+          c.photos.splice(Math.min(at, c.photos.length), 0, ph);
+          afterPhotosChanged(ci, at);
+          throw err;
+        });
+      }
+    };
+  }
+
+  function afterPhotosChanged(ci, at) {
+    if (!openState || openState.ci !== ci) return;
+    var n = CARDS[ci].photos.length;
+    if (!n) { setGrid(true); return; }
+    openState.i = Math.min(at, n - 1);
+    if (openState.grid) buildSheet(); else showPhoto(openState.i, true);
+  }
+
+  function deleteBannerWhat() {
+    var p = currentPhoto();
+    return {
+      name: 'this banner',
+      title: 'Remove this banner?',
+      detail: 'The photo stays; its label comes off for everyone.',
+      run: function () {
+        var key = p.key || p.src;
+        var done = JoyStore.setLabel(key, { hidden: true });
+        renderBanner();
+        return done.catch(function (err) { renderBanner(); throw err; });
+      }
+    };
   }
 
   /* Dragged postcards stay where they're dropped, per browser. Keyed by title so
@@ -670,7 +901,7 @@
   function fitCam() {
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     placed.forEach(function (p) {
-      if (p.inBox) return;
+      if (p.inBox || p.gone) return;
       x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y);
       x1 = Math.max(x1, p.x + p.w); y1 = Math.max(y1, p.y + p.h);
     });
@@ -702,12 +933,13 @@
     stage.style.backgroundPosition = mod(-cam.x * z, s) + 'px ' + mod(-cam.y * z, s) + 'px';
 
     if (recenter) recenter.classList.toggle('lost', !placed.some(onScreen));
+    if (minusTarget) positionMinus();
   }
 
   function mod(a, b) { return ((a % b) + b) % b; }
 
   function onScreen(p) {
-    if (p.inBox) return false;
+    if (p.inBox || p.gone) return false;
     var r = p.el.getBoundingClientRect();
     return r.right > 0 && r.bottom > 0 && r.left < window.innerWidth && r.top < window.innerHeight;
   }
@@ -809,6 +1041,19 @@
       last = { t: e.timeStamp };
       // a tap anywhere else closes an open box (phones have no hover-out)
       if (boxItem && press.card !== boxItem.el) openBox(false);
+      hideMinus();
+      var pr = press;
+      if (pr.card || pr.fan) pr.hold = holdTimer(function () {
+        if (press !== pr || pr.moved) return;
+        if (pr.fan) {
+          pr.longPress = true;
+          showMinus(pr.fan, deleteLetterWhat(+pr.fan.dataset.letter));
+        } else if (!pr.card.classList.contains('keepsake')) {
+          var item = placed[+pr.card.dataset.p];
+          pr.longPress = true;
+          showMinus(pr.card, item.kind === 'card' ? deleteCardWhat(item) : deleteLetterWhat(item.idx));
+        }
+      });
     } else {
       // a second finger: this is a pinch now, and never a tap
       dropCard();
@@ -838,6 +1083,8 @@
 
     if (!press || e.pointerId !== press.id) return;
     if (!press.moved && Math.hypot(e.clientX - press.sx, e.clientY - press.sy) > TAP_SLOP) {
+      if (press.longPress) return;             // the minus is up; this press is done
+      clearTimeout(press.hold);
       press.moved = true;
       stage.classList.add('dragging');
       dismissHint();
@@ -904,11 +1151,12 @@
     }
 
     var p = press;
+    if (p) clearTimeout(p.hold);
     dropCard();
     press = null;
     stage.classList.remove('dragging');
     if (!p || p.id !== e.pointerId) return;
-    if (p.held) return;
+    if (p.held || p.longPress) return;
     if (!p.moved) {
       vel.x = vel.y = 0;
       if (e.type !== 'pointerup') return;
@@ -925,6 +1173,7 @@
     e.preventDefault();
     if (openState || letterState || rb) return;
     stop();
+    hideMinus();
     var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
     var dx = e.deltaX * unit, dy = e.deltaY * unit;
     if (e.ctrlKey || e.metaKey) {
@@ -1080,6 +1329,7 @@
 
   function labelFor(p) {
     var o = window.JoyStore && JoyStore.label(p.key || p.src);
+    if (o && o.hidden) return { text: '', x: null, y: null };
     return {
       text: o && typeof o.text === 'string' && o.text ? o.text : (p.label || ''),
       x: o && isFinite(o.x) ? o.x : null,
@@ -1154,7 +1404,13 @@
     if (editing || (e.pointerType === 'mouse' && e.button !== 0)) return;
     e.stopPropagation();                      // not a swipe of the photo
     var c = bannerCentre();
-    bDrag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: c.x, y0: c.y, moved: false };
+    hideMinus();
+    var bd = bDrag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: c.x, y0: c.y, moved: false };
+    bd.hold = holdTimer(function () {
+      if (bDrag !== bd || bd.moved) return;
+      bd.longPress = true;
+      showMinus(vBanner, deleteBannerWhat());
+    });
     try { vBanner.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
   }
 
@@ -1162,6 +1418,8 @@
     if (!bDrag || e.pointerId !== bDrag.id) return;
     var dx = e.clientX - bDrag.sx, dy = e.clientY - bDrag.sy;
     if (!bDrag.moved && Math.hypot(dx, dy) <= TAP_SLOP) return;
+    if (bDrag.longPress) return;
+    clearTimeout(bDrag.hold);
     bDrag.moved = true;
     vBanner.classList.add('moving');
     var ph = vPhoto.getBoundingClientRect();
@@ -1177,7 +1435,9 @@
     e.stopPropagation();
     var d = bDrag;
     bDrag = null;
+    clearTimeout(d.hold);
     vBanner.classList.remove('moving');
+    if (d.longPress) { try { vBanner.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ } return; }
     try { vBanner.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     var p = currentPhoto();
     if (!p || e.type !== 'pointerup') { renderBanner(); return; }
@@ -1277,6 +1537,7 @@
 
   function closeViewer() {
     if (!openState || openState.closing) return;
+    hideMinus();
     if (editing) endEdit(true);
     var st = openState;
     st.closing = true;
@@ -1344,6 +1605,7 @@
   }
 
   function setGrid(on) {
+    hideMinus();
     // with nothing to show one at a time, the grid (and its "+ add photos") is all there is
     if (!on && openState && !CARDS[openState.ci].photos.length) on = true;
     if (openState) openState.grid = on;
@@ -1391,7 +1653,13 @@
    * touch-action: none, so the browser never claims the gesture as a scroll. */
   function onSwipeDown(e) {
     if (!openState || openState.grid || editing || (e.pointerType === 'mouse' && e.button !== 0)) return;
-    swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, moved: false, onPhoto: !!e.target.closest('.viewer-photo') };
+    hideMinus();
+    var sw = swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, moved: false, onPhoto: !!e.target.closest('.viewer-photo') };
+    if (sw.onPhoto) sw.hold = holdTimer(function () {
+      if (swipe !== sw || sw.moved) return;
+      sw.longPress = true;
+      showMinus(vPhoto, deletePhotoWhat(openState.ci, openState.i));
+    });
     try { vCard.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
   }
 
@@ -1399,7 +1667,8 @@
     if (!swipe || e.pointerId !== swipe.id) return;
     var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
     if (!swipe.moved) {
-      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
+      if (Math.hypot(dx, dy) > TAP_SLOP) clearTimeout(swipe.hold);
+      if (swipe.longPress || Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
       swipe.moved = true;
       vImg.style.transition = 'none';
     }
@@ -1428,7 +1697,9 @@
     if (!swipe || e.pointerId !== swipe.id) return;
     var sw = swipe;
     swipe = null;
+    clearTimeout(sw.hold);
     try { vCard.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    if (sw.longPress) return;
     // the tap that finished editing a banner shouldn't also turn the page
     if (editing || Date.now() - editEndedAt < 450) return;
     var n = CARDS[openState.ci].photos.length;
@@ -1598,6 +1869,7 @@
 
     function firstPaint() {
       mergeAdded();
+      applyGone();
       layout();
       var f = fitCam();
       cam.x = f.x; cam.y = f.y; cam.z = f.z;
@@ -1613,6 +1885,9 @@
       JoyStore.ready.then(function () { if (!painted) { clearTimeout(late); paintOnce(); } else refreshAdded(); });
     } else firstPaint();
 
+    document.addEventListener('contextmenu', function (e) {
+      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env')) e.preventDefault();
+    });
     window.JoyDesk = {
       cards: function () { return CARDS; },
       refresh: refreshAdded,
@@ -1648,8 +1923,28 @@
     });
     vPrev.addEventListener('click', function () { step(-1); });
     vGridBtn.addEventListener('click', function () { if (openState) setGrid(!openState.grid); });
+    var thumbHold = 0, thumbHeldAt = 0, thumbStart = null;
+    vSheetGrid.addEventListener('pointerdown', function (e) {
+      var t = e.target.closest('.sheet-thumb');
+      hideMinus();
+      clearTimeout(thumbHold);
+      if (!t) return;
+      thumbStart = { x: e.clientX, y: e.clientY };
+      thumbHold = holdTimer(function () {
+        thumbHeldAt = Date.now();
+        showMinus(t, deletePhotoWhat(openState.ci, +t.dataset.i));
+      });
+    });
+    vSheetGrid.addEventListener('pointermove', function (e) {
+      if (thumbStart && Math.hypot(e.clientX - thumbStart.x, e.clientY - thumbStart.y) > TAP_SLOP) clearTimeout(thumbHold);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) {
+      vSheetGrid.addEventListener(t, function () { clearTimeout(thumbHold); thumbStart = null; });
+    });
+    vSheetGrid.addEventListener('scroll', function () { clearTimeout(thumbHold); hideMinus(); }, true);
     vSheetGrid.addEventListener('click', function (e) {
       if (e.target.closest('.sheet-add')) return;
+      if (Date.now() - thumbHeldAt < 700) return;      // that press was a hold
       var t = e.target.closest('.sheet-thumb');
       if (!t || !openState) return;
       openState.i = +t.dataset.i;

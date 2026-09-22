@@ -154,8 +154,17 @@ Deno.serve(async (req) => {
         if ("text" in body) patch.text = text(body.text, 80);
         if ("x" in body) patch.x = num(body.x, -25, 125);
         if ("y" in body) patch.y = num(body.y, -25, 125);
+        if ("hidden" in body) patch.hidden = body.hidden === true;   // a banner taken off its photo
         if (!Object.keys(patch).length) throw new Bad("nothing to change");
         return json(await setState(sb, visitor, action, "label:" + src, patch));
+      }
+
+      // Delete a postcard, photo or letter -- for everyone. Nothing is erased:
+      // it's marked gone (and logged), so it can always be brought back.
+      case "remove": {
+        const key = typeof body.key === "string" ? body.key : "";
+        if (!/^(card|photo|letter):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
+        return json(await setState(sb, visitor, action, "gone:" + key, { gone: body.gone !== false }));
       }
 
       // Put a letter in the keepsake box, or take it out.
