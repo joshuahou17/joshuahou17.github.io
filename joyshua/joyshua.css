@@ -199,7 +199,7 @@ body {
   opacity: 0;
   transition: opacity 0.35s ease;
 }
-.viewer.open .viewer-scrim { opacity: 1; }
+.viewer.open .viewer-scrim, .letter-view.open .viewer-scrim { opacity: 1; }
 
 .viewer-card {
   position: relative;
@@ -267,7 +267,7 @@ body {
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.15s ease;
 }
-.viewer.open .viewer-btn { opacity: 1; }
+.viewer.open .viewer-btn, .letter-view.open .viewer-btn { opacity: 1; }
 .viewer-btn:hover { transform: scale(1.07); }
 .viewer-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .viewer-btn[disabled] { visibility: hidden; }
@@ -480,11 +480,158 @@ body {
 }
 .banner--sticker.banner--alt > span { background: #2aa198; }
 
+/* ---------- envelopes on the desk ----------
+   Back side up: the pale bottom fold, the darker top flap, the label written
+   across the bottom. All grey, like the real ones. */
+
+:root {
+  --env: #b9b9b5;
+  --env-fold: #c6c6c2;
+  --env-flap: #a8a8a4;
+  --env-ink: #36363a;
+  --letter: #dededa;
+}
+
+.card.envelope { width: 360px; height: 226px; }
+.env-body {
+  position: relative;
+  background: var(--env);
+  border-radius: 4px;
+}
+.env-body::before {                 /* the bottom fold */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--env-fold);
+  clip-path: polygon(0 100%, 50% 42%, 100% 100%);
+}
+.env-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 56%;
+  background: linear-gradient(var(--env-flap), #a1a19d);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.env-label {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 11%;
+  font: 700 29px/1.02 'Caveat', cursive;
+  color: var(--env-ink);
+  text-align: center;
+  rotate: -2deg;
+}
+
+/* ---------- opening a letter ---------- */
+
+.letter-view {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+}
+.letter-view[hidden] { display: none; }
+
+.lv-env {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(86vw, 520px);
+  aspect-ratio: 360 / 226;
+  translate: -50% -50%;
+  perspective: 1000px;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.lv-env.gone { opacity: 0; transform: translateY(70px); }
+.lv-env > span { position: absolute; display: block; }
+.lv-back {
+  inset: 0;
+  background: #a9a9a5;
+  border-radius: 5px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55);
+}
+.lv-slip {
+  left: 5%;
+  right: 5%;
+  top: 6%;
+  bottom: 8%;
+  z-index: 1;
+  background: var(--letter);
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.55s cubic-bezier(.2, .8, .2, 1);
+}
+.lv-env.out .lv-slip { transform: translateY(-62%); }
+.lv-front {                         /* the pocket: everything but the V at the top */
+  inset: 0;
+  z-index: 2;
+  background: var(--env);
+  border-radius: 5px;
+  clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+}
+.lv-front::before {                 /* its bottom fold */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--env-fold);
+  clip-path: polygon(0 100%, 50% 42%, 100% 100%);
+}
+.lv-flap {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 56%;
+  z-index: 3;
+  background: linear-gradient(var(--env-flap), #a1a19d);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  /* the flap passes behind the card exactly as it goes edge-on */
+  transition: transform 0.44s ease-in-out, z-index 0s linear 0.22s;
+}
+.lv-env.opened .lv-flap { transform: rotateX(180deg); z-index: 0; }
+
+.lv-letter {
+  position: relative;
+  z-index: 4;
+  width: min(92vw, 640px);
+  max-height: calc(100vh - 130px);
+  max-height: calc(100dvh - 130px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 30px 40px 36px;
+  background: var(--letter);
+  color: #2e2e31;
+  border-radius: 3px;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.55);
+  visibility: hidden;
+  outline: none;
+}
+.lv-letter.shown { visibility: visible; }
+.lv-label {
+  margin: 0 0 18px;
+  font: 700 11px/1.4 'Space Mono', monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7c7c78;
+}
+.lv-text p {
+  margin: 0 0 0.75em;
+  font: 500 23px/1.36 'Caveat', cursive;
+}
+.lv-text .lv-greeting { font-weight: 700; font-size: 26px; }
+.lv-text .lv-sign { margin: 1.1em 0 0; }
+
 /* ---------- phones ---------- */
 
 @media (max-width: 640px) {
   .mast-title { font-size: 34px; }
   .viewer-card { padding: 12px 12px 0; }
+  .lv-letter { padding: 22px 20px 26px; }
+  .lv-text p { font-size: 21px; }
   .viewer-title { font-size: 26px; }
   .viewer-sheet { padding: 12px 12px 14px; max-height: calc(100dvh - 160px); }
   .sheet-title { font-size: 26px; margin-bottom: 8px; }
@@ -501,4 +648,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .card-body, .viewer-photo, .viewer-scrim, .viewer-btn, .viewer-photo img { transition: none; }
   .banner, #zoom-fit.lost { animation: none; }
+  .lv-flap, .lv-slip, .lv-env { transition: none; }
 }

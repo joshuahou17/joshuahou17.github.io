@@ -19,7 +19,9 @@
   'use strict';
 
   var CARDS = window.POSTCARDS || [];
+  var LETTERS = window.LETTERS || [];
   if (!CARDS.length) return;
+  var EW = 360, EH = 226;     // an envelope on the desk
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -71,6 +73,19 @@
     var saved = loadSpots();
     placed.forEach(function (p) { world.removeChild(p.el); });
     placed = [];
+
+    function put(el, x, y, rot, kind, idx, w, h, key) {
+      // wherever this visitor last dropped it, if they moved it
+      var spot = saved[key];
+      if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
+      var p = { el: el, x: x, y: y, rot: rot, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
+      el.dataset.p = placed.length;
+      el.dataset.rot = rot.toFixed(2);
+      placed.push(p);
+      placeCard(p);
+      world.appendChild(el);
+    }
+
     for (var i = 0; i < n; i++) {
       var c = i % cols, r = Math.floor(i / cols);
       var inRow = Math.min(cols, n - r * cols);      // centre a short last row
@@ -78,12 +93,18 @@
       var y = (r - (rows - 1) / 2) * cellH - CH / 2 + (rand() - 0.5) * CH * 0.16;
       // alternate the lean so neighbours don't tilt the same way
       var rot = (i % 2 ? 1 : -1) * (2.5 + rand() * 3.5);
-      // wherever this visitor last dropped it, if they moved it
-      var spot = saved[CARDS[i].title];
-      if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
-      var el = makeCard(i, x, y, rot);
-      world.appendChild(el);
-      placed.push({ el: el, x: x, y: y, rot: rot, card: i, moved: !!spot });
+      put(makeCard(i), x, y, rot, 'card', i, CW, CH, CARDS[i].title);
+    }
+
+    // The envelopes get a row of their own under the postcards (on a phone, they
+    // just carry on down the column).
+    var m = LETTERS.length;
+    for (var j = 0; j < m; j++) {
+      var er = rows + (portrait ? j : 0), ec = portrait ? 0 : j, eIn = portrait ? 1 : m;
+      var ex = (ec - (eIn - 1) / 2) * cellW - EW / 2 + (rand() - 0.5) * EW * 0.2;
+      var ey = (er - (rows - 1) / 2) * cellH - EH / 2 + (rand() - 0.5) * EH * 0.16;
+      var erot = (j % 2 ? -1 : 1) * (3 + rand() * 4);
+      put(makeEnvelope(j), ex, ey, erot, 'letter', j, EW, EH, 'letter:' + LETTERS[j].label);
     }
   }
 
@@ -98,9 +119,7 @@
 
   function saveSpots() {
     var out = {};
-    placed.forEach(function (p) { if (p.moved) out[CARDS[p.card].title] = { x: Math.round(p.x), y: Math.round(p.y) }; });
-    var old = loadSpots();
-    for (var k in old) if (!(k in out) && CARDS.some(function (c) { return c.title === k; })) out[k] = old[k];
+    placed.forEach(function (p) { if (p.moved) out[p.key] = { x: Math.round(p.x), y: Math.round(p.y) }; });
     try { localStorage.setItem(SPOTS_KEY, JSON.stringify(out)); } catch (err) { /* ignore */ }
   }
 
@@ -110,15 +129,13 @@
 
   var zTop = 1;
 
-  function makeCard(i, x, y, rot) {
+  function makeCard(i) {
     var c = CARDS[i];
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'card';
     b.dataset.card = i;
-    b.dataset.rot = rot.toFixed(2);
     b.setAttribute('aria-label', c.title + ' postcard, ' + c.photos.length + (c.photos.length === 1 ? ' photo' : ' photos'));
-    b.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot.toFixed(2) + 'deg)';
     var img = document.createElement('img');
     img.className = 'card-art';
     img.src = c.front.src;
@@ -134,12 +151,32 @@
     return b;
   }
 
-  // The camera that fits every postcard on screen with room to breathe.
+  // A grey envelope, back side up (flap and all), with its label written across.
+  function makeEnvelope(j) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'card envelope';
+    b.dataset.letter = j;
+    b.setAttribute('aria-label', 'Envelope: ' + LETTERS[j].label + '. Open the letter.');
+    var body = document.createElement('span');
+    body.className = 'card-body env-body';
+    var flap = document.createElement('span');
+    flap.className = 'env-flap';
+    var label = document.createElement('span');
+    label.className = 'env-label';
+    label.textContent = LETTERS[j].label;
+    body.appendChild(flap);
+    body.appendChild(label);
+    b.appendChild(body);
+    return b;
+  }
+
+  // The camera that fits everything on the desk on screen with room to breathe.
   function fitCam() {
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     placed.forEach(function (p) {
       x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y);
-      x1 = Math.max(x1, p.x + CW); y1 = Math.max(y1, p.y + CH);
+      x1 = Math.max(x1, p.x + p.w); y1 = Math.max(y1, p.y + p.h);
     });
     var vw = window.innerWidth, vh = window.innerHeight;
     var padX = small ? 28 : 120, padY = 150;   // leaves room for the label + controls
@@ -262,7 +299,7 @@
   }
 
   function onDown(e) {
-    if (openState || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (openState || letterState || (e.pointerType === 'mouse' && e.button !== 0)) return;
     if (pointers.size >= 2) return;
     stop();
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -307,7 +344,7 @@
       // a press that started on a postcard picks the postcard up instead of
       // panning the desk; it comes to the top of the pile
       if (press.card) {
-        press.held = placed[+press.card.dataset.card];
+        press.held = placed[+press.card.dataset.p];
         press.held.el.classList.add('held');
         press.held.el.style.zIndex = ++zTop;
       }
@@ -362,7 +399,7 @@
     if (p.held) return;
     if (!p.moved) {
       vel.x = vel.y = 0;
-      if (p.card && e.type === 'pointerup') openCard(p.card);
+      if (p.card && e.type === 'pointerup') openItem(p.card);
       return;
     }
     // a drag that stopped before letting go shouldn't fling
@@ -372,7 +409,7 @@
 
   function onWheel(e) {
     e.preventDefault();
-    if (openState) return;
+    if (openState || letterState) return;
     stop();
     var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
     var dx = e.deltaX * unit, dy = e.deltaY * unit;
@@ -388,6 +425,7 @@
   }
 
   function onKey(e) {
+    if (letterState) return letterKey(e);
     if (openState) return viewerKey(e);
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var step = e.shiftKey ? 480 : 180;
@@ -413,7 +451,7 @@
   function onClick(e) {
     if (e.detail !== 0) return;
     var b = e.target.closest && e.target.closest('.card');
-    if (b) openCard(b);
+    if (b) openItem(b);
   }
 
   // ---------- the viewer ----------
@@ -508,14 +546,19 @@
     var f = panel.getBoundingClientRect();
     var dx = (r.left + r.width / 2) - (f.left + f.width / 2);
     var dy = (r.top + r.height / 2) - (f.top + f.height / 2);
-    var s = CW * cam.z / f.width;
+    var s = placed[+btn.dataset.p].w * cam.z / f.width;
     return 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (+btn.dataset.rot || 0) + 'deg) scale(' + s + ')';
   }
 
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  function openItem(btn) {
+    if (btn.classList.contains('envelope')) openLetter(btn);
+    else openCard(btn);
+  }
+
   function openCard(btn) {
-    if (openState) return;
+    if (openState || letterState) return;
     stop();
     var ci = +btn.dataset.card;
     openState = { ci: ci, i: 0, btn: btn, grid: false };
@@ -631,6 +674,111 @@
     else if (Math.hypot(dx, dy) < TAP_SLOP && e.target.closest('.viewer-photo')) step(1);
   }
 
+  // ---------- the letters ----------
+
+  /* Opening an envelope, in four beats: it flies off the desk to the middle, the
+   * flap swings open (the flap drops behind the card halfway through its turn,
+   * via a delayed z-index in the CSS), a plain grey card rises out of the pocket,
+   * and then the card grows into the full letter while the envelope falls away.
+   * The small card and the letter are separate elements -- the letter is far
+   * taller than an envelope, so it can't honestly sit inside one. */
+  var lv, lvEnv, lvSlip, lvLetter, lvLabel, lvText, lvClose;
+  var letterState = null;     // {btn, timers, shown}
+
+  function rectTransform(from, to) {
+    var dx = (from.left + from.width / 2) - (to.left + to.width / 2);
+    var dy = (from.top + from.height / 2) - (to.top + to.height / 2);
+    return 'translate(' + dx + 'px,' + dy + 'px) scale(' + (from.width / to.width) + ')';
+  }
+
+  function fillLetter(L) {
+    lvLabel.textContent = L.label;
+    lvText.textContent = '';
+    function para(text, cls) {
+      var el = document.createElement('p');
+      if (cls) el.className = cls;
+      text.split('\n').forEach(function (line, k) {
+        if (k) el.appendChild(document.createElement('br'));
+        el.appendChild(document.createTextNode(line));
+      });
+      lvText.appendChild(el);
+    }
+    para(L.greeting, 'lv-greeting');
+    L.body.forEach(function (t) { para(t); });
+    para(L.closing + '\n' + L.name, 'lv-sign');
+    lvLetter.scrollTop = 0;
+  }
+
+  function showLetter(animateFrom) {
+    lvLetter.classList.add('shown');
+    letterState.shown = true;
+    if (animateFrom && lvLetter.animate) {
+      lvLetter.animate(
+        [{ transform: rectTransform(animateFrom, lvLetter.getBoundingClientRect()), opacity: 0.5 }, { transform: 'none', opacity: 1 }],
+        { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' }
+      );
+    }
+    lvEnv.classList.add('gone');
+    lvLetter.focus({ preventScroll: true });
+  }
+
+  function openLetter(btn) {
+    if (letterState || openState) return;
+    stop();
+    letterState = { btn: btn, timers: [], shown: false };
+    fillLetter(LETTERS[+btn.dataset.letter]);
+    lvEnv.className = 'lv-env';
+    lvLetter.classList.remove('shown');
+    lv.hidden = false;
+    btn.style.visibility = 'hidden';
+    void lv.offsetWidth;
+    lv.classList.add('open');
+    lvClose.focus({ preventScroll: true });
+
+    if (reduced || !lvEnv.animate) { showLetter(null); return; }
+    lvEnv.animate(
+      [{ transform: fromCardTransform(btn, lvEnv), opacity: 0.6 }, { transform: 'none', opacity: 1 }],
+      { duration: 460, easing: 'cubic-bezier(.2,.8,.2,1)' }
+    );
+    var t = letterState.timers;
+    t.push(setTimeout(function () { lvEnv.classList.add('opened'); }, 500));
+    t.push(setTimeout(function () { lvEnv.classList.add('out'); }, 950));
+    t.push(setTimeout(function () { showLetter(lvSlip.getBoundingClientRect()); }, 1550));
+  }
+
+  function closeLetter() {
+    if (!letterState || letterState.closing) return;
+    var st = letterState;
+    st.closing = true;
+    st.timers.forEach(clearTimeout);
+    lv.classList.remove('open');
+    var panel = st.shown ? lvLetter : lvEnv;
+    function done() {
+      lv.hidden = true;
+      lvLetter.classList.remove('shown');
+      lvEnv.className = 'lv-env';
+      st.btn.style.visibility = '';
+      letterState = null;
+      st.btn.focus({ preventScroll: true });
+    }
+    if (!reduced && panel.animate) {
+      var a = panel.animate(
+        [{ transform: 'none', opacity: 1 }, { transform: fromCardTransform(st.btn, panel), opacity: 0.2 }],
+        { duration: 360, easing: 'cubic-bezier(.5,0,.75,.3)', fill: 'forwards' }
+      );
+      a.onfinish = function () { done(); a.cancel(); };
+    } else done();
+  }
+
+  function letterKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeLetter(); }
+    else if (e.key === 'Tab') {
+      // only two stops in here: the letter (so it can be scrolled) and close
+      e.preventDefault();
+      (document.activeElement === lvClose ? lvLetter : lvClose).focus({ preventScroll: true });
+    }
+  }
+
   // ---------- boot ----------
 
   function ready() {
@@ -652,6 +800,16 @@
     vSheetTitle = document.getElementById('sheet-title');
     vSheetGrid = document.getElementById('sheet-grid');
     recenter = document.getElementById('zoom-fit');
+    lv = document.getElementById('letter-view');
+    lvEnv = document.getElementById('lv-env');
+    lvSlip = lvEnv.querySelector('.lv-slip');
+    lvLetter = document.getElementById('lv-letter');
+    lvLabel = document.getElementById('lv-label');
+    lvText = document.getElementById('lv-text');
+    lvClose = lv.querySelector('.viewer-close');
+    lv.addEventListener('click', function (e) {
+      if (e.target.closest('[data-lclose]')) closeLetter();
+    });
 
     layout();
     var f = fitCam();
