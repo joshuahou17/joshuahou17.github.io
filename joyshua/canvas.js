@@ -23,7 +23,7 @@
   if (!CARDS.length) return;
   var EW = 360, EH = 226;     // an envelope on the desk
   var BW = 300, BH = 210;     // the keepsake box
-  var PW = 370, PH = 272;     // the bucket-list pail (and its pile of done slips)
+  var PW = 262, PH = 272;     // the bucket-list pail
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -280,8 +280,8 @@
 
   /* ---------- the bucket-list pail ----------
    * A galvanised pail with a wire handle, folded paper slips (one per idea)
-   * sticking up out of it; the ones that have been done lie in a stamped pile
-   * beside it. bucket.js fills in the slips and the pile and owns what happens
+   * sticking up out of it, done ones included (stamped). bucket.js fills in
+   * the slips and owns what happens
    * when it's tapped -- the desk only places it, like everything else. */
   function makePail() {
     var b = document.createElement('div');
@@ -291,12 +291,17 @@
     b.setAttribute('aria-label', 'The bucket list');
     b.innerHTML =
       '<span class="pl-shadow"></span>' +
-      '<span class="pl-pile" aria-hidden="true"></span>' +
       '<svg class="pl-shell pl-shell--back" viewBox="0 0 220 230" preserveAspectRatio="none" aria-hidden="true">' +
-        '<defs><linearGradient id="plIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d6266"/><stop offset="1" stop-color="#8b9094"/></linearGradient></defs>' +
+        '<defs><linearGradient id="plIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ba1a6"/><stop offset=".45" stop-color="#6c7277"/><stop offset="1" stop-color="#3d4247"/></linearGradient></defs>' +
         '<ellipse cx="110" cy="62" rx="98" ry="22" fill="url(#plIn)"/>' +
+        // the back rim, catching the light behind the slips
+        '<path d="M12 62 A98 22 0 0 1 208 62" fill="none" stroke="#e3e7ea" stroke-width="4"/>' +
       '</svg>' +
       '<span class="pl-slips"></span>' +
+      '<svg class="pl-shell pl-shade" viewBox="0 0 220 230" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs><linearGradient id="plShade" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#1e2226" stop-opacity="0"/><stop offset="1" stop-color="#1e2226" stop-opacity=".62"/></linearGradient></defs>' +
+        '<ellipse cx="110" cy="62" rx="98" ry="22" fill="url(#plShade)"/>' +
+      '</svg>' +
       '<svg class="pl-shell pl-shell--front" viewBox="0 0 220 230" preserveAspectRatio="none" aria-hidden="true">' +
         '<defs>' +
           '<linearGradient id="plBody" x1="0" y1="0" x2="1" y2="0">' +
@@ -1690,8 +1695,7 @@
   function openItem(btn, target) {
     if (btn.classList.contains('keepsake')) openRainbow();
     else if (btn.classList.contains('pail')) {
-      var onPile = target && target.closest && target.closest('.pl-pile');
-      if (window.JoyBucket) JoyBucket.open(onPile ? 'done' : 'todo');
+      if (window.JoyBucket) JoyBucket.open('todo');
     }
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
