@@ -3,8 +3,8 @@
  *
  * Tap the pail and every slip spills out of it across the screen; tap the
  * background to put them back. A slip that's been done gets a DONE stamp with
- * the date and goes onto a separate pile beside the pail (tap the pile to
- * spread those out; the arrow on one puts it back in the pail).
+ * the date and stays in the pail (its top shows the stamp); the "done" tab
+ * spreads those out, and the arrow on one takes the stamp off again.
  *
  * The slips are rows in joyshua_topics with kind 'bucket' (the same shape as
  * the things to talk about), saved through JoyStore. The desk (canvas.js) owns
@@ -62,43 +62,39 @@
   function pailEl() { return document.querySelector('.card.pail'); }
 
   /* ---------- the pail on the desk ----------
-   * Up to nine slips stand up out of it, fanned across the opening; the done
-   * ones lie in a little stamped pile beside it. */
+   * Up to ten slips stand in it, in two rows across the opening -- the ones
+   * still to do and the ones that have been done (a red stamp on their tops)
+   * all together, the newest nearest the middle. */
   function paint() {
     var p = pailEl();
     if (!p) return;
     var open = todo(), fin = done();
-    p.classList.toggle('empty', !open.length);
-    p.classList.toggle('has-pile', fin.length > 0);
+    p.classList.toggle('empty', !open.length && !fin.length);
     p.setAttribute('aria-label', 'The bucket list, ' +
-      (open.length ? open.length + (open.length === 1 ? ' thing' : ' things') + ' to do' : 'empty') +
+      (open.length ? open.length + (open.length === 1 ? ' thing' : ' things') + ' to do' : 'nothing to do') +
       (fin.length ? ', ' + fin.length + ' done' : '') + '. Press to spill them out.');
 
     var box = p.querySelector('.pl-slips');
     box.textContent = '';
-    var shown = open.slice(0, 9), n = shown.length;
-    shown.forEach(function (t, k) {
+    var all = slips().sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; }).slice(0, 10);
+    // deal them out from the middle, so the newest stand in the centre
+    var n = all.length, order = [];
+    all.forEach(function (t, k) { order[k % 2 ? Math.floor((n - 1) / 2) - Math.ceil(k / 2) : Math.floor((n - 1) / 2) + k / 2] = t; });
+    order.forEach(function (t, k) {
+      if (!t) return;
       var r = hash(t.id);
-      var s = el('span', 'pl-slip author-' + who(t.author));
+      var s = el('span', 'pl-slip author-' + who(t.author) + (t.done_at ? ' pl-slip--done' : ''));
       var off = n > 1 ? k / (n - 1) - 0.5 : 0;                   // -0.5 .. 0.5 across the opening
-      s.style.left = (50 + off * 62 + (r - 0.5) * 6).toFixed(1) + '%';
-      s.style.setProperty('--lift', (10 + r * 24 + (1 - Math.abs(off) * 2) * 10).toFixed(1) + 'px');
-      s.style.setProperty('--lean', (off * 26 + (r - 0.5) * 14).toFixed(1) + 'deg');
-      s.style.zIndex = k % 2 ? 2 : 1;
+      var back = k % 2 === 0;                                    // two rows, back and front
+      // the opening is an ellipse: nearer its ends, a slip has to stand further back
+      var edge = Math.abs(off) * 2;
+      s.style.left = (50 + off * (back ? 56 : 64) + (r - 0.5) * 6).toFixed(1) + '%';
+      s.style.setProperty('--lift', ((back ? 20 : 6) + r * 14 - edge * 10).toFixed(1) + 'px');
+      s.style.setProperty('--lean', (off * 18 + (r - 0.5) * 10).toFixed(1) + 'deg');
+      s.style.zIndex = back ? 1 : 2;
+      if (back) s.classList.add('pl-slip--back');
       box.appendChild(s);
     });
-
-    var pile = p.querySelector('.pl-pile');
-    pile.textContent = '';
-    fin.slice(0, 4).reverse().forEach(function (t, k) {
-      var r = hash(t.id);
-      var s = el('span', 'pl-done author-' + who(t.author));
-      s.style.setProperty('--tilt', ((r - 0.5) * 30).toFixed(1) + 'deg');
-      s.style.setProperty('--dx', ((r - 0.5) * 16).toFixed(1) + 'px');
-      s.style.bottom = (k * 5) + 'px';
-      pile.appendChild(s);
-    });
-    if (fin.length) pile.appendChild(el('span', 'pl-count', String(fin.length)));
   }
 
   /* ---------- one slip, spilled out ---------- */
@@ -232,7 +228,7 @@
   // Each slip flies out from wherever the pail (or its pile) is on screen.
   function spillFrom(items) {
     var p = pailEl();
-    var src = p && p.querySelector(mode === 'done' && p.classList.contains('has-pile') ? '.pl-pile' : '.pl-slips');
+    var src = p && p.querySelector('.pl-slips');
     var r = src && src.getBoundingClientRect();
     if (!r || !r.width) r = { left: window.innerWidth / 2, top: window.innerHeight, width: 0, height: 0 };
     var ox = r.left + r.width / 2, oy = r.top + r.height / 2;

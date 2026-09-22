@@ -1087,7 +1087,7 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 .c-input:focus { outline: 2px solid var(--pen); outline-offset: 1px; background: rgba(255, 255, 255, 0.8); }
 .c-letter { resize: vertical; min-height: 200px; line-height: 1.35; }
 
-.c-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.c-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .c-choice {
   display: flex;
   flex-direction: column;
@@ -1452,7 +1452,7 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
    string, and a stamped pile of the done slips beside it. Tapped, the slips
    spill out over the screen. */
 
-.card.pail { width: 370px; height: 272px; overflow: visible; }
+.card.pail { width: 262px; height: 272px; overflow: visible; }
 .pail > span, .pail > svg { position: absolute; display: block; }
 .pail:focus-visible { outline: none; }
 .pail:focus-visible .pl-shell--front { filter: drop-shadow(0 0 1.5px var(--pen)) drop-shadow(0 0 1.5px var(--pen)); }
@@ -1467,26 +1467,30 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 
 /* the slips standing up out of the pail: folded strips of paper, their
    bottoms hidden behind the front of the body */
-.pl-slips { left: 16px; top: 0; width: 220px; height: 108px; pointer-events: none; }
+.pl-slips { left: 16px; top: 0; width: 220px; height: 126px; pointer-events: none; isolation: isolate; }   /* bottoms end behind the body */
+.pl-shade, .pl-shell--front { z-index: 1; }       /* in front of every slip, whatever its row */
+.pl-tag { z-index: 2; }
 .pl-slip {
   position: absolute;
   bottom: 0;
-  width: 34px; height: 80px;
+  width: 34px; height: 92px;
   margin-left: -17px;
   border-radius: 2px 2px 0 0;
   background-color: #fff;
   background-image:
     var(--grain),
+    /* deeper in the pail, darker */
+    linear-gradient(to top, rgba(30, 34, 38, 0.55) 0, rgba(30, 34, 38, 0.18) 38%, transparent 62%),
     linear-gradient(to right, rgba(0, 0, 0, 0.07) 0 48%, rgba(255, 255, 255, 0.35) 50%, transparent 54%),
     linear-gradient(var(--slip), var(--slip));
-  background-blend-mode: multiply, normal, normal;
+  background-blend-mode: multiply, normal, normal, normal;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
   transform-origin: 50% 100%;
   transform: translateY(calc(-1 * var(--lift))) rotate(var(--lean));
   transition: transform 0.3s cubic-bezier(.2, 1.4, .4, 1);
 }
-.pl-slip.author-josh, .pl-done.author-josh, .slip.author-josh { --slip: #f4f3ef; }
-.pl-slip.author-joyce, .pl-done.author-joyce, .slip.author-joyce { --slip: #f6ecd8; }
+.pl-slip.author-josh, .slip.author-josh { --slip: #f4f3ef; }
+.pl-slip.author-joyce, .slip.author-joyce { --slip: #f6ecd8; }
 .pail:hover .pl-slip { transform: translateY(calc(-1 * var(--lift) - 8px)) rotate(var(--lean)); }
 
 /* the paper tag, tied to the left lug */
@@ -1511,40 +1515,16 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 }
 .pl-tag-text { font: 700 22px/1 'Caveat', cursive; color: #3b3326; white-space: nowrap; }
 
-/* the pile of done slips, lying flat beside the pail */
-.pl-pile { left: 246px; top: 170px; width: 122px; height: 90px; cursor: pointer; }
-.pail:not(.has-pile) .pl-pile { display: none; }
-.pl-done {
-  position: absolute;
-  left: 50%;
-  width: 104px; height: 42px;
-  margin-left: -52px;
+/* a done slip, still in the pail: a small red stamp across its top */
+.pl-slip--done::after {
+  content: '';
+  position: absolute; left: 4px; right: 4px; top: 8px;
+  height: 12px;
+  border: 2px solid rgba(184, 43, 34, 0.8);
   border-radius: 2px;
-  background-color: #fff;
-  background-image: var(--grain), linear-gradient(var(--slip), var(--slip));
-  background-blend-mode: multiply;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.18);
-  transform: translateX(var(--dx)) rotate(var(--tilt));
-}
-.pl-done::after {                 /* a little red DONE stamp on each */
-  content: 'done';
-  position: absolute; right: 8px; top: 9px;
-  padding: 2px 5px 1px;
-  border: 2px solid rgba(190, 40, 32, 0.75);
-  border-radius: 3px;
-  rotate: -12deg;
-  color: rgba(190, 40, 32, 0.8);
-  font: 700 10px/1 'Special Elite', monospace;
-  letter-spacing: 0.12em; text-transform: uppercase;
-}
-.pl-count {
-  position: absolute; right: -2px; top: 4px;
-  min-width: 22px; height: 22px;
-  display: grid; place-items: center;
-  border-radius: 999px;
-  background: #b8352b; color: #fff;
-  font: 700 11px/1 'Space Mono', monospace;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  rotate: -14deg;
+  background: repeating-linear-gradient(to right, rgba(184, 43, 34, 0.75) 0 3px, transparent 3px 5px) center / 70% 3px no-repeat;
+  mix-blend-mode: multiply;
 }
 
 /* ---------- the spill ---------- */
@@ -1684,6 +1664,18 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   border: 0; border-radius: 50%;
   background: var(--pen); color: #fff;
   cursor: pointer;
+}
+
+/* the + panel's choice: an index card, ruled, with its red margin */
+.c-choice--talk .c-choice-art {
+  width: 70px; margin: 0 3px;
+  border-radius: 2px;
+  rotate: 3deg;
+  background:
+    linear-gradient(to right, transparent 9px, #e39a92 9px 10px, transparent 10px),
+    repeating-linear-gradient(to bottom, #fbf8f1 0 9px, #a9c3d6 9px 10px),
+    #fbf8f1;
+  box-shadow: 0 3px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 /* the + panel's choice: a little pail */

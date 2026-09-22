@@ -190,7 +190,9 @@
 
   // ---------- open / close ----------
 
-  function openBoard() {
+  // opts.write ('josh' | 'joyce'): open with a blank card of theirs ready to
+  // write on (the + panel's "To talk about")
+  function openBoard(opts) {
     open = true;
     showingDone = false;
     single = null;
@@ -198,7 +200,12 @@
     void boardEl.offsetWidth;
     boardEl.classList.add('open');
     draw();
-    boardEl.querySelector('.board-close').focus({ preventScroll: true });
+    var author = opts && (opts.write === 'josh' || opts.write === 'joyce') ? opts.write : null;
+    if (author) {
+      var w = writeCard(author);
+      listEl.insertBefore(w.card, listEl.firstChild);
+      w.area.focus({ preventScroll: true });
+    } else boardEl.querySelector('.board-close').focus({ preventScroll: true });
   }
 
   function closeBoard() {
