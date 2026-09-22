@@ -335,14 +335,76 @@ body {
 .banner {
   position: absolute;
   z-index: 3;
-  pointer-events: none;
   /* long captions wrap rather than run off the photo */
   width: max-content;
   max-width: 72%;
   text-align: center;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
-  animation: stick 0.5s cubic-bezier(.2, 1.5, .4, 1) 0.12s both;
+  /* backwards, not both: once stuck on, `scale` is free for the edit pop */
+  animation: stick 0.5s cubic-bezier(.2, 1.5, .4, 1) 0.12s backwards;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: scale 0.3s cubic-bezier(.2, 1.5, .4, 1), filter 0.3s ease;
 }
+.banner.moving { cursor: grabbing; scale: 1.06; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.4)); }
+/* moved by hand: centred on its saved spot, whatever corner its style prefers */
+.banner.placed { right: auto !important; bottom: auto !important; translate: -50% -50% !important; }
+
+/* editing a banner: it pops up and the photo goes dark behind it */
+.viewer-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 16, 10, 0.62);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  pointer-events: none;
+}
+.viewer.editing .viewer-photo::after { opacity: 1; }
+.viewer.editing .banner {
+  scale: 1.2;
+  z-index: 6;
+  cursor: text;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.55));
+}
+.banner .edit {
+  outline: none;
+  cursor: text;
+  min-width: 2ch;
+  caret-color: currentColor;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.banner--clipping > .edit {          /* the cut-out letters are rebuilt after */
+  padding: 3px 8px 4px;
+  font: 400 22px/1.2 'Abril Fatface', Georgia, serif;
+  background: #fff;
+  color: #111;
+}
+
+/* a quiet "saved" / "couldn't save" note */
+.toast {
+  position: fixed;
+  left: 50%;
+  top: max(26px, env(safe-area-inset-top));   /* clear of the arrows and zoom buttons */
+  z-index: 30;
+  translate: -50% -12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(30, 26, 20, 0.88);
+  color: #f6f1e6;
+  font: 700 11px/1.3 'Space Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.toast.show { opacity: 1; translate: -50% 0; }
+.toast.bad { background: #8f2a22; text-transform: none; letter-spacing: 0.02em; font-size: 12px; }
 .banner[hidden] { display: none; }
 .banner > span { display: inline-block; line-height: 1.12 !important; }
 @keyframes stick {

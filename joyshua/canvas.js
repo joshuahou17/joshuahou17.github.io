@@ -529,13 +529,165 @@
     vImg.src = p.src;
     if (vImg.complete && vImg.naturalWidth) vImg.classList.add('loaded');
 
-    vBanner.hidden = !p.label;
-    if (p.label) setBanner(i, p.label);
+    openState.box = box;
+    renderBanner();
 
     vCount.textContent = n > 1 ? (i + 1) + ' / ' + n : '';
     vPrev.disabled = vNext.disabled = n < 2;
 
     if (n > 1) { var pre = new Image(); pre.src = c.photos[(i + 1) % n].src; }
+  }
+
+  /* ---------- banners you can edit and move ----------
+   * A banner's words and spot come from the photo (postcards.js) unless someone
+   * has changed them on the page, in which case JoyStore has the edit. The spot
+   * is the banner's centre as a percentage of the photo, so it lands in the same
+   * place at every screen size; with no saved spot the style's own corner is
+   * used. A press that travels under TAP_SLOP is a tap (edit the words); any
+   * further and it's a drag (move the banner). */
+
+  var bDrag = null;           // a banner being pressed or dragged
+  var editing = null;         // {src, before, span}
+  var editEndedAt = 0;
+
+  function currentPhoto() {
+    return openState ? CARDS[openState.ci].photos[openState.i] : null;
+  }
+
+  function labelFor(p) {
+    var o = window.JoyStore && JoyStore.label(p.src);
+    return {
+      text: o && typeof o.text === 'string' && o.text ? o.text : (p.label || ''),
+      x: o && isFinite(o.x) ? o.x : null,
+      y: o && isFinite(o.y) ? o.y : null
+    };
+  }
+
+  function renderBanner() {
+    var p = currentPhoto();
+    if (!p || editing) return;
+    var L = labelFor(p);
+    vBanner.hidden = !L.text;
+    if (L.text) setBanner(openState.i, L.text);
+    placeBanner(L.x, L.y);
+  }
+
+  function placeBanner(x, y) {
+    if (x == null || y == null) {
+      vBanner.classList.remove('placed');
+      vBanner.style.left = vBanner.style.top = '';
+      return;
+    }
+    var box = openState.box, pad = vPhoto.offsetLeft;
+    vBanner.classList.add('placed');
+    vBanner.style.left = (pad + x / 100 * box.w) + 'px';
+    vBanner.style.top = (vPhoto.offsetTop + y / 100 * box.h) + 'px';
+  }
+
+  // Where the banner's centre is now, in % of the photo.
+  function bannerCentre() {
+    var b = vBanner.getBoundingClientRect(), ph = vPhoto.getBoundingClientRect();
+    return { x: (b.left + b.width / 2 - ph.left) / ph.width * 100, y: (b.top + b.height / 2 - ph.top) / ph.height * 100 };
+  }
+
+  function toast(msg, bad) {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.toggle('bad', !!bad);
+    t.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () { t.classList.remove('show'); }, bad ? 3200 : 1400);
+  }
+
+  function saveLabel(src, patch) {
+    if (!window.JoyStore) return;
+    JoyStore.setLabel(src, patch).then(
+      function () { toast('saved'); },
+      function (err) { toast(err.message || 'Couldn\u2019t save that.', true); if (currentPhoto() && currentPhoto().src === src) renderBanner(); }
+    );
+  }
+
+  function onBannerDown(e) {
+    if (editing || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.stopPropagation();                      // not a swipe of the photo
+    var c = bannerCentre();
+    bDrag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: c.x, y0: c.y, moved: false };
+    try { vBanner.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  }
+
+  function onBannerMove(e) {
+    if (!bDrag || e.pointerId !== bDrag.id) return;
+    var dx = e.clientX - bDrag.sx, dy = e.clientY - bDrag.sy;
+    if (!bDrag.moved && Math.hypot(dx, dy) <= TAP_SLOP) return;
+    bDrag.moved = true;
+    vBanner.classList.add('moving');
+    var ph = vPhoto.getBoundingClientRect();
+    // on the photo or hanging off its edges, but never lost off the card
+    bDrag.x = Math.max(-15, Math.min(115, bDrag.x0 + dx / ph.width * 100));
+    bDrag.y = Math.max(-12, Math.min(112, bDrag.y0 + dy / ph.height * 100));
+    placeBanner(bDrag.x, bDrag.y);
+  }
+
+  function onBannerUp(e) {
+    if (!bDrag || e.pointerId !== bDrag.id) return;
+    e.stopPropagation();
+    var d = bDrag;
+    bDrag = null;
+    vBanner.classList.remove('moving');
+    try { vBanner.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    var p = currentPhoto();
+    if (!p || e.type !== 'pointerup') { renderBanner(); return; }
+    if (d.moved) saveLabel(p.src, { x: Math.round(d.x * 10) / 10, y: Math.round(d.y * 10) / 10 });
+    else startEdit();
+  }
+
+  function startEdit() {
+    var p = currentPhoto();
+    if (!p || editing) return;
+    var before = labelFor(p).text;
+    var span = document.createElement('span');
+    span.className = 'edit';
+    span.contentEditable = 'plaintext-only';
+    if (span.contentEditable !== 'plaintext-only') span.contentEditable = 'true';
+    span.spellcheck = false;
+    span.textContent = before;
+    vBanner.textContent = '';
+    vBanner.appendChild(span);
+    editing = { src: p.src, before: before, span: span, count: vCount.textContent };
+    viewer.classList.add('editing');
+    vCount.textContent = 'enter to save';
+    span.focus();
+    var range = document.createRange();
+    range.selectNodeContents(span);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    span.addEventListener('keydown', function (e) {
+      e.stopPropagation();                    // arrows and G belong to the text now
+      if (e.key === 'Enter') { e.preventDefault(); endEdit(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); endEdit(false); }
+    });
+    span.addEventListener('input', function () {
+      if (span.textContent.length > 80) span.textContent = span.textContent.slice(0, 80);
+    });
+    span.addEventListener('blur', function () { endEdit(true); });
+  }
+
+  function endEdit(keep) {
+    if (!editing) return;
+    var ed = editing;
+    editing = null;
+    editEndedAt = Date.now();
+    viewer.classList.remove('editing');
+    vCount.textContent = ed.count;
+    var next = ed.span.textContent.replace(/\s+/g, ' ').trim().slice(0, 80);
+    var p = currentPhoto();
+    // JoyStore applies the new words at once and puts the old ones back if the
+    // save fails, so re-drawing from it is always right
+    if (keep && next && next !== ed.before) saveLabel(ed.src, { text: next });
+    if (p && p.src === ed.src) renderBanner();
   }
 
   // The transform that makes the (centred, upright) viewer card sit exactly where
@@ -580,6 +732,7 @@
 
   function closeViewer() {
     if (!openState || openState.closing) return;
+    if (editing) endEdit(true);
     var st = openState;
     st.closing = true;
     viewer.classList.remove('open');
@@ -601,7 +754,11 @@
     } else done();
   }
 
-  function step(d) { if (openState && !openState.grid) showPhoto(openState.i + d); }
+  function step(d) {
+    if (!openState || openState.grid) return;
+    if (editing) endEdit(true);
+    showPhoto(openState.i + d);
+  }
 
   /* The contact sheet: every photo of this postcard at once, four across. Tap
    * one to go straight to it. Thumbnails are 360px squares made for this, so a
@@ -650,6 +807,7 @@
   }
 
   function viewerKey(e) {
+    if (editing) return;
     if (e.key === 'Escape') { e.preventDefault(); closeViewer(); }
     else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); setGrid(!openState.grid); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
@@ -670,6 +828,8 @@
     if (!swipe || e.pointerId !== swipe.id) return;
     var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
     swipe = null;
+    // the tap that finished editing a banner shouldn't also turn the page
+    if (editing || Date.now() - editEndedAt < 450) return;
     if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
     else if (Math.hypot(dx, dy) < TAP_SLOP && e.target.closest('.viewer-photo')) step(1);
   }
@@ -848,6 +1008,12 @@
     });
     vNext.addEventListener('click', function () { step(1); });
     vCard.addEventListener('pointerdown', onSwipeDown);
+    vBanner.addEventListener('pointerdown', onBannerDown);
+    vBanner.addEventListener('pointermove', onBannerMove);
+    vBanner.addEventListener('pointerup', onBannerUp);
+    vBanner.addEventListener('pointercancel', onBannerUp);
+    vBanner.title = 'Tap to edit \u00b7 drag to move';
+    if (window.JoyStore) JoyStore.ready.then(function () { if (openState && !openState.grid && !editing) renderBanner(); });
     vCard.addEventListener('pointerup', onSwipeUp);
     vCard.addEventListener('pointercancel', function () { swipe = null; });
 
