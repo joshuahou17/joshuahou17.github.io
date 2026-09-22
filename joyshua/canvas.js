@@ -143,6 +143,13 @@
     });
     var vw = window.innerWidth, vh = window.innerHeight;
     var padX = small ? 28 : 120, padY = 150;   // leaves room for the label + controls
+    if (portrait && small) {
+      // A phone stacks the postcards in one column. Fitting them all would make
+      // each one stamp-sized, so fit the width instead and start at the top: the
+      // next card peeking in at the bottom says "drag up for more".
+      var zp = clampZ(Math.min(1.1, (vw - padX * 2) / (x1 - x0)));
+      return { x: (x0 + x1) / 2 - vw / 2 / zp, y: y0 - 140 / zp, z: zp };
+    }
     var z = clampZ(Math.min(1.1, (vw - padX * 2) / (x1 - x0), (vh - padY * 2) / (y1 - y0)));
     return { x: (x0 + x1) / 2 - vw / 2 / z, y: (y0 + y1) / 2 - vh / 2 / z, z: z };
   }
@@ -428,16 +435,20 @@
     vBanner.textContent = '';
     if (style === 'clipping') {
       // ransom-note letters, each cut from a different "magazine"
+      // letters are grouped by word so a long caption only wraps between words
       var r = rng(SEED + i * 97);
-      text.split('').forEach(function (ch) {
-        var s = document.createElement('span');
-        if (ch === ' ') s.className = 'gap';
-        else {
+      text.split(' ').forEach(function (word, wi) {
+        if (wi) { var g = document.createElement('span'); g.className = 'gap'; g.textContent = ' '; vBanner.appendChild(g); }
+        var w = document.createElement('span');
+        w.className = 'word';
+        word.split('').forEach(function (ch) {
+          var s = document.createElement('span');
           s.className = 'cut cut' + Math.floor(r() * 5);
           s.style.transform = 'rotate(' + ((r() - 0.5) * 14).toFixed(1) + 'deg)';
-        }
-        s.textContent = ch;
-        vBanner.appendChild(s);
+          s.textContent = ch;
+          w.appendChild(s);
+        });
+        vBanner.appendChild(w);
       });
     } else {
       var span = document.createElement('span');
