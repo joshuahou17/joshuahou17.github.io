@@ -102,18 +102,17 @@
   function viewLetter() {
     body.appendChild(heading('Write a letter'));
     var f = el('form', 'c-form');
-    var label = input('label', '', 80, 'what it’s for, e.g. “happy birthday”', true);
+    var label = input('label', '', 80, '', true);
     var greeting = input('greeting', NAMES[OTHER[who]] + ',', 80);
     greeting.dataset.auto = greeting.value;
     var text = el('textarea', 'c-input c-letter');
     text.name = 'body'; text.maxLength = 8000; text.required = true; text.rows = 9;
-    text.placeholder = 'Dear…';
     var closing = input('closing', 'Love,', 80);
     var name = input('name', NAMES[who], 40);
     name.dataset.auto = name.value;
     f.appendChild(field('Written on the envelope', label));
     f.appendChild(field('Opening', greeting));
-    f.appendChild(field('Letter', text, 'A blank line starts a new paragraph.'));
+    f.appendChild(field('Letter', text));
     var row = el('div', 'c-row');
     row.appendChild(field('Sign-off', closing));
     row.appendChild(field('From', name));
@@ -139,7 +138,7 @@
     fileInput.accept = 'image/*';
     fileInput.multiple = multiple;
     z.appendChild(fileInput);
-    z.appendChild(el('span', 'c-drop-text', multiple ? 'Choose photos, or drop them here' : 'Choose the postcard picture, or drop it here'));
+    z.appendChild(el('span', 'c-drop-text', multiple ? 'Choose photos' : 'Choose a picture'));
     fileInput.addEventListener('change', function () { onFiles(Array.prototype.slice.call(fileInput.files)); fileInput.value = ''; });
     ['dragenter', 'dragover'].forEach(function (t) {
       z.addEventListener(t, function (e) { e.preventDefault(); z.classList.add('over'); });
@@ -214,7 +213,7 @@
         var item = el('div', 'c-pick');
         var img = el('img');
         img.src = p.url; img.alt = '';
-        var lab = input('label' + i, p.label, 80, 'a label for this one');
+        var lab = input('label' + i, p.label, 80, 'label');
         lab.addEventListener('input', function () { p.label = lab.value; });
         var rm = el('button', 'c-remove', '\u00d7');
         rm.type = 'button';
@@ -273,7 +272,7 @@
   function viewPostcard() {
     body.appendChild(heading('Add a postcard'));
     var f = el('form', 'c-form');
-    var title = input('title', '', 60, 'the place, e.g. “Montauk”', true);
+    var title = input('title', '', 60, '', true);
     f.appendChild(field('Label', title));
     var preview = el('div', 'c-postcard-preview');
     var file = null;
@@ -288,7 +287,6 @@
       status('');
     }));
     f.appendChild(preview);
-    f.appendChild(el('p', 'c-hint c-hint--block', 'Landscape pictures fit best; the desk shows it at postcard shape. Add its photos afterwards from the postcard’s grid.'));
     f.appendChild(actions('Add postcard'));
     f.addEventListener('submit', function (e) {
       e.preventDefault();
