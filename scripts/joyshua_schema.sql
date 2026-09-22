@@ -110,3 +110,10 @@ create index if not exists joyshua_topics_open on public.joyshua_topics (done_at
 alter table public.joyshua_topics enable row level security;
 drop policy if exists "joyshua read topics" on public.joyshua_topics;
 create policy "joyshua read topics" on public.joyshua_topics for select to anon, authenticated using (not hidden);
+
+-- The bucket list shares the topics table: same shape (a line of text, who
+-- wrote it, when, ticked off when it's done). `kind` tells them apart; every
+-- row written before 2026-09-22 is a topic. Added 2026-09-22.
+alter table public.joyshua_topics add column if not exists kind text not null default 'topic';
+alter table public.joyshua_topics drop constraint if exists joyshua_topics_kind;
+alter table public.joyshua_topics add constraint joyshua_topics_kind check (kind in ('topic', 'bucket'));

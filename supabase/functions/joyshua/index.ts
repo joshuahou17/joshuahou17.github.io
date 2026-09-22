@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
       // it's marked gone (and logged), so it can always be brought back.
       case "remove": {
         const key = typeof body.key === "string" ? body.key : "";
-        if (!/^(card|photo|letter|topic):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
+        if (!/^(card|photo|letter|topic|bucket):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
         return json(await setState(sb, visitor, action, "gone:" + key, { gone: body.gone !== false }));
       }
 
@@ -244,9 +244,11 @@ Deno.serve(async (req) => {
         return json({ postcard: data });
       }
 
-      // A conversation topic, and ticking one off once it's been talked about.
+      // A conversation topic (or a bucket-list slip: kind "bucket"), and ticking
+      // one off once it's been talked about (or done).
       case "add-topic": {
-        const row = { text: text(body.text, 280, { multiline: true, required: true }), author: author(body.author) };
+        const kind = body.kind === "bucket" ? "bucket" : "topic";
+        const row = { text: text(body.text, 280, { multiline: true, required: true }), author: author(body.author), kind };
         await log(sb, visitor, action, row.text.slice(0, 60), null, row);
         const { data, error } = await sb.from("joyshua_topics").insert(row).select().single();
         if (error) throw new Error(error.message);
