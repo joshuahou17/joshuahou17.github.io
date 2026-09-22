@@ -73,18 +73,7 @@
     var saved = loadSpots();
     placed.forEach(function (p) { world.removeChild(p.el); });
     placed = [];
-
-    function put(el, x, y, rot, kind, idx, w, h, key) {
-      // wherever this visitor last dropped it, if they moved it
-      var spot = saved[key];
-      if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
-      var p = { el: el, x: x, y: y, rot: rot, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
-      el.dataset.p = placed.length;
-      el.dataset.rot = rot.toFixed(2);
-      placed.push(p);
-      placeCard(p);
-      world.appendChild(el);
-    }
+    function put(el, x, y, rot, kind, idx, w, h, key) { putItem(saved, el, x, y, rot, kind, idx, w, h, key); }
 
     for (var i = 0; i < n; i++) {
       var c = i % cols, r = Math.floor(i / cols);
@@ -104,8 +93,93 @@
       var ex = (ec - (eIn - 1) / 2) * cellW - EW / 2 + (rand() - 0.5) * EW * 0.2;
       var ey = (er - (rows - 1) / 2) * cellH - EH / 2 + (rand() - 0.5) * EH * 0.16;
       var erot = (j % 2 ? -1 : 1) * (3 + rand() * 4);
-      put(makeEnvelope(j), ex, ey, erot, 'letter', j, EW, EH, 'letter:' + LETTERS[j].label);
+      put(makeEnvelope(j), ex, ey, erot, 'letter', j, EW, EH, letterKey(j));
     }
+  }
+
+  function putItem(saved, el, x, y, rot, kind, idx, w, h, key) {
+    // wherever this visitor last dropped it, if they moved it
+    var spot = saved[key];
+    if (spot && isFinite(spot.x) && isFinite(spot.y)) { x = spot.x; y = spot.y; }
+    var p = { el: el, x: x, y: y, rot: rot, kind: kind, idx: idx, w: w, h: h, key: key, moved: !!spot };
+    el.dataset.p = placed.length;
+    el.dataset.rot = rot.toFixed(2);
+    placed.push(p);
+    placeCard(p);
+    world.appendChild(el);
+    return p;
+  }
+
+  function letterKey(j) { return 'letter:' + (LETTERS[j].key || LETTERS[j].label); }
+
+  /* ---------- things added from the page ----------
+   * JoyStore holds the rows; they're folded into CARDS / LETTERS here, once
+   * each. Static postcards are keyed by title, added ones by id. */
+  var merged = {};
+
+  function mergeAdded() {
+    var S = window.JoyStore;
+    var fresh = { cards: [], letters: [] };
+    if (!S) return fresh;
+    S.added.postcards.forEach(function (r) {
+      if (merged[r.id]) return;
+      merged[r.id] = true;
+      CARDS.push({
+        title: r.title, key: r.id, author: r.author,
+        front: { src: S.fileUrl(r.front_path), w: r.w, h: r.h, alt: 'A postcard: ' + r.title + '.' },
+        photos: []
+      });
+      fresh.cards.push(CARDS.length - 1);
+    });
+    S.added.photos.forEach(function (r) {
+      if (merged[r.id]) return;
+      var card = CARDS.filter(function (c) { return (c.key || c.title) === r.postcard_key; })[0];
+      if (!card) return;
+      merged[r.id] = true;
+      card.photos.push({
+        key: r.path, src: S.fileUrl(r.path), thumb: S.fileUrl(r.thumb_path),
+        w: r.w, h: r.h, label: r.label, alt: r.label || 'A photo.', author: r.author
+      });
+    });
+    S.added.letters.forEach(function (r) {
+      if (merged[r.id]) return;
+      merged[r.id] = true;
+      LETTERS.push({
+        key: r.id, label: r.label, greeting: r.greeting,
+        body: r.body.split(/\n\s*\n/), closing: r.closing, name: r.name, author: r.author
+      });
+      fresh.letters.push(LETTERS.length - 1);
+    });
+    return fresh;
+  }
+
+  // New things drop onto the desk where you're looking, rather than reshuffling
+  // everything already there; next visit they take their place in the layout.
+  function dropNew(fresh) {
+    var saved = loadSpots();
+    var cx = cam.x + window.innerWidth / 2 / cam.z, cy = cam.y + window.innerHeight / 2 / cam.z;
+    var last = null, k = 0;
+    fresh.cards.forEach(function (i) {
+      last = putItem(saved, makeCard(i), cx - CW / 2 + k * 40, cy - CH / 2 + k * 30, (k % 2 ? 1 : -1) * 4, 'card', i, CW, CH, CARDS[i].key || CARDS[i].title);
+      k++;
+    });
+    fresh.letters.forEach(function (j) {
+      last = putItem(saved, makeEnvelope(j), cx - EW / 2 + k * 40, cy - EH / 2 + k * 30, (k % 2 ? -1 : 1) * 5, 'letter', j, EW, EH, letterKey(j));
+      k++;
+    });
+    if (last) {
+      last.el.style.zIndex = ++zTop;
+      last.el.classList.add('arrived');
+      setTimeout(function () { last.el.classList.remove('arrived'); }, 900);
+    }
+    render();
+    return last;
+  }
+
+  function refreshAdded() {
+    var fresh = mergeAdded();
+    if (openState && openState.grid) buildSheet();
+    return dropNew(fresh);
   }
 
   /* Dragged postcards stay where they're dropped, per browser. Keyed by title so
@@ -155,7 +229,7 @@
   function makeEnvelope(j) {
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'card envelope';
+    b.className = 'card envelope author-' + (LETTERS[j].author || 'josh');
     b.dataset.letter = j;
     b.setAttribute('aria-label', 'Envelope: ' + LETTERS[j].label + '. Open the letter.');
     var body = document.createElement('span');
@@ -511,6 +585,7 @@
   function showPhoto(i, instant) {
     var c = CARDS[openState.ci];
     var n = c.photos.length;
+    if (!n) return;
     i = (i + n) % n;
     openState.i = i;
     var p = c.photos[i];
@@ -555,7 +630,7 @@
   }
 
   function labelFor(p) {
-    var o = window.JoyStore && JoyStore.label(p.src);
+    var o = window.JoyStore && JoyStore.label(p.key || p.src);
     return {
       text: o && typeof o.text === 'string' && o.text ? o.text : (p.label || ''),
       x: o && isFinite(o.x) ? o.x : null,
@@ -604,7 +679,7 @@
     if (!window.JoyStore) return;
     JoyStore.setLabel(src, patch).then(
       function () { toast('saved'); },
-      function (err) { toast(err.message || 'Couldn\u2019t save that.', true); if (currentPhoto() && currentPhoto().src === src) renderBanner(); }
+      function (err) { toast(err.message || 'Couldn\u2019t save that.', true); var c = currentPhoto(); if (c && (c.key || c.src) === src) renderBanner(); }
     );
   }
 
@@ -638,7 +713,7 @@
     try { vBanner.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     var p = currentPhoto();
     if (!p || e.type !== 'pointerup') { renderBanner(); return; }
-    if (d.moved) saveLabel(p.src, { x: Math.round(d.x * 10) / 10, y: Math.round(d.y * 10) / 10 });
+    if (d.moved) saveLabel(p.key || p.src, { x: Math.round(d.x * 10) / 10, y: Math.round(d.y * 10) / 10 });
     else startEdit();
   }
 
@@ -654,7 +729,7 @@
     span.textContent = before;
     vBanner.textContent = '';
     vBanner.appendChild(span);
-    editing = { src: p.src, before: before, span: span, count: vCount.textContent };
+    editing = { src: p.key || p.src, before: before, span: span, count: vCount.textContent };
     viewer.classList.add('editing');
     vCount.textContent = 'enter to save';
     span.focus();
@@ -687,7 +762,7 @@
     // JoyStore applies the new words at once and puts the old ones back if the
     // save fails, so re-drawing from it is always right
     if (keep && next && next !== ed.before) saveLabel(ed.src, { text: next });
-    if (p && p.src === ed.src) renderBanner();
+    if (p && (p.key || p.src) === ed.src) renderBanner();
   }
 
   // The transform that makes the (centred, upright) viewer card sit exactly where
@@ -715,7 +790,8 @@
     var ci = +btn.dataset.card;
     openState = { ci: ci, i: 0, btn: btn, grid: false };
     vTitle.textContent = CARDS[ci].title;
-    setGrid(false);
+    var empty = !CARDS[ci].photos.length;
+    setGrid(empty);
     viewer.hidden = false;
     showPhoto(0, true);
     btn.style.visibility = 'hidden';
@@ -723,11 +799,11 @@
     viewer.classList.add('open');
     if (!reduced && vCard.animate) {
       vCard.animate(
-        [{ transform: fromCardTransform(btn, vCard), opacity: 0.4 }, { transform: 'none', opacity: 1 }],
+        [{ transform: fromCardTransform(btn, empty ? vSheet : vCard), opacity: 0.4 }, { transform: 'none', opacity: 1 }],
         { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' }
       );
     }
-    vClose.focus({ preventScroll: true });
+    if (!empty) vClose.focus({ preventScroll: true });
   }
 
   function closeViewer() {
@@ -765,7 +841,7 @@
    * 27-photo sheet costs about 400KB, not the full-size set. */
   function buildSheet() {
     var c = CARDS[openState.ci];
-    vSheetTitle.textContent = c.title + ' \u00b7 ' + c.photos.length + (c.photos.length === 1 ? ' photo' : ' photos');
+    vSheetTitle.textContent = c.title + ' \u00b7 ' + (c.photos.length ? c.photos.length + (c.photos.length === 1 ? ' photo' : ' photos') : 'no photos yet');
     vSheetGrid.textContent = '';
     c.photos.forEach(function (p, i) {
       var b = document.createElement('button');
@@ -782,10 +858,21 @@
       b.appendChild(img);
       vSheetGrid.appendChild(b);
     });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'sheet-add';
+    add.innerHTML = '<span aria-hidden="true">+</span>add photos';
+    add.addEventListener('click', function () {
+      if (window.JoyCompose) JoyCompose.open('photos', { card: openState.ci });
+    });
+    vSheetGrid.appendChild(add);
   }
 
   function setGrid(on) {
+    // with nothing to show one at a time, the grid (and its "+ add photos") is all there is
+    if (!on && openState && !CARDS[openState.ci].photos.length) on = true;
     if (openState) openState.grid = on;
+    vGridBtn.disabled = !!openState && !CARDS[openState.ci].photos.length;
     viewer.classList.toggle('grid', on);
     vCard.hidden = on;
     vSheet.hidden = !on;
@@ -886,7 +973,9 @@
     if (letterState || openState) return;
     stop();
     letterState = { btn: btn, timers: [], shown: false };
-    fillLetter(LETTERS[+btn.dataset.letter]);
+    var L = LETTERS[+btn.dataset.letter];
+    lv.classList.toggle('author-joyce', L.author === 'joyce');
+    fillLetter(L);
     lvEnv.className = 'lv-env';
     lvLetter.classList.remove('shown');
     lv.hidden = false;
@@ -971,10 +1060,33 @@
       if (e.target.closest('[data-lclose]')) closeLetter();
     });
 
-    layout();
-    var f = fitCam();
-    cam.x = f.x; cam.y = f.y; cam.z = f.z;
-    render();
+    function firstPaint() {
+      mergeAdded();
+      layout();
+      var f = fitCam();
+      cam.x = f.x; cam.y = f.y; cam.z = f.z;
+      render();
+    }
+    // Wait briefly for what's been added from the page, so it's laid out with
+    // everything else; if the database is slow, paint anyway and drop the rest
+    // in when it arrives.
+    if (window.JoyStore) {
+      var painted = false;
+      var paintOnce = function () { if (!painted) { painted = true; firstPaint(); } };
+      var late = setTimeout(paintOnce, 1500);
+      JoyStore.ready.then(function () { if (!painted) { clearTimeout(late); paintOnce(); } else refreshAdded(); });
+    } else firstPaint();
+
+    window.JoyDesk = {
+      cards: function () { return CARDS; },
+      refresh: refreshAdded,
+      toast: toast,
+      // glide to something just added so you can see it land
+      show: function (p) {
+        if (!p) return;
+        glideTo({ x: p.x + p.w / 2 - window.innerWidth / 2 / cam.z, y: p.y + p.h / 2 - window.innerHeight / 2 / cam.z, z: cam.z });
+      }
+    };
 
     stage.addEventListener('pointerdown', onDown);
     stage.addEventListener('pointermove', onMove);
@@ -1000,6 +1112,7 @@
     vPrev.addEventListener('click', function () { step(-1); });
     vGridBtn.addEventListener('click', function () { if (openState) setGrid(!openState.grid); });
     vSheetGrid.addEventListener('click', function (e) {
+      if (e.target.closest('.sheet-add')) return;
       var t = e.target.closest('.sheet-thumb');
       if (!t || !openState) return;
       openState.i = +t.dataset.i;
