@@ -527,6 +527,15 @@
   function cardKey(c) { return 'card:' + (c.key || c.title); }
   function photoKey(p) { return 'photo:' + (p.key || p.src); }
 
+  // Photos run oldest first, by when the picture was taken -- so one added
+  // later slots into the middle of the series instead of landing at the end.
+  // (An uploaded photo whose file had no date falls back to when it was added.)
+  function sortPhotos() {
+    CARDS.forEach(function (c) {
+      c.photos.sort(function (a, b) { return (a.taken || '') < (b.taken || '') ? -1 : (a.taken || '') > (b.taken || '') ? 1 : 0; });
+    });
+  }
+
   // Anything deleted from the page is dropped here (postcards and letters are
   // flagged, so every index stays put; a postcard's photos are filtered).
   function applyGone() {
@@ -560,7 +569,8 @@
       merged[r.id] = true;
       card.photos.push({
         key: r.path, src: S.fileUrl(r.path), thumb: S.fileUrl(r.thumb_path),
-        w: r.w, h: r.h, label: r.label, alt: r.label || 'A photo.', author: r.author
+        w: r.w, h: r.h, label: r.label, alt: r.label || 'A photo.', author: r.author,
+        taken: r.taken_at || r.created_at
       });
     });
     S.added.letters.forEach(function (r) {
@@ -602,6 +612,7 @@
   function refreshAdded() {
     var fresh = mergeAdded();
     applyGone();
+    sortPhotos();
     if (openState && openState.grid) buildSheet();
     var last = dropNew(fresh);
     renderBox();
@@ -1964,6 +1975,7 @@
     function firstPaint() {
       mergeAdded();
       applyGone();
+      sortPhotos();
       layout();
       var f = fitCam();
       cam.x = f.x; cam.y = f.y; cam.z = f.z;
