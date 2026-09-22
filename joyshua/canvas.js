@@ -160,12 +160,12 @@
     b.setAttribute('aria-label', 'Envelope: ' + LETTERS[j].label + '. Open the letter.');
     var body = document.createElement('span');
     body.className = 'card-body env-body';
-    var flap = document.createElement('span');
-    flap.className = 'env-flap';
+    // each fold is a clipped sheet of paper inside an unclipped wrapper, so the
+    // wrapper's drop-shadow can fall on the paper underneath it
+    body.innerHTML = '<span class="fold fold--bottom"><i></i></span><span class="fold fold--top"><i></i></span>';
     var label = document.createElement('span');
     label.className = 'env-label';
     label.textContent = LETTERS[j].label;
-    body.appendChild(flap);
     body.appendChild(label);
     b.appendChild(body);
     return b;
