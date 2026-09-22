@@ -155,17 +155,44 @@
    * What's in the box is saved for everyone. */
   var boxItem = null, boxTimer = 0;
 
+  /* The box's shell, drawn as one piece so every face meets the next: viewed a
+   * little from above and to the left, you see the front, the right-hand side
+   * running back, and down into the open top -- the inside of the back wall and
+   * of the left wall -- with the card's cut edge along every rim. The inside
+   * sits behind the files; the front and side sit in front of them.
+   * (viewBox 320 x 250: front 0..286 x 110..250, depth (+34, -26).) */
+  var SHELL_DEFS =
+    '<defs>' +
+      '<linearGradient id="kbFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3986b"/><stop offset=".55" stop-color="#b1865a"/><stop offset="1" stop-color="#9c7147"/></linearGradient>' +
+      '<linearGradient id="kbSide" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8e653d"/><stop offset="1" stop-color="#76512f"/></linearGradient>' +
+      '<linearGradient id="kbBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e4f31"/><stop offset="1" stop-color="#3a2817"/></linearGradient>' +
+      '<linearGradient id="kbLeft" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4f3822"/><stop offset="1" stop-color="#6d4e30"/></linearGradient>' +
+    '</defs>';
+  var SHELL_BACK =
+    '<svg class="kb-shell kb-shell--back" viewBox="0 0 320 250" preserveAspectRatio="none" aria-hidden="true">' + SHELL_DEFS +
+      '<polygon points="34,84 320,84 320,224 34,224" fill="url(#kbBack)"/>' +          // inside of the back wall
+      '<polygon points="0,110 34,84 34,224 0,250" fill="url(#kbLeft)"/>' +            // inside of the left wall
+      '<polygon points="34,84 320,84 318,88 36,88" fill="#d6ae82"/>' +                 // back rim
+      '<polygon points="0,110 34,84 36,88 3,112" fill="#caa073"/>' +                   // left rim
+    '</svg>';
+  var SHELL_FRONT =
+    '<svg class="kb-shell kb-shell--front" viewBox="0 0 320 250" preserveAspectRatio="none" aria-hidden="true">' +
+      '<polygon points="286,110 320,84 320,224 286,250" fill="url(#kbSide)"/>' +       // right-hand side
+      '<polygon points="286,110 320,84 320,88 288,113" fill="#c9a074"/>' +             // side rim
+      '<polygon points="0,110 286,110 286,250 0,250" fill="url(#kbFront)"/>' +         // front
+      '<polygon points="0,110 286,110 286,115 0,115" fill="#dcb58a"/>' +               // front rim
+      '<polygon points="286,110 286,250 288,249 288,113" fill="rgba(0,0,0,.18)"/>' +   // the corner
+    '</svg>';
+
   function makeBox() {
     var b = document.createElement('div');
     b.className = 'card keepsake';
     b.tabIndex = 0;
     b.setAttribute('role', 'button');
     b.innerHTML =
-      '<span class="kb-shadow"></span>' +
-      '<span class="kb-back"></span>' +
-      '<span class="kb-files"></span>' +
-      '<span class="kb-side"></span>' +
-      '<span class="kb-front"><span class="kb-rim"></span>' +
+      '<span class="kb-shadow"></span>' + SHELL_BACK +
+      '<span class="kb-files"></span>' + SHELL_FRONT +
+      '<span class="kb-front">' +
         '<span class="kb-plate"><span class="kb-label">our letters</span></span>' +
         '<span class="kb-pull"></span><span class="kb-count"></span></span>';
     b.addEventListener('pointerenter', function (e) {
@@ -253,6 +280,9 @@
     openBox(false);
     var el = document.getElementById('rainbow');
     var arc = el.querySelector('.rb-arc');
+    var rbBox = el.querySelector('.rb-box');
+    if (!rbBox.firstChild) rbBox.innerHTML = SHELL_BACK + SHELL_FRONT +
+      '<span class="kb-front"><span class="kb-plate"><span class="kb-label">our letters</span></span><span class="kb-pull"></span></span>';
     arc.textContent = '';
     var items = inside.map(function (p) {
       var b = miniEnvelope('rb-env', p.idx);
@@ -1035,10 +1065,28 @@
       vBanner.style.left = vBanner.style.top = '';
       return;
     }
-    var box = openState.box, pad = vPhoto.offsetLeft;
+    var box = openState.box;
+    var left = vPhoto.offsetLeft + x / 100 * box.w, top = vPhoto.offsetTop + y / 100 * box.h;
     vBanner.classList.add('placed');
-    vBanner.style.left = (pad + x / 100 * box.w) + 'px';
-    vBanner.style.top = (vPhoto.offsetTop + y / 100 * box.h) + 'px';
+    // A spot saved on a wide screen can hang off a narrow one: keep the banner
+    // on screen (the saved spot itself is untouched). Layout sizes, not the
+    // on-screen box, so the stick-on scale and the open animation don't skew it.
+    // Half-extents of the tilted banner (each style has its own lean).
+    var w = vBanner.offsetWidth, h = vBanner.offsetHeight;
+    var a = (parseFloat(getComputedStyle(vBanner).rotate) || 0) * Math.PI / 180;
+    var hw = (w * Math.abs(Math.cos(a)) + h * Math.abs(Math.sin(a))) / 2;
+    var hh = (w * Math.abs(Math.sin(a)) + h * Math.abs(Math.cos(a))) / 2;
+    // Where the card will sit once the photo frame has finished resizing (it
+    // animates between photos, so its current spot can be mid-way): centred.
+    var cardW = box.w + vPhoto.offsetLeft * 2;
+    var cardH = vCard.offsetHeight - vPhoto.offsetHeight + box.h;
+    var m = 6, ox = (window.innerWidth - cardW) / 2, oy = (window.innerHeight - cardH) / 2;
+    left = Math.max(m + hw - ox, Math.min(window.innerWidth - m - hw - ox, left));
+    top = Math.max(m + hh - oy, Math.min(window.innerHeight - m - hh - oy, top));
+    vBanner.style.left = left + 'px';
+    vBanner.style.top = top + 'px';
+    // where it actually landed, in % of the photo (what a drag should save)
+    return { x: (left - vPhoto.offsetLeft) / box.w * 100, y: (top - vPhoto.offsetTop) / box.h * 100 };
   }
 
   // Where the banner's centre is now, in % of the photo.
@@ -1081,9 +1129,10 @@
     vBanner.classList.add('moving');
     var ph = vPhoto.getBoundingClientRect();
     // on the photo or hanging off its edges, but never lost off the card
-    bDrag.x = Math.max(-15, Math.min(115, bDrag.x0 + dx / ph.width * 100));
-    bDrag.y = Math.max(-12, Math.min(112, bDrag.y0 + dy / ph.height * 100));
-    placeBanner(bDrag.x, bDrag.y);
+    var at = placeBanner(
+      Math.max(-15, Math.min(115, bDrag.x0 + dx / ph.width * 100)),
+      Math.max(-12, Math.min(112, bDrag.y0 + dy / ph.height * 100)));
+    bDrag.x = at.x; bDrag.y = at.y;        // save where it is, not where the finger went
   }
 
   function onBannerUp(e) {
@@ -1526,6 +1575,15 @@
     });
     vNext.addEventListener('click', function () { step(1); });
     vCard.addEventListener('pointerdown', onSwipeDown);
+    // a banner can grow after it's placed (its typeface finishing loading), so
+    // keep it on screen whenever its size changes
+    if (window.ResizeObserver) {
+      new ResizeObserver(function () {
+        if (!openState || openState.grid || editing || bDrag || !vBanner.classList.contains('placed')) return;
+        var L = labelFor(currentPhoto());
+        if (L.x != null && L.y != null) placeBanner(L.x, L.y);
+      }).observe(vBanner);
+    }
     vBanner.addEventListener('pointerdown', onBannerDown);
     vBanner.addEventListener('pointermove', onBannerMove);
     vBanner.addEventListener('pointerup', onBannerUp);

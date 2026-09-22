@@ -774,45 +774,32 @@ body {
   filter: blur(4px);
   pointer-events: none;
 }
-.kb-back {                      /* the inside: back wall and floor, in shadow */
-  left: 3%; right: 12%; top: 28%; height: 38%;
-  border-radius: 3px 3px 0 0;
-  background-color: #fff;
-  background-image: var(--grain), var(--kraft-inside);
-  background-blend-mode: multiply;
-  box-shadow: inset 0 8px 14px -6px rgba(0, 0, 0, 0.55);
-  pointer-events: none;
-}
-.kb-side {                      /* the right-hand side, receding */
-  right: 0; bottom: 0; width: 11%; height: 60%;
-  transform-origin: 0 100%;
-  transform: skewY(-32deg);
-  border-radius: 0 3px 3px 0;
-  background-color: #fff;
-  background-image: var(--grain), var(--kraft-side);
-  background-blend-mode: multiply;
-  box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
-}
-.kb-front {
-  left: 0; right: 11%; bottom: 0; height: 60%;
-  border-radius: 3px 2px 5px 6px;
-  background-color: #fff;
-  background-image: var(--grain), var(--kraft-front);
-  background-blend-mode: multiply;
-  box-shadow:
-    inset 0 -8px 14px -8px rgba(40, 25, 10, 0.4),
-    inset -3px 0 4px -2px rgba(40, 25, 10, 0.3),
-    0 3px 3px rgba(40, 25, 10, 0.25);
-  z-index: 3;
-}
-.kb-rim {                       /* the cut edge of the card along the top */
+.kb-shell {                     /* the drawn box: inside behind the files, front and side ahead of them */
   position: absolute;
-  left: 0; right: 0; top: 0; height: 6px;
-  border-radius: 3px 2px 0 0;
-  background: linear-gradient(to bottom, #d9b286, #b88d61);
-  box-shadow: 0 1px 1px rgba(40, 25, 10, 0.3);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
+.kb-shell--back { z-index: 1; }
+.kb-shell--front { z-index: 3; filter: drop-shadow(0 3px 3px rgba(40, 25, 10, 0.25)); }
+.kb-front {                     /* over the drawn front: its grain, plate, pull and count */
+  left: 0; top: 44%; width: 89.4%; bottom: 0;
+  border-radius: 0 0 4px 4px;
+  box-shadow: inset 0 -8px 14px -8px rgba(40, 25, 10, 0.35);
+  z-index: 4;
+}
+.kb-front::before {             /* the card's grain, soaked into the drawn colour */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.kb-front > * { z-index: 1; }
 .kb-plate {                     /* brass label holder */
   position: absolute;
   left: 50%; top: 22%;
@@ -859,7 +846,7 @@ body {
 }
 
 /* the files: standing in the box, only their tops showing */
-.kb-files { left: 4%; right: 13%; top: 0; height: 64%; z-index: 2; pointer-events: none; }
+.kb-files { left: 5%; right: 5%; top: 0; height: 66%; z-index: 2; pointer-events: none; }
 .kb-env {
   position: absolute;
   left: 50%; top: 10%;
@@ -950,7 +937,7 @@ body {
 .rb-box {                        /* the box the rainbow rises out of */
   position: absolute;
   left: 50%; bottom: max(24px, env(safe-area-inset-bottom));
-  width: min(64vw, 300px); aspect-ratio: 320 / 150;
+  width: min(64vw, 300px); aspect-ratio: 320 / 250;
   translate: -50% 20px;
   opacity: 0;
   transition: translate 0.4s cubic-bezier(.2, 1.3, .4, 1), opacity 0.3s ease;
@@ -958,9 +945,6 @@ body {
 }
 .rainbow.open .rb-box { translate: -50% 0; opacity: 1; }
 .rb-box > span { position: absolute; display: block; }
-.rb-box .kb-back { top: 0; height: 40%; }
-.rb-box .kb-side { height: 100%; }
-.rb-box .kb-front { height: 100%; }
 
 /* an envelope that's in the box: gone from the desk */
 .card.envelope.in-box {
