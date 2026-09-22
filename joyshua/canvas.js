@@ -23,6 +23,7 @@
   if (!CARDS.length) return;
   var EW = 360, EH = 226;     // an envelope on the desk
   var BW = 300, BH = 210;     // the keepsake box
+  var PW = 370, PH = 272;     // the bucket-list pail (and its pile of done slips)
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -94,7 +95,7 @@
     // The envelopes share a row with the keepsake box (on a phone they all carry
     // on down the column). Letters already in the box don't take a spot.
     var m = LETTERS.length, slot = 0;
-    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 1;
+    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 2;
     function spot(w, h) {
       var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
       slot++;
@@ -118,6 +119,9 @@
     put(makeBox(), bs.x, bs.y + 10, -1.5, 'box', 0, BW, BH, 'keepsake-box');
     boxItem = placed[placed.length - 1];
     renderBox();
+    var ps = spot(PW, PH);
+    put(makePail(), ps.x, ps.y + 20, 2, 'pail', 0, PW, PH, 'bucket-pail');
+    if (window.JoyBucket) JoyBucket.paint();
     fitAll(world);
   }
 
@@ -272,6 +276,60 @@
     var el = boxItem.el;
     el.classList.toggle('open', !!on && boxedItems().length > 0);
     if (on) el.style.zIndex = ++zTop;
+  }
+
+  /* ---------- the bucket-list pail ----------
+   * A galvanised pail with a wire handle, folded paper slips (one per idea)
+   * sticking up out of it; the ones that have been done lie in a stamped pile
+   * beside it. bucket.js fills in the slips and the pile and owns what happens
+   * when it's tapped -- the desk only places it, like everything else. */
+  function makePail() {
+    var b = document.createElement('div');
+    b.className = 'card pail';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-label', 'The bucket list');
+    b.innerHTML =
+      '<span class="pl-shadow"></span>' +
+      '<span class="pl-pile" aria-hidden="true"></span>' +
+      '<svg class="pl-shell pl-shell--back" viewBox="0 0 220 230" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs><linearGradient id="plIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d6266"/><stop offset="1" stop-color="#8b9094"/></linearGradient></defs>' +
+        '<ellipse cx="110" cy="62" rx="98" ry="22" fill="url(#plIn)"/>' +
+      '</svg>' +
+      '<span class="pl-slips"></span>' +
+      '<svg class="pl-shell pl-shell--front" viewBox="0 0 220 230" preserveAspectRatio="none" aria-hidden="true">' +
+        '<defs>' +
+          '<linearGradient id="plBody" x1="0" y1="0" x2="1" y2="0">' +
+            '<stop offset="0" stop-color="#8e9398"/><stop offset=".18" stop-color="#c9ced2"/><stop offset=".34" stop-color="#eef1f3"/>' +
+            '<stop offset=".52" stop-color="#b4babf"/><stop offset=".8" stop-color="#9aa0a5"/><stop offset="1" stop-color="#6f7479"/>' +
+          '</linearGradient>' +
+          '<linearGradient id="plRib" x1="0" y1="0" x2="1" y2="0">' +
+            '<stop offset="0" stop-color="#7c8186"/><stop offset=".3" stop-color="#dfe3e6"/><stop offset=".6" stop-color="#9ea4a9"/><stop offset="1" stop-color="#63686d"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        // body: wider at the rim than the base, both ends curved
+        '<path d="M12 62 L34 206 Q110 226 186 206 L208 62 Q110 86 12 62 Z" fill="url(#plBody)"/>' +
+        // two pressed ribs round the body
+        '<path d="M19 108 Q110 130 201 108 L200 116 Q110 138 20 116 Z" fill="url(#plRib)" opacity=".85"/>' +
+        '<path d="M27 162 Q110 182 193 162 L192 169 Q110 189 28 169 Z" fill="url(#plRib)" opacity=".85"/>' +
+        // the rolled rim, front half
+        '<path d="M10 62 Q110 90 210 62" fill="none" stroke="#e8ecef" stroke-width="7" stroke-linecap="round"/>' +
+        '<path d="M10 64 Q110 93 210 64" fill="none" stroke="#7f858a" stroke-width="2" stroke-linecap="round" opacity=".7"/>' +
+        // ear lugs and the wire handle, flopped forward over the front
+        '<circle cx="15" cy="78" r="6" fill="#aab0b5" stroke="#6f7479" stroke-width="1.5"/>' +
+        '<circle cx="205" cy="78" r="6" fill="#aab0b5" stroke="#6f7479" stroke-width="1.5"/>' +
+        '<path d="M15 78 Q20 150 110 154 Q200 150 205 78" fill="none" stroke="#5f6469" stroke-width="3.2" stroke-linecap="round"/>' +
+        '<path d="M15 78 Q20 150 110 154 Q200 150 205 78" fill="none" stroke="#c7ccd0" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>' +
+        '<rect x="92" y="147" width="36" height="12" rx="6" fill="#6b4a2c"/>' +
+        '<rect x="92" y="147" width="36" height="5" rx="2.5" fill="#8e6a45"/>' +
+      '</svg>' +
+      '<span class="pl-tag"><span class="pl-tag-text">bucket list</span></span>';
+    b.addEventListener('keydown', function (e) {
+      if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (window.JoyBucket) JoyBucket.open('todo');
+    });
+    return b;
   }
 
   /* ---------- the rainbow ----------
@@ -1157,7 +1215,7 @@
     try { stage.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
 
     if (pointers.size === 1) {
-      press = { id: e.pointerId, sx: e.clientX, sy: e.clientY, moved: false,
+      press = { id: e.pointerId, sx: e.clientX, sy: e.clientY, moved: false, target: e.target,
                 card: e.target.closest ? e.target.closest('.card') : null,
                 fan: e.target.closest ? e.target.closest('.kb-env') : null };
       last = { t: e.timeStamp };
@@ -1170,7 +1228,7 @@
         if (pr.fan) {
           pr.longPress = true;
           showMinus(pr.fan, deleteLetterWhat(+pr.fan.dataset.letter));
-        } else if (!pr.card.classList.contains('keepsake')) {
+        } else if (!pr.card.classList.contains('keepsake') && !pr.card.classList.contains('pail')) {
           var item = placed[+pr.card.dataset.p];
           pr.longPress = true;
           showMinus(pr.card, item.kind === 'card' ? deleteCardWhat(item) : deleteLetterWhat(item.idx));
@@ -1283,7 +1341,7 @@
       vel.x = vel.y = 0;
       if (e.type !== 'pointerup') return;
       if (p.fan) openLetter(p.fan);
-      else if (p.card) openItem(p.card);
+      else if (p.card) openItem(p.card, p.target);
       return;
     }
     // a drag that stopped before letting go shouldn't fling
@@ -1339,7 +1397,7 @@
     var f = e.target.closest && e.target.closest('.kb-env');
     if (f) { openLetter(f); return; }
     var b = e.target.closest && e.target.closest('.card');
-    if (b && !b.classList.contains('keepsake')) openItem(b);
+    if (b && !b.classList.contains('keepsake') && !b.classList.contains('pail')) openItem(b);
   }
 
   // ---------- the viewer ----------
@@ -1629,8 +1687,12 @@
 
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function openItem(btn) {
+  function openItem(btn, target) {
     if (btn.classList.contains('keepsake')) openRainbow();
+    else if (btn.classList.contains('pail')) {
+      var onPile = target && target.closest && target.closest('.pl-pile');
+      if (window.JoyBucket) JoyBucket.open(onPile ? 'done' : 'todo');
+    }
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
   }
@@ -2009,7 +2071,7 @@
     } else firstPaint();
 
     document.addEventListener('contextmenu', function (e) {
-      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env')) e.preventDefault();
+      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env, .slip')) e.preventDefault();
     });
     window.JoyDesk = {
       cards: function () { return CARDS; },

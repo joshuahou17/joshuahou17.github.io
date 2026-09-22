@@ -230,8 +230,9 @@
     // what's been added from the page (filled once `ready` resolves)
     added: added,
 
-    addTopic: function (text, author) {
-      return call('add-topic', { text: text, author: author }).then(function (r) { added.topics.push(r.topic); return r.topic; });
+    // `kind` is 'topic' (things to talk about) or 'bucket' (the bucket list)
+    addTopic: function (text, author, kind) {
+      return call('add-topic', { text: text, author: author, kind: kind || 'topic' }).then(function (r) { added.topics.push(r.topic); return r.topic; });
     },
 
     setTopicDone: function (id, done) {

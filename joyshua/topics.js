@@ -28,7 +28,7 @@
     var S = window.JoyStore;
     if (!S) return [];
     return S.added.topics
-      .filter(function (t) { return !t.hidden && !S.isGone('topic:' + t.id); })
+      .filter(function (t) { return !t.hidden && t.kind !== 'bucket' && !S.isGone('topic:' + t.id); })
       .slice()
       .sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });   // newest first
   }
