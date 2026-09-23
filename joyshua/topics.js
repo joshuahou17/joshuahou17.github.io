@@ -24,11 +24,16 @@
     return e;
   }
 
+  // Whose device this is (whoever's notifications are on here), or null for
+  // no one yet -- then the board shows everybody's.
+  function owner() { return window.JoyNotify && JoyNotify.owner ? JoyNotify.owner() : null; }
+
   function topics() {
-    var S = window.JoyStore;
+    var S = window.JoyStore, me = owner();
     if (!S) return [];
     return S.added.topics
       .filter(function (t) { return !t.hidden && t.kind !== 'bucket' && !S.isGone('topic:' + t.id); })
+      .filter(function (t) { return !me || t.author === me; })
       .slice()
       .sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });   // newest first
   }
@@ -152,6 +157,8 @@
       : 'Things to talk about');
 
     if (!open) return;
+    var me = owner();
+    boardEl.querySelectorAll('[data-topic-add]').forEach(function (b) { b.hidden = !!me && b.dataset.topicAdd !== me; });
     countEl.textContent = opens.length || '';
     listEl.textContent = '';
     opens.forEach(function (t) { listEl.appendChild(cardFor(t)); });
