@@ -505,7 +505,14 @@
     cam.classList.remove('taken', 'fallback', 'busy');
     cam.querySelector('.pc-shot').removeAttribute('src');
     cam.querySelector('.pc-cap').value = '';
+    fitCaption();
     status('');
+  }
+
+  function fitCaption() {
+    var c = cam.querySelector('.pc-cap');
+    c.style.height = '';
+    if (c.value) c.style.height = c.scrollHeight + 'px';
   }
 
   function status(msg, bad) {
@@ -707,7 +714,7 @@
             '<img class="pc-shot" alt="">' +
             '<span class="pc-flash"></span>' +
           '</div>' +
-          '<div class="pol-strip"><input class="pc-cap" maxlength="40" autocomplete="off" aria-label="Write on it"><span class="who-chip pc-who"></span></div>' +
+          '<div class="pol-strip"><textarea class="pc-cap" maxlength="40" rows="1" autocomplete="off" aria-label="Write on it"></textarea><span class="who-chip pc-who"></span></div>' +
         '</article>' +
         '<div class="pc-controls">' +
           '<button class="pc-round pc-flip" type="button" aria-label="Switch camera">' + ICON_FLIP + '</button>' +
@@ -733,9 +740,12 @@
     fileInput.addEventListener('change', function () { fromFile(fileInput.files[0]); fileInput.value = ''; });
     cam.querySelector('.pc-retake').addEventListener('click', function () { reset(); startCamera(); });
     cam.querySelector('.pc-send').addEventListener('click', send);
-    cam.querySelector('.pc-cap').addEventListener('keydown', function (e) {
+    var capBox = cam.querySelector('.pc-cap');
+    capBox.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); send(); }
     });
+    // it wraps like the finished polaroid will, the strip growing to fit
+    capBox.addEventListener('input', fitCaption);
     cam.querySelector('.pc-close').addEventListener('click', closeCamera);
     cam.querySelector('.pc-scrim').addEventListener('click', closeCamera);
     cam.addEventListener('keydown', function (e) { e.stopPropagation(); });

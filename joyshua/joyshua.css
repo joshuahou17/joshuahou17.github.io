@@ -1795,20 +1795,18 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 }
 .pol--blank .pol-film, .pol--none .pol-film { opacity: 1; }
 .pol-strip {
-  height: 44px;
+  min-height: 44px;             /* grows when the line wraps */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 0 2px;
+  padding: 5px 2px;
 }
 .pol-cap {
   min-width: 0;
-  font: 500 22px/1 'Caveat', cursive;
+  font: 500 22px/1.05 'Caveat', cursive;
   color: var(--pen);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;      /* the whole line, on as many lines as it takes */
 }
 .pol .who-chip { flex: none; font-size: 15px; }
 
@@ -1880,7 +1878,7 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
   font: 700 10px/18px 'Space Mono', monospace; text-align: center;
 }
 .pol--mini { width: 60%; margin-top: 10%; padding: 4% 4% 0; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 6px 10px -6px rgba(0, 0, 0, 0.6); }
-.pol--mini .pol-strip { height: 0; padding-bottom: 20%; }
+.pol--mini .pol-strip { min-height: 0; height: 0; padding: 0 0 20%; }
 .pol--mini .pol-cap { display: none; }
 
 .pday-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 18px 16px; }
@@ -1906,7 +1904,7 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
 .pview.open .pol { opacity: 1; scale: 1; }
 .pview .pol.held { transition: opacity 0.22s ease, scale 0.3s ease; cursor: grabbing; }
 .pol--big { width: min(84vw, 440px); padding: 18px 18px 0; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
-.pol--big .pol-strip { height: 84px; padding: 0 4px; }
+.pol--big .pol-strip { min-height: 84px; padding: 8px 4px; }
 .pol--big .pol-cap { font-size: 34px; }
 .pol--big .who-chip { font-size: 18px; }
 .pol.shaken { animation: jiggle 0.18s ease-in-out; }
@@ -1939,11 +1937,14 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
 .pc-cap {
   flex: 1;
   min-width: 0;
+  height: 1.1em;                /* one line; grows as it wraps (polaroids.js) */
+  resize: none;
+  overflow: hidden;
   padding: 4px 2px;
   border: 0;
   border-bottom: 1px dashed transparent;
   background: transparent;
-  font: 500 34px/1 'Caveat', cursive;
+  font: 500 34px/1.05 'Caveat', cursive;
   color: var(--pen);
   visibility: hidden;
 }
@@ -2005,7 +2006,7 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
 @media (max-width: 640px) {
   .pday-row { gap: 12px 10px; }
   .pday-row .pol { width: calc(50% - 5px); padding: 7px 7px 0; }
-  .pday-row .pol-strip { height: 36px; }
+  .pday-row .pol-strip { min-height: 36px; padding: 4px 2px; }
   .pday-row .pol-cap { font-size: 18px; }
   .pday-row .pol .who-chip { font-size: 12px; padding: 1px 6px 2px; }
   .pcal { gap: 4px; }
