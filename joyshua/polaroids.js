@@ -9,7 +9,8 @@
  * polaroid developed, the same rule the topics board uses.
  *
  * On the desk they lie in a pile (canvas.js places it; this fills it in). Tap
- * the pile and they spread out by the day they were taken, newest day first.
+ * the pile and they spread out by the day they were taken (9/2/26), newest
+ * day first.
  *
  * Saved through JoyStore (joyshua_polaroids). Deleting reuses the desk's
  * press-and-hold minus (JoyDesk).
@@ -19,8 +20,6 @@
 
   var NAMES = { josh: 'Josh', joyce: 'Joyce' };
   var OTHER = { josh: 'joyce', joyce: 'josh' };
-  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var DEV_MS = 60000;         // developing, left alone
   var SIDE = 1400;            // the picture's size, square
 
@@ -149,12 +148,8 @@
   }
 
   function dayName(iso) {
-    var d = new Date(iso), now = new Date();
-    var y = new Date(now); y.setDate(now.getDate() - 1);
-    if (dayKey(iso) === dayKey(now.toISOString())) return 'today';
-    if (dayKey(iso) === dayKey(y.toISOString())) return 'yesterday';
-    return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] +
-      (d.getFullYear() !== now.getFullYear() ? ' ' + d.getFullYear() : '');
+    var d = new Date(iso);
+    return d.getMonth() + 1 + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(2);   // 9/2/26
   }
 
   function draw() {
