@@ -15,7 +15,6 @@
   'use strict';
 
   var NAMES = { josh: 'Josh', joyce: 'Joyce' };
-  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   var root, sheet, list, adders, tabTodo, tabDone;
   var mode = null;            // 'todo' | 'done' while the spill is open
@@ -49,7 +48,7 @@
 
   function dayOf(iso) {
     var d = new Date(iso);
-    return isNaN(d) ? '' : d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
+    return isNaN(d) ? '' : d.getMonth() + 1 + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(2);   // 9/2/26
   }
 
   // A steady number from a slip's id, so it lands at the same tilt every time.

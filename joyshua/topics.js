@@ -12,7 +12,6 @@
   'use strict';
 
   var NAMES = { josh: 'Josh', joyce: 'Joyce' };
-  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   var stackEl, boardEl, listEl, doneEl, doneWrap, oneEl, countEl;
   var open = false, showingDone = false, single = null, holdTimer = 0, holdStart = null;
@@ -64,7 +63,7 @@
 
   function dayOf(iso) {
     var d = new Date(iso);
-    return isNaN(d) ? '' : d.getDate() + ' ' + MONTHS[d.getMonth()];
+    return isNaN(d) ? '' : d.getMonth() + 1 + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(2);   // 9/2/26
   }
 
   // ---------- one index card ----------
