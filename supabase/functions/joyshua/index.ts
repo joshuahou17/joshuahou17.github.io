@@ -179,7 +179,7 @@ async function setState(sb: SupabaseClient, visitor: string, action: string, key
 
 /* ---------- notifications ---------- */
 
-type Kind = "letter" | "photo" | "postcard" | "topic" | "bucket";
+type Kind = "letter" | "photo" | "postcard" | "topic" | "bucket" | "polaroid";
 
 // Deliberately vague: who, and what kind of thing -- never its words.
 function message(name: string, kind: Kind, n: number): string {
@@ -190,6 +190,7 @@ function message(name: string, kind: Kind, n: number): string {
     case "postcard": return many ? `${name} added ${n} postcards` : `${name} added a postcard`;
     case "topic":    return many ? `${name} added ${n} things to talk about` : `${name} added something to talk about`;
     case "bucket":   return many ? `${name} added ${n} things to the bucket list` : `${name} added to the bucket list`;
+    case "polaroid": return many ? `${name} sent you ${n} polaroids 📷` : `${name} sent you a polaroid 📷`;
   }
 }
 
@@ -197,7 +198,7 @@ function message(name: string, kind: Kind, n: number): string {
 // notification carries a tag, and a new one with the same tag quietly replaces
 // the last, so a burst of additions reads as one running total.
 async function recentCount(sb: SupabaseClient, who: string, kind: Kind): Promise<number> {
-  const table = { letter: "joyshua_letters", photo: "joyshua_photos", postcard: "joyshua_postcards", topic: "joyshua_topics", bucket: "joyshua_topics" }[kind];
+  const table = { letter: "joyshua_letters", photo: "joyshua_photos", postcard: "joyshua_postcards", topic: "joyshua_topics", bucket: "joyshua_topics", polaroid: "joyshua_polaroids" }[kind];
   let q = sb.from(table).select("id", { count: "exact", head: true })
     .eq("author", who).gte("created_at", new Date(Date.now() - RECENT_MIN * 60e3).toISOString());
   if (kind === "topic" || kind === "bucket") q = q.eq("kind", kind);
@@ -206,7 +207,8 @@ async function recentCount(sb: SupabaseClient, who: string, kind: Kind): Promise
 }
 
 // Tell the other person's devices. `go` is where tapping it takes them
-// (sw.js hands it to the page): 'letter:<id>', 'card:<key>', 'topics', 'bucket'.
+// (sw.js hands it to the page): 'letter:<id>', 'card:<key>', 'topics', 'bucket',
+// 'polaroid:<id>'.
 async function notifyOther(sb: SupabaseClient, who: string, kind: Kind, go: string) {
   const publicKey = Deno.env.get("VAPID_PUBLIC_KEY"), privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!publicKey || !privateKey) return;
@@ -274,7 +276,7 @@ Deno.serve(async (req) => {
       // it's marked gone (and logged), so it can always be brought back.
       case "remove": {
         const key = typeof body.key === "string" ? body.key : "";
-        if (!/^(card|photo|letter|topic|bucket):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
+        if (!/^(card|photo|letter|topic|bucket|polaroid):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
         return json(await setState(sb, visitor, action, "gone:" + key, { gone: body.gone !== false }));
       }
 
@@ -386,6 +388,42 @@ Deno.serve(async (req) => {
         if (error) throw new Error(error.message);
         later(notifyOther(sb, row.author, "letter", "letter:" + data.id));
         return json({ letter: data });
+      }
+
+      // A polaroid: one photo from the camera, a line on its strip. It arrives
+      // blank for the other person and develops the first time they open it.
+      case "add-polaroid": {
+        const row = {
+          path: uploadPath(body.path),
+          thumb_path: uploadPath(body.thumb),
+          w: int(body.w, 1, 4000), h: int(body.h, 1, 4000),
+          caption: text(body.caption, 40),
+          author: author(body.author),
+        };
+        if (!(await exists(sb, row.path)) || !(await exists(sb, row.thumb_path))) throw new Bad("upload missing");
+        await log(sb, visitor, action, row.caption || null, null, row);
+        const { data, error } = await sb.from("joyshua_polaroids").insert(row).select().single();
+        if (error) throw new Error(error.message);
+        later(notifyOther(sb, row.author, "polaroid", "polaroid:" + data.id));
+        return json({ polaroid: data });
+      }
+
+      // It has finished developing: from now on it's developed everywhere.
+      // Only the first time counts.
+      case "develop-polaroid": {
+        const id = typeof body.id === "string" ? body.id : "";
+        if (!/^[0-9a-f-]{36}$/.test(id)) throw new Bad("bad id");
+        const { data: cur } = await sb.from("joyshua_polaroids").select("developed_at").eq("id", id).maybeSingle();
+        if (!cur) throw new Bad("no such polaroid");
+        if (!cur.developed_at) {
+          await log(sb, visitor, action, id, cur, { developed_at: "now" });
+          const { error } = await sb.from("joyshua_polaroids")
+            .update({ developed_at: new Date().toISOString() }).eq("id", id).is("developed_at", null);
+          if (error) throw new Error(error.message);
+        }
+        const { data, error } = await sb.from("joyshua_polaroids").select().eq("id", id).single();
+        if (error) throw new Error(error.message);
+        return json({ polaroid: data });
       }
 
       // The key a browser needs to sign up for notifications. Null until the
