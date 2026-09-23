@@ -24,6 +24,7 @@
   var EW = 360, EH = 226;     // an envelope on the desk
   var BW = 300, BH = 210;     // the keepsake box
   var PW = 262, PH = 272;     // the bucket-list pail
+  var LW = 236, LH = 262;     // the pile of polaroids
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -95,7 +96,7 @@
     // The envelopes share a row with the keepsake box (on a phone they all carry
     // on down the column). Letters already in the box don't take a spot.
     var m = LETTERS.length, slot = 0;
-    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 2;
+    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 3;
     function spot(w, h) {
       var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
       slot++;
@@ -122,6 +123,9 @@
     var ps = spot(PW, PH);
     put(makePail(), ps.x, ps.y + 20, 2, 'pail', 0, PW, PH, 'bucket-pail');
     if (window.JoyBucket) JoyBucket.paint();
+    var ls = spot(LW, LH);
+    put(makePile(), ls.x, ls.y + 14, -3, 'polaroids', 0, LW, LH, 'polaroid-pile');
+    if (window.JoyPolaroids) JoyPolaroids.paint();
     fitAll(world);
   }
 
@@ -275,6 +279,25 @@
     var el = boxItem.el;
     el.classList.toggle('open', !!on && boxedItems().length > 0);
     if (on) el.style.zIndex = ++zTop;
+  }
+
+  /* ---------- the pile of polaroids ----------
+   * The newest few, tossed on top of each other. polaroids.js fills it in and
+   * owns what happens when it's tapped -- the desk only places it. */
+  function makePile() {
+    var b = document.createElement('div');
+    b.className = 'card pol-pile';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-label', 'Polaroids');
+    b.innerHTML = '<span class="pp-stack"></span>';
+    return b;
+  }
+
+  // The pail and the pile belong to bucket.js and polaroids.js; the box to the
+  // rainbow. None of them can be deleted from the desk.
+  function isFixture(el) {
+    return el.classList.contains('keepsake') || el.classList.contains('pail') || el.classList.contains('pol-pile');
   }
 
   /* ---------- the bucket-list pail ----------
@@ -1234,7 +1257,7 @@
         if (pr.fan) {
           pr.longPress = true;
           showMinus(pr.fan, deleteLetterWhat(+pr.fan.dataset.letter));
-        } else if (!pr.card.classList.contains('keepsake') && !pr.card.classList.contains('pail')) {
+        } else if (!isFixture(pr.card)) {
           var item = placed[+pr.card.dataset.p];
           pr.longPress = true;
           showMinus(pr.card, item.kind === 'card' ? deleteCardWhat(item) : deleteLetterWhat(item.idx));
@@ -1403,7 +1426,7 @@
     var f = e.target.closest && e.target.closest('.kb-env');
     if (f) { openLetter(f); return; }
     var b = e.target.closest && e.target.closest('.card');
-    if (b && !b.classList.contains('keepsake') && !b.classList.contains('pail')) openItem(b);
+    if (b && !isFixture(b)) openItem(b);
   }
 
   // ---------- the viewer ----------
@@ -1697,6 +1720,9 @@
     if (btn.classList.contains('keepsake')) openRainbow();
     else if (btn.classList.contains('pail')) {
       if (window.JoyBucket) JoyBucket.open('todo');
+    }
+    else if (btn.classList.contains('pol-pile')) {
+      if (window.JoyPolaroids) JoyPolaroids.open();
     }
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
@@ -2088,10 +2114,12 @@
       refresh: refreshAdded,
       toast: toast,
       // Open what a notification was about: 'letter:<key>', 'card:<key>',
-      // 'topics' or 'bucket'. Anything already open is left alone.
+      // 'topics', 'bucket' or 'polaroid:<id>'. Anything already open is left alone.
       go: function (target) {
         if (target === 'topics') { if (window.JoyTopics) JoyTopics.open(); return; }
         if (target === 'bucket') { if (window.JoyBucket) JoyBucket.open('todo'); return; }
+        var pol = /^polaroid:(.+)$/.exec(target || '');
+        if (pol) { if (window.JoyPolaroids) JoyPolaroids.show(pol[1]); return; }
         if (openState || letterState || rb) return;
         var m = /^(letter|card):(.+)$/.exec(target || '');
         if (!m) return;

@@ -136,3 +136,30 @@ create table if not exists public.joyshua_push (
 create index if not exists joyshua_push_who on public.joyshua_push (who, updated_at);
 
 alter table public.joyshua_push enable row level security;   -- no policies: unreadable from the browser
+
+-- When a photo was taken (read from the picture by the page), so a postcard's
+-- photos can sort by it (#54). It was added straight to the database; it's here
+-- so a fresh setup has it too.
+alter table public.joyshua_photos add column if not exists taken_at timestamptz;
+
+-- Polaroids: a photo taken there and then with the camera, a line on its white
+-- strip, sent to the other person. It arrives blank and develops the first
+-- time they open it; `developed_at` records that, so it's developed on every
+-- device after. Added 2026-09-23.
+create table if not exists public.joyshua_polaroids (
+  id            uuid primary key default gen_random_uuid(),
+  path          text not null,
+  thumb_path    text not null,
+  w             int  not null check (w between 1 and 4000),
+  h             int  not null check (h between 1 and 4000),
+  caption       text not null default '' check (char_length(caption) <= 40),
+  author        text not null check (author in ('josh', 'joyce')),
+  created_at    timestamptz not null default now(),
+  developed_at  timestamptz,               -- null until the other person has watched it develop
+  hidden        boolean not null default false
+);
+create index if not exists joyshua_polaroids_made on public.joyshua_polaroids (created_at);
+
+alter table public.joyshua_polaroids enable row level security;
+drop policy if exists "joyshua read polaroids" on public.joyshua_polaroids;
+create policy "joyshua read polaroids" on public.joyshua_polaroids for select to anon, authenticated using (not hidden);

@@ -37,7 +37,7 @@
       });
   }
 
-  var added = { postcards: [], photos: [], letters: [], topics: [] };   // rows added from the page
+  var added = { postcards: [], photos: [], letters: [], topics: [], polaroids: [] };   // rows added from the page
 
   function soft(p) {
     return p.catch(function (err) { if (window.console) console.warn('[joyshua] couldn\u2019t load:', err.message); return null; });
@@ -51,7 +51,8 @@
       soft(get('joyshua_postcards', 'select=*&order=created_at')),
       soft(get('joyshua_photos', 'select=*&order=created_at')),
       soft(get('joyshua_letters', 'select=*&order=created_at')),
-      soft(get('joyshua_topics', 'select=*&order=created_at'))
+      soft(get('joyshua_topics', 'select=*&order=created_at')),
+      soft(get('joyshua_polaroids', 'select=*&order=created_at'))
     ]).then(function (r) {
       // (whatever couldn't be fetched keeps what was there before)
       if (r[0]) r[0].forEach(function (row) { state[row.key] = row.value; });
@@ -59,6 +60,7 @@
       if (r[2]) added.photos = r[2];
       if (r[3]) added.letters = r[3];
       if (r[4]) added.topics = r[4];
+      if (r[5]) added.polaroids = r[5];
     });
   }
 
@@ -214,7 +216,8 @@
       );
     },
 
-    // Deleted from the page (for everyone)? Keys: 'card:', 'photo:', 'letter:'.
+    // Deleted from the page (for everyone)? Keys: 'card:', 'photo:', 'letter:',
+    // 'topic:', 'bucket:', 'polaroid:'.
     isGone: function (key) { var v = state['gone:' + key]; return !!(v && v.gone === true); },
 
     remove: function (key) {
@@ -272,6 +275,21 @@
         onProgress && onProgress('Saving\u2026');
         return call('add-postcard', { title: title, author: author, path: ups[0].path, w: ups[0].w, h: ups[0].h });
       }).then(function (r) { added.postcards.push(r.postcard); return r.postcard; });
+    },
+
+    // `file` is the square picture the camera took (polaroids.js makes it)
+    addPolaroid: function (author, file, caption, onProgress) {
+      return upload([file], 1400, onProgress).then(function (ups) {
+        onProgress && onProgress('Sending\u2026');
+        return call('add-polaroid', { author: author, path: ups[0].path, thumb: ups[0].thumb, w: ups[0].w, h: ups[0].h, caption: caption || '' });
+      }).then(function (r) { added.polaroids.push(r.polaroid); return r.polaroid; });
+    },
+
+    developPolaroid: function (id) {
+      return call('develop-polaroid', { id: id }).then(function (r) {
+        added.polaroids = added.polaroids.map(function (p) { return p.id === id ? r.polaroid : p; });
+        return r.polaroid;
+      });
     },
 
     call: call,
