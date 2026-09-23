@@ -131,7 +131,7 @@
       return;
     }
     top.forEach(function (p, k) {
-      var pol = polFor(p, { bare: true });
+      var pol = polFor(p);
       var r = hash(p.id + 'pile');
       pol.style.setProperty('--tilt', ((r - 0.5) * 22).toFixed(1) + 'deg');
       pol.style.setProperty('--px', ((hash(p.id + 'x') - 0.5) * 26).toFixed(0) + 'px');
@@ -483,6 +483,13 @@
     if (!cam) return;
     author = w === 'joyce' ? 'joyce' : 'josh';
     cam.classList.toggle('author-joyce', author === 'joyce');
+    // the frame in the sender's paper, with their name on it
+    var frame = cam.querySelector('.pol--cam');
+    frame.classList.toggle('author-josh', author === 'josh');
+    frame.classList.toggle('author-joyce', author === 'joyce');
+    var tag = cam.querySelector('.pc-who');
+    tag.className = 'who-chip pc-who author-' + author;
+    tag.textContent = NAMES[author];
     cam.hidden = false;
     void cam.offsetWidth;
     cam.classList.add('open');
@@ -700,7 +707,7 @@
             '<img class="pc-shot" alt="">' +
             '<span class="pc-flash"></span>' +
           '</div>' +
-          '<div class="pol-strip"><input class="pc-cap" maxlength="40" autocomplete="off" aria-label="Write on it"></div>' +
+          '<div class="pol-strip"><input class="pc-cap" maxlength="40" autocomplete="off" aria-label="Write on it"><span class="who-chip pc-who"></span></div>' +
         '</article>' +
         '<div class="pc-controls">' +
           '<button class="pc-round pc-flip" type="button" aria-label="Switch camera">' + ICON_FLIP + '</button>' +
