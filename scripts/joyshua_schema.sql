@@ -117,3 +117,22 @@ create policy "joyshua read topics" on public.joyshua_topics for select to anon,
 alter table public.joyshua_topics add column if not exists kind text not null default 'topic';
 alter table public.joyshua_topics drop constraint if exists joyshua_topics_kind;
 alter table public.joyshua_topics add constraint joyshua_topics_kind check (kind in ('topic', 'bucket'));
+
+-- Notifications: the devices that asked to hear when the other person adds
+-- something. `who` is whose device it is (Josh's devices hear about Joyce's
+-- additions, and the other way round). Only the edge function touches this --
+-- no policies, so the browser can't read anyone's subscription. Rows really
+-- are deleted here: a device that's turned off, or that its push service says
+-- is gone, is just dropped. Added 2026-09-23.
+create table if not exists public.joyshua_push (
+  endpoint    text primary key check (char_length(endpoint) <= 1000),
+  who         text not null check (who in ('josh', 'joyce')),
+  p256dh      text not null check (char_length(p256dh) <= 100),
+  auth        text not null check (char_length(auth) <= 40),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  last_ok_at  timestamptz                -- the last notification it accepted
+);
+create index if not exists joyshua_push_who on public.joyshua_push (who, updated_at);
+
+alter table public.joyshua_push enable row level security;   -- no policies: unreadable from the browser

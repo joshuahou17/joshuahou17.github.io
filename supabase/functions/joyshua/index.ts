@@ -9,12 +9,23 @@
 //   - every change is written to joyshua_log with its old and new value BEFORE
 //     it's applied, and nothing is ever deleted, so anything can be rolled back
 //
+// It also sends the notifications: when Josh adds something, Joyce's devices
+// hear about it, and the other way round (push.ts does the sending). They
+// stay vague on purpose -- "Joyce wrote you a letter", never what it says --
+// since they show on a lock screen.
+//
 // Tables and bucket come from scripts/joyshua_schema.sql, which must be applied
 // before this is deployed.
+//
+// Notifications need the VAPID key pair as secrets first: run
+//   node scripts/joyshua_vapid.mjs
+// and it prints the `supabase secrets set` command. Without them the page
+// simply doesn't offer notifications.
 //
 // Deploy:  supabase functions deploy joyshua --no-verify-jwt
 
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { send, Subscription, unb64u } from "./push.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +38,20 @@ const WRITES_PER_10_MIN = 60;       // per visitor
 const UPLOADS_PER_DAY_VISITOR = 40; // signed upload slots, per visitor
 const UPLOADS_PER_DAY_TOTAL = 120;  // across the whole page
 const AUTHORS = ["josh", "joyce"];
+const NAMES: Record<string, string> = { josh: "Josh", joyce: "Joyce" };
+const DEVICES_PER_PERSON = 10;      // the oldest sign-ups past this are dropped
+const RECENT_MIN = 10;              // a notification counts what's been added this long
+
+// Only the browsers' own push services -- the endpoint is fetched, so it can't
+// be allowed to point anywhere else.
+const PUSH_HOSTS = [
+  /^fcm\.googleapis\.com$/,                    // Chrome, Edge on Android, Samsung
+  /^updates\.push\.services\.mozilla\.com$/,   // Firefox
+  /(^|\.)push\.apple\.com$/,                   // Safari, and iPhone home-screen apps
+  /\.notify\.windows\.com$/,                   // Edge on Windows
+];
+
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "content-type": "application/json" } });
@@ -73,6 +98,21 @@ function takenAt(v: unknown): string | null {
 function author(v: unknown): string {
   if (typeof v !== "string" || !AUTHORS.includes(v)) throw new Bad("unknown author");
   return v;
+}
+
+// A browser's push subscription, as PushSubscription.toJSON() gives it.
+function pushSub(v: unknown): Subscription {
+  const s = (v && typeof v === "object" ? v : {}) as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
+  const endpoint = typeof s.endpoint === "string" ? s.endpoint : "";
+  let host = "";
+  try { const u = new URL(endpoint); if (u.protocol === "https:") host = u.hostname; } catch { /* not a URL */ }
+  if (!host || endpoint.length > 1000 || !PUSH_HOSTS.some((r) => r.test(host))) throw new Bad("bad subscription");
+  const key = (k: unknown, bytes: number) => {
+    const t = typeof k === "string" ? k.replace(/=+$/, "") : "";
+    if (!/^[\w-]+$/.test(t) || unb64u(t).length !== bytes) throw new Bad("bad subscription");
+    return t;
+  };
+  return { endpoint, p256dh: key(s.keys?.p256dh, 65), auth: key(s.keys?.auth, 16) };
 }
 
 // A photo is either one of the page's own files or one uploaded here.
@@ -135,6 +175,67 @@ async function setState(sb: SupabaseClient, visitor: string, action: string, key
   const { error } = await sb.from("joyshua_state").upsert({ key, value: next, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
   return { key, value: next };
+}
+
+/* ---------- notifications ---------- */
+
+type Kind = "letter" | "photo" | "postcard" | "topic" | "bucket";
+
+// Deliberately vague: who, and what kind of thing -- never its words.
+function message(name: string, kind: Kind, n: number): string {
+  const many = n > 1;
+  switch (kind) {
+    case "letter":   return many ? `${name} wrote you ${n} letters 💌` : `${name} wrote you a letter 💌`;
+    case "photo":    return many ? `${name} added ${n} photos` : `${name} added a photo`;
+    case "postcard": return many ? `${name} added ${n} postcards` : `${name} added a postcard`;
+    case "topic":    return many ? `${name} added ${n} things to talk about` : `${name} added something to talk about`;
+    case "bucket":   return many ? `${name} added ${n} things to the bucket list` : `${name} added to the bucket list`;
+  }
+}
+
+// How many of this kind `who` has added in the last few minutes. Each
+// notification carries a tag, and a new one with the same tag quietly replaces
+// the last, so a burst of additions reads as one running total.
+async function recentCount(sb: SupabaseClient, who: string, kind: Kind): Promise<number> {
+  const table = { letter: "joyshua_letters", photo: "joyshua_photos", postcard: "joyshua_postcards", topic: "joyshua_topics", bucket: "joyshua_topics" }[kind];
+  let q = sb.from(table).select("id", { count: "exact", head: true })
+    .eq("author", who).gte("created_at", new Date(Date.now() - RECENT_MIN * 60e3).toISOString());
+  if (kind === "topic" || kind === "bucket") q = q.eq("kind", kind);
+  const { count } = await q;
+  return Math.max(1, count ?? 1);
+}
+
+// Tell the other person's devices. `go` is where tapping it takes them
+// (sw.js hands it to the page): 'letter:<id>', 'card:<key>', 'topics', 'bucket'.
+async function notifyOther(sb: SupabaseClient, who: string, kind: Kind, go: string) {
+  const publicKey = Deno.env.get("VAPID_PUBLIC_KEY"), privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!publicKey || !privateKey) return;
+  const { data: subs } = await sb.from("joyshua_push").select("endpoint, p256dh, auth").eq("who", who === "josh" ? "joyce" : "josh");
+  if (!subs?.length) return;
+  const tag = `${who}-${kind}`;
+  const payload = JSON.stringify({ title: message(NAMES[who], kind, await recentCount(sb, who, kind)), tag, go });
+  const keys = { publicKey, privateKey, subject: Deno.env.get("VAPID_SUBJECT") || "https://joshhou.com/joyshua" };
+  await Promise.all(subs.map(async (s: Subscription) => {
+    try {
+      const status = await send(s, payload, keys, tag);
+      if (status === 404 || status === 410) {
+        await sb.from("joyshua_push").delete().eq("endpoint", s.endpoint);       // that device unsubscribed
+      } else if (status >= 200 && status < 300) {
+        await sb.from("joyshua_push").update({ last_ok_at: new Date().toISOString() }).eq("endpoint", s.endpoint);
+      } else {
+        console.error(`push to ${new URL(s.endpoint).hostname} failed: ${status}`);
+      }
+    } catch (err) {
+      console.error("push failed:", err);
+    }
+  }));
+}
+
+// Notifications go out after the reply, so saving never waits on them (or
+// fails because of them).
+function later(p: Promise<unknown>) {
+  const settled = p.catch((err) => console.error("notify failed:", err));
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(settled);
 }
 
 Deno.serve(async (req) => {
@@ -227,6 +328,7 @@ Deno.serve(async (req) => {
         await log(sb, visitor, action, card, null, rows);
         const { data, error } = await sb.from("joyshua_photos").insert(rows).select();
         if (error) throw new Error(error.message);
+        later(notifyOther(sb, who, "photo", "card:" + card));
         return json({ photos: data });
       }
 
@@ -241,6 +343,7 @@ Deno.serve(async (req) => {
         await log(sb, visitor, action, row.title, null, row);
         const { data, error } = await sb.from("joyshua_postcards").insert(row).select().single();
         if (error) throw new Error(error.message);
+        later(notifyOther(sb, row.author, "postcard", "card:" + data.id));
         return json({ postcard: data });
       }
 
@@ -252,6 +355,7 @@ Deno.serve(async (req) => {
         await log(sb, visitor, action, row.text.slice(0, 60), null, row);
         const { data, error } = await sb.from("joyshua_topics").insert(row).select().single();
         if (error) throw new Error(error.message);
+        later(notifyOther(sb, row.author, kind, kind === "bucket" ? "bucket" : "topics"));
         return json({ topic: data });
       }
 
@@ -280,7 +384,41 @@ Deno.serve(async (req) => {
         await log(sb, visitor, action, row.label, null, row);
         const { data, error } = await sb.from("joyshua_letters").insert(row).select().single();
         if (error) throw new Error(error.message);
+        later(notifyOther(sb, row.author, "letter", "letter:" + data.id));
         return json({ letter: data });
+      }
+
+      // The key a browser needs to sign up for notifications. Null until the
+      // VAPID secrets are set, and the page then doesn't offer them.
+      case "push-key": {
+        return json({ key: Deno.env.get("VAPID_PUBLIC_KEY") || null });
+      }
+
+      // This device wants to hear when the other person adds something. A
+      // device belongs to one person at a time: signing up again as the other
+      // one moves it over.
+      case "subscribe": {
+        const who = author(body.who);
+        const sub = pushSub(body.subscription);
+        await log(sb, visitor, action, who, null, { who, host: new URL(sub.endpoint).hostname });
+        const { error } = await sb.from("joyshua_push")
+          .upsert({ ...sub, who, updated_at: new Date().toISOString() }, { onConflict: "endpoint" });
+        if (error) throw new Error(error.message);
+        const { data: all } = await sb.from("joyshua_push").select("endpoint").eq("who", who).order("updated_at", { ascending: false });
+        const extra = (all ?? []).slice(DEVICES_PER_PERSON).map((r: { endpoint: string }) => r.endpoint);
+        if (extra.length) await sb.from("joyshua_push").delete().in("endpoint", extra);
+        return json({ ok: true, who });
+      }
+
+      case "unsubscribe": {
+        const endpoint = typeof body.endpoint === "string" ? body.endpoint.slice(0, 1000) : "";
+        if (!endpoint) throw new Bad("bad subscription");
+        const { data: cur } = await sb.from("joyshua_push").select("who").eq("endpoint", endpoint).maybeSingle();
+        if (cur) {
+          await log(sb, visitor, action, cur.who, { who: cur.who }, null);
+          await sb.from("joyshua_push").delete().eq("endpoint", endpoint);
+        }
+        return json({ ok: true });
       }
 
       default:

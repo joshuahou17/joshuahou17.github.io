@@ -13,7 +13,7 @@
   var OTHER = { josh: 'joyce', joyce: 'josh' };
   var MAX_PHOTOS = 20;
 
-  var root, card, body, fromTag, who = null, busy = false, lastFocus = null;
+  var root, card, body, fromTag, bell = null, who = null, busy = false, lastFocus = null;
   var picked = [];            // photos chosen but not yet uploaded: {file, url}
 
   function el(tag, cls, text) {
@@ -48,6 +48,7 @@
     root.classList.toggle('author-none', !w);
     fromTag.textContent = w ? 'from ' + NAMES[w] : '';
     fromTag.hidden = !w;
+    if (bell) JoyNotify.forWho(bell, w);     // notifications for whoever this panel is
   }
 
   function status(msg, bad) {
@@ -375,6 +376,7 @@
     x.setAttribute('aria-label', 'Close');
     x.addEventListener('click', close);
     top.appendChild(fromTag);
+    if (window.JoyNotify) { bell = JoyNotify.button(); top.appendChild(bell); }
     top.appendChild(x);
     body = el('div', 'c-body');
     card.appendChild(top);

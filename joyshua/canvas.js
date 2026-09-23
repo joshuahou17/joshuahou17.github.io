@@ -2087,6 +2087,26 @@
       confirm: askConfirm,
       refresh: refreshAdded,
       toast: toast,
+      // Open what a notification was about: 'letter:<key>', 'card:<key>',
+      // 'topics' or 'bucket'. Anything already open is left alone.
+      go: function (target) {
+        if (target === 'topics') { if (window.JoyTopics) JoyTopics.open(); return; }
+        if (target === 'bucket') { if (window.JoyBucket) JoyBucket.open('todo'); return; }
+        if (openState || letterState || rb) return;
+        var m = /^(letter|card):(.+)$/.exec(target || '');
+        if (!m) return;
+        var list = m[1] === 'letter' ? LETTERS : CARDS, at = -1;
+        for (var i = 0; i < list.length; i++) {
+          if ((list[i].key || list[i].label || list[i].title) === m[2] && !list[i].gone) at = i;
+        }
+        if (at < 0) return;
+        for (var k = 0; k < placed.length; k++) {
+          var p = placed[k];
+          if (p.inBox || !p.el.matches(m[1] === 'letter' ? '.envelope[data-letter="' + at + '"]' : '.card[data-card="' + at + '"]')) continue;
+          openItem(p.el);
+          return;
+        }
+      },
       // glide to something just added so you can see it land
       show: function (p) {
         if (!p) return;
