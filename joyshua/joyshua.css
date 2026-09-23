@@ -1410,6 +1410,9 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 }
 .topic-tick:hover { border-color: var(--pen); color: rgba(39, 64, 122, 0.35); }
 .topic-tick[aria-pressed="true"] { background: #4b7a4e; border-color: #4b7a4e; color: #fff; }
+/* the other person's card, until it's been talked about */
+.topic--secret .topic-text { filter: blur(6px); -webkit-user-select: none; user-select: none; }
+.topic-stack.secret .stack-text { filter: blur(3px); }
 .topic--done { opacity: 0.6; }
 .topic--done .topic-text { text-decoration: line-through; text-decoration-color: rgba(60, 45, 25, 0.5); }
 .topic--big { width: min(86vw, 460px); padding: 26px 40px 22px 26px; rotate: -1deg; }
