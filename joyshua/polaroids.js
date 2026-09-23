@@ -232,7 +232,7 @@
     prevBtn.setAttribute('aria-label', 'Back to the month');
     prevBtn.disabled = false;
     nextBtn.disabled = true;
-    adders.hidden = true;
+    adders.hidden = false;      // taking one from here too (it lands on today)
     var row = el('div', 'pday-row');
     var out = items.map(function (p) {
       var pol = polFor(p);
@@ -603,7 +603,9 @@
         var to = NAMES[OTHER[author]];
         closeCamera();
         paint();
-        if (spread) { dayOn = null; shown = monthOf(Date.now()); draw(); }
+        // show it where it landed: today's polaroids, or this month if the
+        // calendar was up
+        if (spread) { if (dayOn) dayOn = dayKey(Date.now()); shown = monthOf(Date.now()); draw(); }
         var pile = pileEl();
         if (pile) { pile.classList.remove('landed'); void pile.offsetWidth; pile.classList.add('landed'); }
         if (window.JoyDesk) JoyDesk.toast('Polaroid sent to ' + to);
