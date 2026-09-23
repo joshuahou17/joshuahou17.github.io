@@ -16,6 +16,13 @@
   var stackEl, boardEl, listEl, doneEl, doneWrap, oneEl, countEl;
   var open = false, showingDone = false, single = null, holdTimer = 0, holdStart = null;
 
+  // A steady number from an id, so a card lands the same way every time.
+  function hash(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0) / 4294967296;
+  }
+
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -73,6 +80,11 @@
     var c = el('article', 'topic author-' + (t.author === 'joyce' ? 'joyce' : 'josh') + (t.done_at ? ' topic--done' : '') +
       (secret(t) ? ' topic--secret' : ''));
     c.dataset.id = t.id;
+    if (!opts.plain) {        // tossed onto the board, not filed: its own tilt, a little off true
+      c.style.setProperty('--tilt', ((hash(t.id) - 0.5) * 7).toFixed(2) + 'deg');
+      c.style.setProperty('--dx', ((hash(t.id + 'x') - 0.5) * 14).toFixed(0) + 'px');
+      c.style.setProperty('--dy', ((hash(t.id + 'y') - 0.5) * 16).toFixed(0) + 'px');
+    }
     var words = c.appendChild(el('p', 'topic-text', shownText(t)));
     if (secret(t)) words.setAttribute('aria-label', 'Hidden until you’ve talked about it');
     var foot = el('div', 'topic-foot');

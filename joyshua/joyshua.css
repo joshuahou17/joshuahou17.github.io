@@ -1371,7 +1371,30 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   cursor: pointer;
 }
 .board-btn:hover { background: rgba(0, 0, 0, 0.07); }
-.board-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+/* the cards are tossed on, not filed: each as big as what's written on it,
+   tilted its own way, a little off true, the neighbours overlapping at the
+   edges (clear of each other's ticks); the one you touch comes to the top */
+.board-list, .done-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px 8px 14px;
+}
+.board-list .topic, .done-list .topic {
+  flex: none;
+  width: max-content;
+  min-width: 150px;
+  max-width: min(290px, 100%);
+  margin: -3px -5px;
+  padding-right: 46px;              /* the words stop short of the tick */
+  translate: var(--dx, 0px) var(--dy, 0px);
+  rotate: var(--tilt, 0deg);
+  transition: translate 0.2s ease, scale 0.2s ease;
+}
+.board-list .topic:hover, .board-list .topic:focus-within,
+.done-list .topic:hover, .done-list .topic:focus-within { z-index: 2; scale: 1.03; }
+.board-list .topic--new { width: 270px; z-index: 3; }
 .board.one .board-list, .board.one .board-adders, .board.one .board-done { display: none; }
 .board-one { display: grid; place-items: center; padding: 10px 0 18px; }
 .board-adders { display: flex; gap: 8px; margin-top: 16px; }
@@ -1390,8 +1413,6 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   background-blend-mode: multiply, normal, normal, normal;
   box-shadow: 0 2px 2px rgba(60, 45, 25, 0.1), 0 8px 14px -8px rgba(60, 45, 25, 0.35);
 }
-.topic:nth-child(odd) { rotate: -0.7deg; }
-.topic:nth-child(even) { rotate: 0.6deg; }
 .topic.author-joyce { --index: #fdf4e2; --index-rule: #e0cfa8; }
 .topic-text { margin: 0 0 10px; font: 500 24px/24px 'Caveat', cursive; color: #2e2b26; white-space: pre-wrap; overflow-wrap: break-word; }
 .topic-foot { display: flex; align-items: center; gap: 8px; }
@@ -1456,13 +1477,21 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   background: rgba(60, 45, 25, 0.18);
   color: var(--ink);
 }
-.done-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-top: 10px; }
+.done-list { margin-top: 4px; }
 .board-done:not(.showing) .done-list { display: none; }
 
 @media (max-width: 640px) {
   .stack-text { font-size: 13px; line-height: 13px; }
   .board-card { padding: 12px 14px 16px; }
-  .board-list, .done-list { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .board-list, .done-list { padding: 8px 2px 12px; }
+  .board-list .topic, .done-list .topic {
+    min-width: 104px; max-width: 88%;
+    margin: 0 -4px;
+    padding: 12px 42px 10px 18px;
+    translate: var(--dx, 0px) calc(var(--dy, 0px) * 0.35);   /* stacked, so barely overlapping: every name shows */
+  }
+  .topic-tick { top: 8px; right: 8px; }
+  .board-list .topic--new { width: 100%; max-width: 100%; }
   .topic-text { font-size: 21px; line-height: 22px; }
 }
 
