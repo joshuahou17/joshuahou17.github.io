@@ -1062,6 +1062,24 @@ body {
   cursor: pointer;
 }
 .c-close:hover { background: rgba(0, 0, 0, 0.06); }
+/* notifications for whoever the panel is: an outline bell struck through when
+   off, a solid one when on */
+.c-bell {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  margin-left: auto;
+  border: 0; border-radius: 50%;
+  background: transparent; color: inherit;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+}
+.c-bell[hidden] { display: none; }
+.c-bell:hover { background: rgba(0, 0, 0, 0.06); opacity: 0.85; }
+.c-bell.on { opacity: 1; }
+.c-bell.on .bell-body { fill: currentColor; }
+.c-bell.on .bell-slash { display: none; }
+.c-bell.busy { cursor: progress; opacity: 0.35; }
 
 .c-title { margin: 6px 0 14px; font: 700 34px/1.05 'Caveat', cursive; }
 .c-label {
