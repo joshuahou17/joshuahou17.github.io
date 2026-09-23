@@ -85,6 +85,14 @@ export async function encrypt(sub: Subscription, payload: string): Promise<Bytes
   return concat(salt, rs, new Uint8Array([asPublic.length]), asPublic, sealed);
 }
 
+// Apple only accepts a Topic that is a whole base64url string of at most 32
+// characters, and "josh-postcard" (13) isn't one -- it was turned away with
+// BadWebPushTopic. So the name is hashed down to 32 characters, which always
+// is, and still differs for every person and kind.
+async function topicOf(name: string): Promise<string> {
+  return b64u(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(name)))).slice(0, 32);
+}
+
 // Sends one notification. Resolves to the push service's status: 201 is
 // delivered (or queued), 404/410 means the subscription is gone for good.
 // `topic` lets a newer message replace one still waiting to be delivered.
@@ -101,7 +109,7 @@ export async function send(
     "TTL": String(3 * 24 * 3600),
     "Urgency": "normal",
   };
-  if (topic) headers["Topic"] = topic;
+  if (topic) headers["Topic"] = await topicOf(topic);
   const res = await fetch(sub.endpoint, { method: "POST", headers, body: await encrypt(sub, payload) });
   await res.body?.cancel();
   return res.status;
