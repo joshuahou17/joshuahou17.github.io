@@ -55,10 +55,20 @@
     return supported && Notification.permission === 'granted' && saved(WHO_KEY) === who;
   }
 
+  // Whose device this is, as far as the page knows: whoever's notifications
+  // are on here, or null. The topics board shows only their cards.
+  function owner() {
+    var who = saved(WHO_KEY);
+    return isOn(who) ? who : null;
+  }
+
+  function ownerChanged() { if (window.JoyTopics) JoyTopics.draw(); }
+
   function tell(who, sub) {
     return JoyStore.call('subscribe', { who: who, subscription: sub.toJSON() }).then(function () {
       save(WHO_KEY, who);
       save(SENT_KEY, String(Date.now()));
+      ownerChanged();
     });
   }
 
@@ -81,6 +91,7 @@
   function turnOff() {
     save(WHO_KEY, null);
     save(SENT_KEY, null);
+    ownerChanged();
     return subscription().then(function (sub) {
       if (!sub) return;
       var endpoint = sub.endpoint;
@@ -147,7 +158,7 @@
   function checkIn() {
     var who = saved(WHO_KEY);
     if (!who) return;
-    if (Notification.permission !== 'granted') { save(WHO_KEY, null); return; }
+    if (Notification.permission !== 'granted') { save(WHO_KEY, null); ownerChanged(); return; }
     subscription().then(function (sub) {
       if (!sub) {
         return Promise.all([worker, getKey()]).then(function (both) {
@@ -200,7 +211,7 @@
     document.addEventListener('visibilitychange', clearShown);
   }
 
-  window.JoyNotify = { button: button, forWho: forWho };
+  window.JoyNotify = { button: button, forWho: forWho, owner: owner };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
