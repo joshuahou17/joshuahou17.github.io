@@ -1743,7 +1743,7 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   padding: 10px 10px 0;
   border-radius: 2px;
   background-color: #fff;
-  background-image: var(--grain), linear-gradient(#fbfaf5, #f4f2ea);
+  background-image: var(--grain), linear-gradient(var(--pol), var(--pol));
   background-blend-mode: multiply, normal;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 14px 22px -12px rgba(0, 0, 0, 0.55);
   transform: rotate(var(--tilt, 0deg));
@@ -1783,13 +1783,20 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 }
 .pol .who-chip { flex: none; font-size: 15px; }
 
+/* whose it is: the frame in their paper (grey for Josh, cream for Joyce, like
+   their slips and name tags), and their name on the strip */
+.pol { --pol: #f7f5ee; }
+.pol.author-josh { --pol: #e5e5e2; }
+.pol.author-joyce { --pol: #f2e2c3; }
+
 /* on the desk: the newest three, tossed on top of each other */
-.card.pol-pile { width: 236px; height: 262px; overflow: visible; }
+.card.pol-pile { width: 280px; height: 312px; overflow: visible; }
 .pol-pile:focus-visible { outline: none; }
 .pol-pile:focus-visible .pol:last-child { outline: 3px solid var(--pen); outline-offset: 4px; }
 .pp-stack { position: absolute; inset: 0; pointer-events: none; }
 .pp-stack .pol {
-  position: absolute; left: 20px; top: 16px;
+  position: absolute; left: 24px; top: 20px;
+  width: 232px;
   transform: translate(var(--px, 0px), var(--py, 0px)) rotate(var(--tilt, 0deg));
   transition: transform 0.25s ease;
 }
@@ -1901,7 +1908,8 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
 .pcam.flash .pc-flash { animation: flash 0.35s ease-out; }
 @keyframes flash { from { opacity: 0.95; } to { opacity: 0; } }
 .pc-cap {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 4px 2px;
   border: 0;
   border-bottom: 1px dashed transparent;
@@ -1970,7 +1978,7 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
   .pday-row .pol { width: calc(50% - 5px); padding: 7px 7px 0; }
   .pday-row .pol-strip { height: 36px; }
   .pday-row .pol-cap { font-size: 18px; }
-  .pday-row .pol .who-chip { display: none; }
+  .pday-row .pol .who-chip { font-size: 12px; padding: 1px 6px 2px; }
   .pcal { gap: 4px; }
   .pcal-num { left: 4px; top: 4px; font-size: 9px; }
   .pcal-cell--today .pcal-num { left: 2px; top: 2px; padding: 2px 4px; }

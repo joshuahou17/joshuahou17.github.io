@@ -24,7 +24,7 @@
   var EW = 360, EH = 226;     // an envelope on the desk
   var BW = 300, BH = 210;     // the keepsake box
   var PW = 262, PH = 272;     // the bucket-list pail
-  var LW = 236, LH = 262;     // the pile of polaroids
+  var LW = 280, LH = 312;     // the pile of polaroids
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
