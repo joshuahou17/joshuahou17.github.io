@@ -1801,9 +1801,52 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   to   { translate: 0 0; scale: 1; opacity: 1; }
 }
 
-/* spread out, a row per day */
-.pp-days { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 26px; }
-.pday-name { margin: 0 0 12px; text-align: center; font: 700 28px/1 'Caveat', cursive; color: rgba(255, 255, 255, 0.86); }
+/* the calendar: a month of squares, the newest polaroid of each day lying in
+   its square; tap a day and its polaroids spread out (.pday-row) */
+.pp-days { flex-direction: column; flex-wrap: nowrap; align-items: stretch; }
+.pp-nav { align-items: center; gap: 12px; }
+.pp-title { margin: 0; min-width: 8.5em; text-align: center; font: 700 32px/1 'Caveat', cursive; color: #fff; }
+.pp-arrow {
+  width: 42px; height: 42px;
+  border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: 400 26px/1 'Space Mono', monospace;
+  cursor: pointer;
+}
+.pp-arrow:hover, .pp-arrow:focus-visible { background: rgba(255, 255, 255, 0.22); outline: none; }
+.pp-arrow:disabled { visibility: hidden; }
+.pspill.on-day .pp-prev { font-size: 0; }
+.pspill.on-day .pp-prev::before { content: '\2190'; font-size: 20px; }     /* back, not the month before */
+
+.pcal { width: min(100%, 760px); margin: 0 auto; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.pcal-wd { padding-bottom: 4px; text-align: center; font: 700 11px/1 'Space Mono', monospace; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.55); }
+.pcal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 0; border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+.pcal-cell--pad { background: transparent; }
+.pcal-cell--future { opacity: 0.35; }
+button.pcal-cell { cursor: pointer; background: rgba(255, 255, 255, 0.13); transition: background 0.15s ease, transform 0.15s ease; }
+button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 255, 255, 0.22); transform: translateY(-2px); outline: none; }
+.pcal-num { position: absolute; left: 6px; top: 6px; z-index: 1; font: 700 11px/1 'Space Mono', monospace; color: rgba(255, 255, 255, 0.72); }
+.pcal-cell--today .pcal-num { left: 3px; top: 3px; padding: 3px 5px; border-radius: 999px; background: #fbf6ea; color: #2b2620; }
+.pcal-n {
+  position: absolute; right: 4px; bottom: 4px; z-index: 1;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 999px;
+  background: #fbf6ea; color: #2b2620;
+  font: 700 10px/18px 'Space Mono', monospace; text-align: center;
+}
+.pol--mini { width: 60%; margin-top: 10%; padding: 4% 4% 0; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 6px 10px -6px rgba(0, 0, 0, 0.6); }
+.pol--mini .pol-strip { height: 0; padding-bottom: 20%; }
+.pol--mini .pol-cap { display: none; }
+
 .pday-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 18px 16px; }
 .pday-row .pol { margin-top: var(--jy, 0px); cursor: pointer; }
 .pday-row .pol:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
@@ -1928,7 +1971,13 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   .pday-row .pol-strip { height: 36px; }
   .pday-row .pol-cap { font-size: 18px; }
   .pday-row .pol .who-chip { display: none; }
-  .pday-name { font-size: 24px; }
+  .pcal { gap: 4px; }
+  .pcal-num { left: 4px; top: 4px; font-size: 9px; }
+  .pcal-cell--today .pcal-num { left: 2px; top: 2px; padding: 2px 4px; }
+  .pcal-n { right: 2px; bottom: 2px; min-width: 15px; height: 15px; font-size: 9px; line-height: 15px; }
+  .pp-title { font-size: 28px; min-width: 7.5em; }
+  .pp-nav { margin-top: 64px; }                    /* clear of the close button */
+  .pol--mini { width: 50%; margin-top: 26%; }
 }
 
 /* ---------- deleting: hold, wiggle, minus, confirm ---------- */
