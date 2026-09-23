@@ -9,8 +9,8 @@
  * polaroid developed, the same rule the topics board uses.
  *
  * On the desk they lie in a pile (canvas.js places it; this fills it in). Tap
- * the pile and they spread out by the day they were taken (9/2/26), newest
- * day first.
+ * the pile for a calendar: each day they were taken shows its newest one, and
+ * tapping the day spreads that day's polaroids out.
  *
  * Saved through JoyStore (joyshua_polaroids). Deleting reuses the desk's
  * press-and-hold minus (JoyDesk).
@@ -23,7 +23,7 @@
   var DEV_MS = 60000;         // developing, left alone
   var SIDE = 1400;            // the picture's size, square
 
-  var spill, list, adders, countEl;            // the pile, spread out
+  var spill, list, adders, prevBtn, nextBtn, titleEl;   // the calendar, and a day spread out
   var view, viewSlot;                          // one polaroid, big
   var cam;                                     // the camera
   var spread = false, openedAt = 0, held = false, holdTimer = 0, holdStart = null;
@@ -140,50 +140,149 @@
     });
   }
 
-  /* ---------- spread out, by day ---------- */
+  /* ---------- the calendar, and a day spread out ----------
+   * Tapping the pile opens a month (the one with the newest polaroid): a square
+   * for every day, and on each day something was taken, its newest polaroid
+   * lying in the square (with how many, if there's more than one). Tapping the
+   * day spreads its polaroids out, in the order they were taken; the arrow
+   * goes back to the month. */
 
-  function dayKey(iso) {
-    var d = new Date(iso);
+  var WEEK = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var shown = null;           // the month on screen, as its 1st
+  var dayOn = null;           // the day spread out (its dayKey), or null for the month
+
+  function dayKey(when) {
+    var d = new Date(when);
     return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
   }
 
-  function dayName(iso) {
-    var d = new Date(iso);
+  function dayName(when) {
+    var d = new Date(when);
     return d.getMonth() + 1 + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(2);   // 9/2/26
   }
 
+  function monthOf(when) { var d = new Date(when); return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+  // every day that has any, newest first within it
+  function byDay() {
+    var out = {};
+    all().forEach(function (p) { (out[dayKey(p.created_at)] = out[dayKey(p.created_at)] || []).push(p); });
+    return out;
+  }
+
+  // from the month of the first polaroid to this one
+  function firstMonth() { var ps = all(); return monthOf(ps.length ? ps[ps.length - 1].created_at : Date.now()); }
+
   function draw() {
     if (!spread) return [];
-    var ps = all();
-    countEl.textContent = ps.length || '';
     var me = owner();
     adders.querySelectorAll('[data-pol-add]').forEach(function (b) { b.hidden = !!me && b.dataset.polAdd !== me; });
     list.textContent = '';
-    // newest day first; within a day, in the order they were taken
-    var days = [], at = {};
-    ps.forEach(function (p) {
-      var k = dayKey(p.created_at);
-      if (!(k in at)) { at[k] = days.length; days.push({ name: dayName(p.created_at), items: [] }); }
-      days[at[k]].items.unshift(p);
-    });
-    var out = [];
-    days.forEach(function (d) {
-      var sec = el('section', 'pday');
-      sec.appendChild(el('h3', 'pday-name', d.name));
-      var row = el('div', 'pday-row');
-      d.items.forEach(function (p) {
-        var pol = polFor(p);
-        pol.tabIndex = 0;
-        pol.setAttribute('role', 'button');
-        pol.style.setProperty('--jy', Math.round(hash(p.id + 'jy') * 16) + 'px');
-        holdToDelete(pol, p);
-        row.appendChild(pol);
-        out.push(pol);
-      });
-      sec.appendChild(row);
-      list.appendChild(sec);
-    });
+    if (dayOn) {
+      var items = drawDay();
+      if (items) return items;
+      dayOn = null;           // nothing left on that day (the last one was thrown away)
+    }
+    return drawMonth();
+  }
+
+  function drawMonth() {
+    var days = byDay(), now = new Date(), today = dayKey(now);
+    var y = shown.getFullYear(), m = shown.getMonth();
+    spill.classList.remove('on-day');
+    titleEl.textContent = MONTHS[m] + ' ' + y;
+    prevBtn.setAttribute('aria-label', 'The month before');
+    prevBtn.disabled = shown <= firstMonth();
+    nextBtn.disabled = shown >= monthOf(now);
+    adders.hidden = false;
+
+    var grid = el('div', 'pcal');
+    WEEK.forEach(function (w) { grid.appendChild(el('span', 'pcal-wd', w)); });
+    for (var pad = 0; pad < shown.getDay(); pad++) grid.appendChild(el('span', 'pcal-cell pcal-cell--pad'));
+    var out = [], last = new Date(y, m + 1, 0).getDate();
+    for (var d = 1; d <= last; d++) {
+      var date = new Date(y, m, d), k = dayKey(date), items = days[k] || [];
+      var cell = el(items.length ? 'button' : 'span', 'pcal-cell' +
+        (k === today ? ' pcal-cell--today' : '') + (date > now ? ' pcal-cell--future' : ''));
+      cell.appendChild(el('span', 'pcal-num', d));
+      if (items.length) {
+        cell.type = 'button';
+        cell.dataset.day = k;
+        cell.setAttribute('aria-label', dayName(date) + ', ' + items.length + (items.length === 1 ? ' polaroid' : ' polaroids'));
+        var mini = polFor(items[0], { bare: true });
+        mini.classList.add('pol--mini');
+        mini.setAttribute('aria-hidden', 'true');
+        mini.style.setProperty('--tilt', ((hash(items[0].id) - 0.5) * 14).toFixed(1) + 'deg');
+        cell.appendChild(mini);
+        if (items.length > 1) cell.appendChild(el('span', 'pcal-n', items.length));
+        out.push(mini);
+      }
+      grid.appendChild(cell);
+    }
+    list.appendChild(grid);
     return out;
+  }
+
+  function drawDay() {
+    var items = (byDay()[dayOn] || []).slice().reverse();   // in the order they were taken
+    if (!items.length) return null;
+    spill.classList.add('on-day');
+    titleEl.textContent = dayName(items[0].created_at);
+    prevBtn.setAttribute('aria-label', 'Back to the month');
+    prevBtn.disabled = false;
+    nextBtn.disabled = true;
+    adders.hidden = true;
+    var row = el('div', 'pday-row');
+    var out = items.map(function (p) {
+      var pol = polFor(p);
+      pol.tabIndex = 0;
+      pol.setAttribute('role', 'button');
+      pol.style.setProperty('--jy', Math.round(hash(p.id + 'jy') * 16) + 'px');
+      holdToDelete(pol, p);
+      row.appendChild(pol);
+      return pol;
+    });
+    list.appendChild(row);
+    return out;
+  }
+
+  // each one flies out from `r` (a screen rect: the pile, or the day tapped)
+  function flyFrom(items, r) {
+    r = r || { left: window.innerWidth / 2, top: window.innerHeight, width: 0, height: 0 };
+    var ox = r.left + r.width / 2, oy = r.top + r.height / 2;
+    items.forEach(function (pol, k) {
+      var b = pol.getBoundingClientRect();
+      pol.style.setProperty('--fx', (ox - (b.left + b.width / 2)).toFixed(0) + 'px');
+      pol.style.setProperty('--fy', (oy - (b.top + b.height / 2)).toFixed(0) + 'px');
+      pol.style.animationDelay = Math.min(k * 25, 500) + 'ms';
+      pol.classList.add('spilling');
+    });
+  }
+
+  function openDay(k, cell) {
+    if (window.JoyDesk) JoyDesk.hideMinus();
+    var r = cell && cell.getBoundingClientRect();
+    dayOn = k;
+    flyFrom(draw(), r);
+    spill.querySelector('.sp-sheet').scrollTop = 0;
+    prevBtn.focus({ preventScroll: true });
+  }
+
+  function backToMonth() {
+    if (!dayOn) return;
+    if (window.JoyDesk) JoyDesk.hideMinus();
+    var k = dayOn;
+    dayOn = null;
+    draw();
+    var cell = list.querySelector('.pcal-cell[data-day="' + k + '"]');
+    (cell || prevBtn).focus({ preventScroll: true });
+  }
+
+  function turnMonth(by) {
+    if (dayOn) { backToMonth(); return; }
+    shown = new Date(shown.getFullYear(), shown.getMonth() + by, 1);
+    draw();
   }
 
   function pileBox() {
@@ -195,22 +294,16 @@
   function open() {
     if (!spill) return;
     if (window.JoyDesk) JoyDesk.hideMinus();
+    var ps = all();
     spread = true;
+    dayOn = null;
+    shown = monthOf(ps.length ? ps[0].created_at : Date.now());
     openedAt = Date.now();
     spill.hidden = false;
     var items = draw();
     void spill.offsetWidth;
     spill.classList.add('open');
-    // each one flies out from the pile
-    var r = pileBox() || { left: window.innerWidth / 2, top: window.innerHeight, width: 0, height: 0 };
-    var ox = r.left + r.width / 2, oy = r.top + r.height / 2;
-    items.forEach(function (pol, k) {
-      var b = pol.getBoundingClientRect();
-      pol.style.setProperty('--fx', (ox - (b.left + b.width / 2)).toFixed(0) + 'px');
-      pol.style.setProperty('--fy', (oy - (b.top + b.height / 2)).toFixed(0) + 'px');
-      pol.style.animationDelay = Math.min(k * 40, 600) + 'ms';
-      pol.classList.add('spilling');
-    });
+    flyFrom(items, pileBox());
     spill.querySelector('.sp-close').focus({ preventScroll: true });
   }
 
@@ -496,7 +589,7 @@
         var to = NAMES[OTHER[author]];
         closeCamera();
         paint();
-        if (spread) draw();
+        if (spread) { dayOn = null; shown = monthOf(Date.now()); draw(); }
         var pile = pileEl();
         if (pile) { pile.classList.remove('landed'); void pile.offsetWidth; pile.classList.add('landed'); }
         if (window.JoyDesk) JoyDesk.toast('Polaroid sent to ' + to);
@@ -530,7 +623,11 @@
     spill.innerHTML =
       '<div class="sp-scrim" data-pclose></div>' +
       '<div class="sp-sheet" data-pclose>' +
-        '<div class="sp-tabs"><h2 class="sp-tab pp-title" aria-pressed="true">polaroids <span class="sp-n"></span></h2></div>' +
+        '<div class="sp-tabs pp-nav">' +
+          '<button class="pp-arrow pp-prev" type="button">\u2039</button>' +
+          '<h2 class="pp-title"></h2>' +
+          '<button class="pp-arrow pp-next" type="button" aria-label="The month after">\u203a</button>' +
+        '</div>' +
         '<div class="sp-list pp-days" data-pclose></div>' +
         '<div class="sp-adders">' +
           '<button class="adder adder--josh" type="button" data-pol-add="josh"><span aria-hidden="true">+</span> Josh</button>' +
@@ -541,22 +638,29 @@
     document.body.appendChild(spill);
     list = spill.querySelector('.pp-days');
     adders = spill.querySelector('.sp-adders');
-    countEl = spill.querySelector('.sp-n');
+    prevBtn = spill.querySelector('.pp-prev');
+    nextBtn = spill.querySelector('.pp-next');
+    titleEl = spill.querySelector('.pp-title');
+    prevBtn.addEventListener('click', function () { if (dayOn) backToMonth(); else turnMonth(-1); });
+    nextBtn.addEventListener('click', function () { turnMonth(1); });
 
     spill.addEventListener('click', function (e) {
       if (Date.now() - openedAt < 450) return;
-      var pol = e.target.closest('.pol');
+      var pol = e.target.closest('.pday-row .pol');
       if (pol) {
         if (held) { held = false; return; }
         show(pol.dataset.id);
         return;
       }
+      var day = e.target.closest('.pcal-cell[data-day]');
+      if (day) { openDay(day.dataset.day, day); return; }
+      if (e.target.closest('.pcal, .pp-nav')) return;          // an empty day, or the header
       var t = e.target.closest('[data-pclose], button');
       if (t && t.hasAttribute('data-pclose')) close();
     });
     spill.addEventListener('keydown', function (e) {
       e.stopPropagation();
-      var pol = e.target.closest && e.target.closest('.pol');
+      var pol = e.target.closest && e.target.closest('.pday-row .pol');
       if (pol && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); show(pol.dataset.id); }
     });
     adders.querySelectorAll('[data-pol-add]').forEach(function (b) {
@@ -636,6 +740,7 @@
       if (c && !c.hidden) return;
       if (!cam.hidden && cam.classList.contains('open')) closeCamera();
       else if (!view.hidden && view.classList.contains('open')) hide();
+      else if (spread && dayOn) backToMonth();
       else if (spread) close(true);
       else return;
       e.preventDefault();
