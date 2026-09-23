@@ -25,15 +25,36 @@
   }
 
   // Whose device this is (whoever's notifications are on here), or null for
-  // no one yet -- then the board shows everybody's.
+  // no one yet -- then every card can be read.
   function owner() { return window.JoyNotify && JoyNotify.owner ? JoyNotify.owner() : null; }
 
+  // The other person's cards stay face down (blurred) until they've been
+  // talked about.
+  function secret(t) {
+    var me = owner();
+    return !!me && t.author !== me && !t.done_at;
+  }
+
+  // What a face-down card says: the same shape of words in random letters, so
+  // selecting or zooming into the blur gives nothing away. Seeded by the id,
+  // so a card doesn't shimmer every time the board redraws.
+  var LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+  function scrambled(t) {
+    var seed = 0;
+    for (var i = 0; i < t.id.length; i++) seed = (seed * 31 + t.id.charCodeAt(i)) | 0;
+    return t.text.replace(/[^\s.,!?'’-]/g, function () {
+      seed = (seed * 1103515245 + 12345) | 0;
+      return LETTERS[(seed >>> 16) % 26];
+    });
+  }
+
+  function shownText(t) { return secret(t) ? scrambled(t) : t.text; }
+
   function topics() {
-    var S = window.JoyStore, me = owner();
+    var S = window.JoyStore;
     if (!S) return [];
     return S.added.topics
       .filter(function (t) { return !t.hidden && t.kind !== 'bucket' && !S.isGone('topic:' + t.id); })
-      .filter(function (t) { return !me || t.author === me; })
       .slice()
       .sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });   // newest first
   }
@@ -50,9 +71,11 @@
 
   function cardFor(t, opts) {
     opts = opts || {};
-    var c = el('article', 'topic author-' + (t.author === 'joyce' ? 'joyce' : 'josh') + (t.done_at ? ' topic--done' : ''));
+    var c = el('article', 'topic author-' + (t.author === 'joyce' ? 'joyce' : 'josh') + (t.done_at ? ' topic--done' : '') +
+      (secret(t) ? ' topic--secret' : ''));
     c.dataset.id = t.id;
-    c.appendChild(el('p', 'topic-text', t.text));
+    var words = c.appendChild(el('p', 'topic-text', shownText(t)));
+    if (secret(t)) words.setAttribute('aria-label', 'Hidden until you’ve talked about it');
     var foot = el('div', 'topic-foot');
     foot.appendChild(el('span', 'who-chip author-' + (t.author === 'joyce' ? 'joyce' : 'josh'), NAMES[t.author] || 'Josh'));
     foot.appendChild(el('span', 'topic-date', dayOf(t.created_at)));
@@ -150,7 +173,8 @@
 
     // the stack under the logo
     stackEl.classList.toggle('empty', !opens.length);
-    stackEl.querySelector('.stack-text').textContent = opens.length ? opens[0].text : '';
+    stackEl.querySelector('.stack-text').textContent = opens.length ? shownText(opens[0]) : '';
+    stackEl.classList.toggle('secret', !!opens.length && secret(opens[0]));
     stackEl.querySelector('.stack-count').textContent = opens.length || '';
     stackEl.setAttribute('aria-label', opens.length
       ? 'Things to talk about: ' + opens.length + (opens.length === 1 ? ' topic' : ' topics')

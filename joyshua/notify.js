@@ -56,7 +56,7 @@
   }
 
   // Whose device this is, as far as the page knows: whoever's notifications
-  // are on here, or null. The topics board shows only their cards.
+  // are on here, or null. The topics board blurs the other person's cards.
   function owner() {
     var who = saved(WHO_KEY);
     return isOn(who) ? who : null;
