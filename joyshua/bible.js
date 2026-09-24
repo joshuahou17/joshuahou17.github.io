@@ -2,13 +2,14 @@
  * up out of it for every verse Josh or Joyce has saved.
  *
  * Tap it and it opens: the saved verses, newest first, on thin gilt-edged
- * pages. + Josh / + Joyce start a new one -- type a reference ("ps 23:1-3",
- * "1 Cor 13:4-7") and the words fill themselves in from the NIV (the
- * translation the Bible-reading plan uses), still editable before it's saved.
- * If the lookup can't find it, the words can just be typed or pasted in.
+ * pages. + Josh / + Joyce lay a slip on the page to pick a new one without
+ * typing: scroll to the book, tap the chapter, and the chapter itself comes
+ * up to read -- tap a verse, then another to take in the ones between. The
+ * words of what's picked fill in underneath from the NIV (the translation
+ * the Bible-reading plan uses), still editable before it's saved.
  *
  * The words come from bolls.life, which serves the NIV with open CORS. Only
- * the lookup goes there; what's saved is a row in joyshua_verses (JoyStore).
+ * reading goes there; what's saved is a row in joyshua_verses (JoyStore).
  * The desk (canvas.js) owns the Bible's place; this fills in the bookmarks and
  * owns the open book. Deleting reuses the desk's press-and-hold minus.
  */
@@ -19,32 +20,30 @@
   var TEXT_API = 'https://bolls.life/get-text/NIV/';
   var MAX_WORDS = 2000;       // the column's cap (joyshua_schema.sql)
 
-  // The 66 books in order (their number is the index + 1), each with the
-  // short forms people actually type. Anything else is matched as a prefix of
-  // the name, first book wins -- "rom", "matt", "rev" all just work.
+  // The 66 books in order (their number is the index + 1), and how many
+  // chapters each has.
   var BOOKS = [
-    ['Genesis', 'gn'], ['Exodus', 'ex'], ['Leviticus', 'lv'], ['Numbers', 'nm'], ['Deuteronomy', 'dt'],
-    ['Joshua', 'jos'], ['Judges', 'jdg'], ['Ruth', 'rth'], ['1 Samuel', '1sa'], ['2 Samuel', '2sa'],
-    ['1 Kings', '1ki'], ['2 Kings', '2ki'], ['1 Chronicles', '1ch'], ['2 Chronicles', '2ch'], ['Ezra'],
-    ['Nehemiah'], ['Esther'], ['Job'], ['Psalms', 'ps', 'psa', 'psalm', 'pss'], ['Proverbs', 'prv'],
-    ['Ecclesiastes', 'eccl', 'qoh'], ['Song of Songs', 'song', 'sos', 'song of solomon', 'songs', 'canticles'], ['Isaiah', 'is'], ['Jeremiah', 'jer'], ['Lamentations'],
-    ['Ezekiel', 'ezk'], ['Daniel', 'dn'], ['Hosea'], ['Joel'], ['Amos'],
-    ['Obadiah'], ['Jonah'], ['Micah'], ['Nahum'], ['Habakkuk'],
-    ['Zephaniah'], ['Haggai'], ['Zechariah'], ['Malachi'],
-    ['Matthew', 'mt'], ['Mark', 'mk', 'mrk'], ['Luke', 'lk'], ['John', 'jn', 'jhn'], ['Acts'],
-    ['Romans', 'rm'], ['1 Corinthians'], ['2 Corinthians'], ['Galatians'], ['Ephesians'],
-    ['Philippians', 'php', 'phil'], ['Colossians'], ['1 Thessalonians'], ['2 Thessalonians'], ['1 Timothy'],
-    ['2 Timothy'], ['Titus'], ['Philemon', 'phm', 'phlm', 'philem'], ['Hebrews'], ['James', 'jas'],
-    ['1 Peter', '1pt'], ['2 Peter', '2pt'], ['1 John', '1jn'], ['2 John', '2jn'], ['3 John', '3jn'],
-    ['Jude'], ['Revelation', 'rev', 'revelations']
+    ['Genesis', 50], ['Exodus', 40], ['Leviticus', 27], ['Numbers', 36], ['Deuteronomy', 34],
+    ['Joshua', 24], ['Judges', 21], ['Ruth', 4], ['1 Samuel', 31], ['2 Samuel', 24],
+    ['1 Kings', 22], ['2 Kings', 25], ['1 Chronicles', 29], ['2 Chronicles', 36], ['Ezra', 10],
+    ['Nehemiah', 13], ['Esther', 10], ['Job', 42], ['Psalms', 150], ['Proverbs', 31],
+    ['Ecclesiastes', 12], ['Song of Songs', 8], ['Isaiah', 66], ['Jeremiah', 52], ['Lamentations', 5],
+    ['Ezekiel', 48], ['Daniel', 12], ['Hosea', 14], ['Joel', 3], ['Amos', 9],
+    ['Obadiah', 1], ['Jonah', 4], ['Micah', 7], ['Nahum', 3], ['Habakkuk', 3],
+    ['Zephaniah', 3], ['Haggai', 2], ['Zechariah', 14], ['Malachi', 4],
+    ['Matthew', 28], ['Mark', 16], ['Luke', 24], ['John', 21], ['Acts', 28],
+    ['Romans', 16], ['1 Corinthians', 16], ['2 Corinthians', 13], ['Galatians', 6], ['Ephesians', 6],
+    ['Philippians', 4], ['Colossians', 4], ['1 Thessalonians', 5], ['2 Thessalonians', 3], ['1 Timothy', 6],
+    ['2 Timothy', 4], ['Titus', 3], ['Philemon', 1], ['Hebrews', 13], ['James', 5],
+    ['1 Peter', 5], ['2 Peter', 3], ['1 John', 5], ['2 John', 1], ['3 John', 1],
+    ['Jude', 1], ['Revelation', 22]
   ];
-
-  var ONE_CHAPTER = [31, 57, 63, 64, 65];   // Obadiah, Philemon, 2 and 3 John, Jude
+  var NEW_TESTAMENT = 40;     // Matthew
 
   var root, book, list, adders;
   var isOpen = false, openedAt = 0;
   var holdTimer = 0, holdStart = null;
-  var chapters = {};          // 'book/chapter' -> Promise of [{verse, text}]
+  var chapters = {};          // 'book/chapter' -> Promise of [{verse, text}], cleaned
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -77,45 +76,23 @@
 
   function bibleEl() { return document.querySelector('.card.bible'); }
 
-  /* ---------- reading a reference ----------
-   * "John 3:16", "ps 23", "1 cor 13:4-7", "Song of Songs 2.4" ->
-   * {book: 43, chapter: 3, from: 16, to: 16, label: 'John 3:16'}, or null. */
-  function squash(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
-
-  function findBook(name) {
-    var q = squash(name);
-    if (q.length < 2) return 0;
-    for (var i = 0; i < BOOKS.length; i++) {
-      for (var j = 0; j < BOOKS[i].length; j++) if (squash(BOOKS[i][j]) === q) return i + 1;
-    }
-    for (var k = 0; k < BOOKS.length; k++) {
-      if (squash(BOOKS[k][0]).indexOf(q) === 0) return k + 1;
-    }
-    return 0;
+  // 'Psalm 23:1–3' (one psalm at a time, so no "s")
+  function label(b, c, from, to) {
+    var name = b === 19 ? 'Psalm' : BOOKS[b - 1][0];
+    return name + ' ' + c + ':' + from + (to > from ? '–' + to : '');
   }
 
-  function parseRef(raw) {
-    var m = /^\s*((?:[1-3]\s*)?[a-z][a-z .]*?)\s*(\d{1,3})(?:\s*[:.]\s*(\d{1,3})(?:\s*[-–—]\s*(\d{1,3}))?)?\s*$/i.exec(raw || '');
-    if (!m) return null;
-    var b = findBook(m[1]);
-    if (!b) return null;
-    var ch = +m[2], from = m[3] ? +m[3] : 0, to = m[4] ? +m[4] : from;
-    // a book with one chapter is cited by verse alone: "Jude 24"
-    if (!m[3] && ONE_CHAPTER.indexOf(b) >= 0 && ch > 1) { from = to = ch; ch = 1; }
-    if (!ch || (m[3] && !from) || to < from) return null;
-    var name = BOOKS[b - 1][0];
-    if (b === 19) name = 'Psalm';                               // one psalm at a time
-    var label = name + ' ' + ch + (from ? ':' + from + (to > from ? '–' + to : '') : '');
-    return { book: b, chapter: ch, from: from, to: to, label: label };
-  }
+  /* ---------- reading a chapter ---------- */
 
-  /* ---------- looking up the words ---------- */
-
-  function chapter(b, c) {
+  function fetchChapter(b, c) {
     var key = b + '/' + c;
     if (!chapters[key]) {
       chapters[key] = fetch(TEXT_API + b + '/' + c + '/')
         .then(function (r) { if (!r.ok) throw new Error('lookup ' + r.status); return r.json(); })
+        .then(function (all) {
+          if (!all || !all.length) throw new Error('empty chapter');
+          return all.map(function (v) { return { verse: v.verse, text: clean(v.text) }; });
+        })
         .catch(function (err) { delete chapters[key]; throw err; });
     }
     return chapters[key];
@@ -141,19 +118,16 @@
     return lines.join('\n');
   }
 
-  // Prose verses run on in one paragraph; poetry keeps its lines.
-  function lookup(ref) {
-    return chapter(ref.book, ref.chapter).then(function (all) {
-      var got = (all || []).filter(function (v) { return !ref.from || (v.verse >= ref.from && v.verse <= ref.to); });
-      if (!got.length) throw new Error('not found');
-      var out = '', poem = false;
-      got.forEach(function (v, k) {
-        var t = clean(v.text), lined = t.indexOf('\n') >= 0;
-        out += (k ? (poem || lined ? '\n' : ' ') : '') + t;
-        poem = lined;
-      });
-      return out;
+  // The words of verses picked out of a chapter: prose runs on in one
+  // paragraph, poetry keeps its lines.
+  function wordsOf(picked) {
+    var out = '', poem = false;
+    picked.forEach(function (v, k) {
+      var lined = v.text.indexOf('\n') >= 0;
+      out += (k ? (poem || lined ? '\n' : ' ') : '') + v.text;
+      poem = lined;
     });
+    return out;
   }
 
   /* ---------- the Bible on the desk ----------
@@ -219,25 +193,26 @@
     });
   }
 
-  /* ---------- writing a new one ----------
-   * The reference fills the words in by itself (a moment after typing stops),
-   * unless the words have been typed by hand -- those are never overwritten. */
+  /* ---------- picking a new one ----------
+   * A slip laid across both pages, in three steps, each one a breadcrumb at
+   * the top to step back to:
+   *   the books   -- the whole Bible in order, scrolled through, Old and New
+   *   a chapter   -- its numbers (skipped for a book with only one)
+   *   the chapter -- to read; tap a verse to pick it, then another to take in
+   *                  everything between (tap again to start over)
+   * The words of what's picked fill in below. They can be edited, and once
+   * they have been, picking again doesn't overwrite them. */
   function writeVerse(author) {
     var old = list.querySelector('.verse--new');
     if (old) old.remove();
 
     var f = el('form', 'verse verse--new author-' + author);
-    var ref = el('input', 'verse-ref verse-ref-input');
-    ref.type = 'text';
-    ref.maxLength = 60;
-    ref.placeholder = 'John 3:16';
-    ref.autocomplete = 'off';
-    ref.spellcheck = false;
-    ref.setAttribute('aria-label', 'Which verse');
+    var crumbs = el('nav', 'vp-crumbs');
+    crumbs.setAttribute('aria-label', 'Where in the Bible');
+    var pane = el('div', 'vp-pane');
     var words = el('textarea', 'verse-text verse-words');
     words.rows = 3;
     words.maxLength = MAX_WORDS;
-    words.placeholder = 'The words fill in by themselves…';
     words.setAttribute('aria-label', 'The words');
     var note = el('p', 'verse-note');
     note.setAttribute('aria-live', 'polite');
@@ -246,58 +221,159 @@
     foot.appendChild(el('span', 'verse-date', dayOf(new Date().toISOString())));
     var add = el('button', 'verse-add');
     add.type = 'submit';
+    add.disabled = true;
     add.setAttribute('aria-label', 'Keep it in the Bible');
     add.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
     foot.appendChild(add);
-    [ref, words, note, foot].forEach(function (n) { f.appendChild(n); });
+    [crumbs, pane, words, note, foot].forEach(function (n) { f.appendChild(n); });
 
-    var auto = '';            // what the lookup last put in the words
-    var seq = 0, timer = 0;
+    var pick = { book: 0, chapter: 0, from: 0, to: 0 };
+    var reading = [];         // the chapter being read
+    var auto = '';            // what picking last put in the words
+    var seq = 0;
+    var bookScroll = 0;       // where the list of books was, to come back to
+
+    function say(t, bad) { note.textContent = t || ''; note.classList.toggle('bad', !!bad); }
     function grow() { words.style.height = 'auto'; words.style.height = words.scrollHeight + 'px'; }
-    function say(t, bad) { note.textContent = t; note.classList.toggle('bad', !!bad); }
+    function hand() { return words.value && words.value !== auto; }
+    function ready() {
+      add.disabled = !(pick.from && words.value.trim());
+      words.hidden = !pick.from && !words.value;
+    }
 
-    ref.addEventListener('input', function () {
-      clearTimeout(timer);
-      var mine = ++seq;
-      var r = parseRef(ref.value);
-      var hand = words.value && words.value !== auto;
-      if (!r) { say(ref.value.trim() && !hand ? 'Book chapter:verse, like Romans 8:28' : ''); return; }
-      if (hand) { say(r.label); return; }
-      say('Looking up ' + r.label + '…');
-      timer = setTimeout(function () {
-        lookup(r).then(function (t) {
-          if (mine !== seq || (words.value && words.value !== auto)) return;
-          if (t.length > MAX_WORDS) { say(r.label + ' is too long to keep — try fewer verses.', true); return; }
-          words.value = auto = t;
-          grow();
-          say(r.label + ' · NIV');
-        }, function () {
-          if (mine !== seq) return;
-          say('Couldn’t find ' + r.label + '. Type the words in instead?', true);
+    function crumb(text, go, current) {
+      var b = el('button', 'vp-crumb', text);
+      b.type = 'button';
+      if (current) b.setAttribute('aria-current', 'step');
+      else b.addEventListener('click', go);
+      crumbs.appendChild(b);
+    }
+    function drawCrumbs() {
+      crumbs.textContent = '';
+      var step = !pick.book ? 0 : !pick.chapter ? 1 : 2;
+      crumb('Books', showBooks, step === 0);
+      if (pick.book) crumb(BOOKS[pick.book - 1][0], BOOKS[pick.book - 1][1] > 1 ? showChapters : showBooks, step === 1 || (step === 2 && BOOKS[pick.book - 1][1] === 1));
+      if (pick.chapter && BOOKS[pick.book - 1][1] > 1) crumb((pick.book === 19 ? 'Psalm ' : 'Chapter ') + pick.chapter, function () {}, true);
+    }
+
+    function showBooks() {
+      pick = { book: 0, chapter: 0, from: 0, to: 0 };
+      drawCrumbs();
+      pane.className = 'vp-pane vp-pane--books';
+      pane.textContent = '';
+      [['Old Testament', 0, NEW_TESTAMENT - 1], ['New Testament', NEW_TESTAMENT - 1, BOOKS.length]].forEach(function (part) {
+        pane.appendChild(el('h4', 'vp-part', part[0]));
+        var grid = el('div', 'vp-books');
+        BOOKS.slice(part[1], part[2]).forEach(function (bk, k) {
+          var n = part[1] + k + 1;
+          var b = el('button', 'vp-book', bk[0]);
+          b.type = 'button';
+          b.addEventListener('click', function () {
+            bookScroll = pane.scrollTop;
+            pick.book = n;
+            if (bk[1] === 1) { pick.chapter = 1; showChapter(); } else showChapters();
+          });
+          grid.appendChild(b);
         });
-      }, 450);
-    });
-    words.addEventListener('input', grow);
+        pane.appendChild(grid);
+      });
+      pane.scrollTop = bookScroll;
+      say(pick.from ? '' : 'Pick a book.');
+      ready();
+    }
+
+    function showChapters() {
+      pick.chapter = pick.from = pick.to = 0;
+      drawCrumbs();
+      pane.className = 'vp-pane vp-pane--chapters';
+      pane.textContent = '';
+      var grid = el('div', 'vp-nums');
+      for (var c = 1; c <= BOOKS[pick.book - 1][1]; c++) {
+        (function (c) {
+          var b = el('button', 'vp-num', String(c));
+          b.type = 'button';
+          b.setAttribute('aria-label', (pick.book === 19 ? 'Psalm ' : 'Chapter ') + c);
+          b.addEventListener('click', function () { pick.chapter = c; showChapter(); });
+          grid.appendChild(b);
+        })(c);
+      }
+      pane.appendChild(grid);
+      pane.scrollTop = 0;
+      say(pick.book === 19 ? 'Which psalm?' : 'Which chapter?');
+      ready();
+    }
+
+    function showChapter() {
+      pick.from = pick.to = 0;
+      drawCrumbs();
+      pane.className = 'vp-pane vp-pane--read';
+      pane.textContent = '';
+      pane.scrollTop = 0;
+      reading = [];
+      var mine = ++seq;
+      say('Opening ' + (pick.book === 19 ? 'Psalm ' + pick.chapter : BOOKS[pick.book - 1][0] + ' ' + pick.chapter) + '…');
+      ready();
+      fetchChapter(pick.book, pick.chapter).then(function (all) {
+        if (mine !== seq) return;
+        reading = all;
+        all.forEach(function (v) {
+          var b = el('button', 'vp-verse');
+          b.type = 'button';
+          b.dataset.v = v.verse;
+          b.appendChild(el('sup', 'vp-vn', String(v.verse)));
+          b.appendChild(document.createTextNode(v.text));
+          b.addEventListener('click', function () { tap(v.verse); });
+          pane.appendChild(b);
+        });
+        say('Tap a verse — then another to take in the ones between.');
+      }, function () {
+        if (mine !== seq) return;
+        say('Couldn’t open that chapter. Check the connection and try again.', true);
+      });
+    }
+
+    function tap(n) {
+      if (!pick.from) pick.from = pick.to = n;
+      else if (pick.from === pick.to && n !== pick.from) { pick.to = Math.max(n, pick.from); pick.from = Math.min(n, pick.from); }
+      else if (pick.from === pick.to) pick.from = pick.to = 0;           // the same one again: none
+      else pick.from = pick.to = n;                                     // a range already: start over
+      pane.querySelectorAll('.vp-verse').forEach(function (b) {
+        var v = +b.dataset.v;
+        b.classList.toggle('on', !!pick.from && v >= pick.from && v <= pick.to);
+        b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false');
+      });
+      if (!pick.from) {
+        if (!hand()) words.value = auto = '';
+        say('Tap a verse — then another to take in the ones between.');
+      } else {
+        var t = wordsOf(reading.filter(function (v) { return v.verse >= pick.from && v.verse <= pick.to; }));
+        if (t.length > MAX_WORDS) say(label(pick.book, pick.chapter, pick.from, pick.to) + ' is too long to keep — pick fewer verses.', true);
+        else {
+          if (!hand()) { words.value = auto = t; }
+          say(label(pick.book, pick.chapter, pick.from, pick.to) + ' · NIV');
+        }
+      }
+      grow();
+      ready();
+    }
+
+    words.addEventListener('input', function () { grow(); ready(); });
 
     f.addEventListener('submit', function (e) {
       e.preventDefault();
-      var r = parseRef(ref.value);
-      var label = r ? r.label : ref.value.replace(/\s+/g, ' ').trim();
       var text = words.value.trim();
-      if (!label) { ref.focus(); return; }
-      if (!text) { words.focus(); return; }
-      add.disabled = ref.disabled = words.disabled = true;
-      JoyStore.addVerse(label, text, author).then(function () { draw(); paint(); }, function (err) {
-        add.disabled = ref.disabled = words.disabled = false;
+      if (!pick.from || !text || text.length > MAX_WORDS) return;
+      add.disabled = words.disabled = true;
+      JoyStore.addVerse(label(pick.book, pick.chapter, pick.from, pick.to), text, author).then(function () { draw(); paint(); }, function (err) {
+        add.disabled = words.disabled = false;
         if (window.JoyDesk) JoyDesk.toast(err.message, true);
       });
     });
-    ref.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); words.value ? (f.requestSubmit ? f.requestSubmit() : add.click()) : words.focus(); }
-    });
 
     list.insertBefore(f, list.firstChild);
-    ref.focus({ preventScroll: true });
+    showBooks();
+    var first = pane.querySelector('button');
+    if (first) first.focus({ preventScroll: true });
   }
 
   /* ---------- the open book ---------- */
@@ -382,7 +458,7 @@
               '<h2 class="bv-title" id="bv-title">Verses we love</h2>' +
               '<span class="bv-count"></span>' +
             '</header>' +
-            '<p class="bv-empty">Nothing kept yet. Press <b>+ Josh</b> or <b>+ Joyce</b> and type a reference &mdash; the words fill in by themselves.</p>' +
+            '<p class="bv-empty">Nothing kept yet. Press <b>+ Josh</b> or <b>+ Joyce</b>, find the verse, and tap it.</p>' +
             '<div class="bv-list"></div>' +
           '</div>' +
         '</div>' +
@@ -424,7 +500,7 @@
 
     if (window.JoyStore) JoyStore.ready.then(paint);
     paint();
-    window.JoyBible = { open: open, close: close, paint: paint, parseRef: parseRef };
+    window.JoyBible = { open: open, close: close, paint: paint };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
