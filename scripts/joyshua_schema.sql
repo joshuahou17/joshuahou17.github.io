@@ -163,3 +163,20 @@ create index if not exists joyshua_polaroids_made on public.joyshua_polaroids (c
 alter table public.joyshua_polaroids enable row level security;
 drop policy if exists "joyshua read polaroids" on public.joyshua_polaroids;
 create policy "joyshua read polaroids" on public.joyshua_polaroids for select to anon, authenticated using (not hidden);
+
+-- The Bible: verses Josh and Joyce want to keep. `ref` is the reference as the
+-- page tidied it ("Psalm 23:1–3"); `text` is the words, filled in from the NIV
+-- by the page (and editable before saving). Added 2026-09-24.
+create table if not exists public.joyshua_verses (
+  id          uuid primary key default gen_random_uuid(),
+  ref         text not null check (char_length(ref) between 1 and 60),
+  text        text not null check (char_length(text) between 1 and 2000),
+  author      text not null check (author in ('josh', 'joyce')),
+  created_at  timestamptz not null default now(),
+  hidden      boolean not null default false
+);
+create index if not exists joyshua_verses_made on public.joyshua_verses (created_at);
+
+alter table public.joyshua_verses enable row level security;
+drop policy if exists "joyshua read verses" on public.joyshua_verses;
+create policy "joyshua read verses" on public.joyshua_verses for select to anon, authenticated using (not hidden);

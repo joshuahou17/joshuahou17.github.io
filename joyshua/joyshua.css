@@ -2018,6 +2018,286 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
   .pol--mini { width: 50%; margin-top: 26%; }
 }
 
+/* ---------- the Bible ----------
+   On the desk: a closed Bible in black leather, gilt page edges showing along
+   the side and the bottom, a red ribbon hanging out, and a paper bookmark
+   sticking up out of the top for each saved verse. Tapped, it opens out into
+   a spread of thin pages with the verses on them. */
+
+.card.bible { width: 250px; height: 330px; overflow: visible; --gilt: #d9b35f; --rubric: #9b2d20; }
+.bible > span { position: absolute; display: block; }
+.bible:focus-visible { outline: none; }
+.bible:focus-visible .bb-cover { box-shadow: 0 0 0 2px var(--pen), 0 14px 22px -10px rgba(30, 20, 10, 0.6); }
+.bb-shadow {
+  left: 6px; top: 300px; width: 244px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(40, 30, 15, 0.45), transparent);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+/* the bookmarks: their bottoms are between the pages, under the cover */
+.bb-marks { left: 12px; top: 0; width: 212px; height: 40px; pointer-events: none; }
+.bb-mark {
+  position: absolute;
+  top: calc(30px - var(--lift));
+  width: 24px; height: 56px;
+  margin-left: -12px;
+  border-radius: 2px 2px 0 0;
+  background-color: #fff;
+  background-image: var(--grain), linear-gradient(var(--mark), var(--mark));
+  background-blend-mode: multiply;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 0 0 0.5px rgba(80, 60, 30, 0.25);
+  transform-origin: 50% 100%;
+  rotate: var(--lean);
+  transition: translate 0.3s cubic-bezier(.2, 1.4, .4, 1);
+}
+.bb-mark.author-josh { --mark: #f4f3ef; }
+.bb-mark.author-joyce { --mark: #f6ecd8; }
+.bible:hover .bb-mark { translate: 0 -6px; }
+
+/* the block of pages, gilt on the edges, showing to the right of and below the cover */
+.bb-block {
+  left: 8px; top: 30px; width: 238px; height: 292px;
+  border-radius: 3px 9px 9px 3px;
+  background:
+    repeating-linear-gradient(to bottom, rgba(120, 80, 20, 0.22) 0 1px, transparent 1px 3px),
+    linear-gradient(135deg, #f3dc97, var(--gilt) 45%, #a77c2c);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 2px 3px 4px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+.bb-ribbon {
+  left: 156px; top: 300px; width: 13px; height: 42px;
+  background: linear-gradient(to right, #6f1418, #b0282c 45%, #7a171b);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+  rotate: 7deg;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+.bb-cover {
+  left: 0; top: 24px; width: 236px; height: 292px;
+  border-radius: 5px 12px 12px 5px;
+  background-color: #2b211d;
+  background-image:
+    var(--grain),
+    /* the spine's hinge down the left */
+    linear-gradient(to right, rgba(0, 0, 0, 0.45), rgba(255, 255, 255, 0.07) 14px, transparent 20px),
+    radial-gradient(120% 80% at 30% 20%, rgba(255, 240, 220, 0.12), transparent 60%),
+    linear-gradient(#2b211d, #1d1613);
+  background-blend-mode: multiply, normal, normal, normal;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 14px 22px -10px rgba(30, 20, 10, 0.6);
+}
+/* a gilt rule pressed in round the cover, and the title stamped in gold */
+.bb-frame {
+  position: absolute; inset: 16px 16px 16px 26px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(217, 179, 95, 0.55);
+  outline: 1px solid rgba(217, 179, 95, 0.3);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.bb-title {
+  font: 500 27px/1.25 'EB Garamond', Georgia, serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-left: 0.22em;
+  color: var(--gilt);
+  background: linear-gradient(170deg, #f6e3a4, var(--gilt) 40%, #9c7127 80%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* ---------- the open Bible ---------- */
+
+.bible-view { position: fixed; inset: 0; z-index: 22; --rubric: #9b2d20; }
+.bible-view[hidden] { display: none; }
+.bv-scrim {
+  position: absolute; inset: 0;
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.bible-view.open .bv-scrim, .bible-view.open .viewer-btn { opacity: 1; }
+.bv-sheet {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  padding: max(22px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+/* the book grows up out of the Bible on the desk (bible.js aims --fx/--fy
+   from the top of the book to it) */
+.bv-book {
+  flex: none;
+  position: relative;
+  width: min(100%, 940px);
+  margin: 12px auto 0;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #2b211d;
+  background-image: var(--grain), linear-gradient(#2b211d, #1d1613);
+  background-blend-mode: multiply;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  transform-origin: 50% 0;
+  transition: translate 0.5s cubic-bezier(.2, 1.05, .35, 1), scale 0.5s cubic-bezier(.2, 1.05, .35, 1), opacity 0.25s ease;
+}
+.bible-view:not(.open) .bv-book { translate: var(--fx, 0) var(--fy, 40px); scale: 0.22; opacity: 0; }
+.bible-view.closing .bv-book { transition-duration: 0.26s, 0.26s, 0.2s; transition-timing-function: cubic-bezier(.5, 0, .75, .4); }
+.bible-view:not(.open) .bv-adders { opacity: 0; transition: opacity 0.12s ease; }
+
+.bv-pages {
+  position: relative;
+  min-height: min(62vh, 560px);
+  padding: 34px 48px 40px;
+  border-radius: 3px;
+  background-color: #fff;
+  background-image:
+    var(--grain),
+    /* the gutter: the pages curve down into the spine */
+    linear-gradient(to right, transparent calc(50% - 44px), rgba(90, 60, 20, 0.1) calc(50% - 4px), rgba(60, 40, 10, 0.22) 50%, rgba(90, 60, 20, 0.1) calc(50% + 4px), transparent calc(50% + 44px)),
+    linear-gradient(#faf5e7, #faf5e7);
+  background-blend-mode: multiply, normal, normal;
+  box-shadow: inset 0 0 0 1px rgba(160, 120, 50, 0.25), inset 0 0 30px rgba(160, 120, 50, 0.12);
+  columns: 2;
+  column-gap: 96px;
+}
+.bv-ribbon {
+  position: absolute; z-index: 1;
+  top: 0; left: calc(50% + 12px);     /* lying in the gutter */
+  width: 16px; height: 150px;
+  background: linear-gradient(to right, #6f1418, #b0282c 45%, #7a171b);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+.bv-head {
+  column-span: all;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  margin: 0 0 30px;
+  padding-bottom: 14px;
+  border-bottom: 3px double rgba(155, 45, 32, 0.4);
+}
+.bv-title {
+  margin: 0;
+  font: 500 17px/1 'EB Garamond', Georgia, serif;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--rubric);
+}
+.bv-count { font: 700 10px/1 'Space Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.bv-count:empty { display: none; }
+.bv-empty {
+  display: none;
+  column-span: all;
+  max-width: 30em;
+  margin: 40px auto;
+  text-align: center;
+  font: italic 400 20px/1.5 'EB Garamond', Georgia, serif;
+  color: #5c5245;
+}
+.bible-view.empty .bv-empty { display: block; }
+
+.verse { break-inside: avoid; margin: 0 0 30px; }
+.verse-ref {
+  margin: 0 0 7px;
+  font: 600 13px/1.2 'EB Garamond', Georgia, serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rubric);
+}
+.verse-text {
+  margin: 0 0 10px;
+  font: 400 20px/1.5 'EB Garamond', Georgia, serif;
+  color: #2b2620;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.verse-foot { display: flex; align-items: center; gap: 8px; }
+.verse-date { font: 700 10px/1 'Space Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* a new one, being written: a slip of paper laid on the page */
+.verse--new {
+  margin: 0 -14px 30px;
+  padding: 14px;
+  border-radius: 3px;
+  background-color: #fff;
+  background-image: var(--grain), linear-gradient(var(--mark), var(--mark));
+  background-blend-mode: multiply;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.08), 0 12px 20px -12px rgba(0, 0, 0, 0.45);
+}
+.verse--new.author-josh { --mark: #f4f3ef; }
+.verse--new.author-joyce { --mark: #f6ecd8; }
+.verse-ref-input, .verse-words {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.verse-ref-input { font-size: 15px; }
+.verse-ref-input::placeholder { color: rgba(155, 45, 32, 0.38); }
+.verse-words { min-height: 90px; resize: none; overflow: hidden; }
+.verse-words::placeholder { color: rgba(43, 38, 32, 0.35); font-style: italic; }
+.verse-ref-input:focus, .verse-words:focus { outline: none; }
+.verse-note { min-height: 14px; margin: -2px 0 10px; font: 400 11px/1.3 'Space Mono', monospace; color: var(--muted); }
+.verse-note.bad { color: #b8352b; }
+.verse-add {
+  margin-left: auto;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: var(--pen); color: #fff;
+  cursor: pointer;
+}
+.verse-add:disabled { opacity: 0.5; }
+
+.bv-adders {                   /* stays in reach however many verses there are */
+  flex: none;
+  position: sticky; bottom: 0; z-index: 2;
+  display: flex; justify-content: center; gap: 8px;
+  margin-top: 20px;
+  transition: opacity 0.2s ease;
+}
+
+@media (max-width: 720px) {
+  .bv-book { padding: 7px; margin-top: 58px; }     /* under the close button */
+  .bv-pages { columns: 1; padding: 26px 22px 30px; background-image: var(--grain), linear-gradient(#faf5e7, #faf5e7); background-blend-mode: multiply, normal; }
+  .bv-ribbon { left: auto; right: 5px; height: 80px; width: 11px; }
+  .bv-head { margin-bottom: 22px; }
+  .verse-text { font-size: 19px; }
+  .verse--new { margin: 0 -8px 26px; padding: 12px; }
+}
+
+/* the + panel's choice: a little black Bible, gilt on its edge, a ribbon out */
+.c-choice--verse .c-choice-art {
+  width: 40px; margin: 0 18px;
+  border-radius: 2px 5px 5px 2px;
+  rotate: 4deg;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.4), transparent 5px), #2b211d;
+  box-shadow: 3px 2px 0 -1px #d9b35f, 0 3px 6px -2px rgba(0, 0, 0, 0.4);
+}
+.c-choice--verse .c-choice-art::before {       /* the cross on the cover */
+  content: ''; position: absolute; left: 50%; top: 12px;
+  width: 12px; height: 18px; margin-left: -5px;
+  background:
+    linear-gradient(#d9b35f, #d9b35f) center / 2px 100% no-repeat,
+    linear-gradient(#d9b35f, #d9b35f) 50% 5px / 100% 2px no-repeat;
+}
+.c-choice--verse .c-choice-art::after {        /* the ribbon */
+  content: ''; position: absolute; left: 26px; bottom: -9px;
+  width: 5px; height: 11px;
+  background: #b0282c;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+}
+
 /* ---------- deleting: hold, wiggle, minus, confirm ---------- */
 
 body { -webkit-touch-callout: none; }

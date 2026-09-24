@@ -25,6 +25,7 @@
   var BW = 300, BH = 210;     // the keepsake box
   var PW = 262, PH = 272;     // the bucket-list pail
   var LW = 280, LH = 312;     // the pile of polaroids
+  var VW = 250, VH = 330;     // the Bible
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -96,7 +97,7 @@
     // The envelopes share a row with the keepsake box (on a phone they all carry
     // on down the column). Letters already in the box don't take a spot.
     var m = LETTERS.length, slot = 0;
-    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 3;
+    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 4;
     function spot(w, h) {
       var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
       slot++;
@@ -126,6 +127,9 @@
     var ls = spot(LW, LH);
     put(makePile(), ls.x, ls.y + 14, -3, 'polaroids', 0, LW, LH, 'polaroid-pile');
     if (window.JoyPolaroids) JoyPolaroids.paint();
+    var vs = spot(VW, VH);
+    put(makeBible(), vs.x, vs.y + 10, 3, 'bible', 0, VW, VH, 'bible');
+    if (window.JoyBible) JoyBible.paint();
     fitAll(world);
   }
 
@@ -294,10 +298,34 @@
     return b;
   }
 
-  // The pail and the pile belong to bucket.js and polaroids.js; the box to the
-  // rainbow. None of them can be deleted from the desk.
+  /* ---------- the Bible ----------
+   * A closed, leather-bound Bible with gilt page edges and a ribbon; the saved
+   * verses are paper bookmarks sticking up out of it. bible.js fills in the
+   * bookmarks and owns what happens when it's tapped. */
+  function makeBible() {
+    var b = document.createElement('div');
+    b.className = 'card bible';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-label', 'The Bible');
+    b.innerHTML =
+      '<span class="bb-shadow"></span>' +
+      '<span class="bb-marks"></span>' +
+      '<span class="bb-block"></span>' +
+      '<span class="bb-ribbon"></span>' +
+      '<span class="bb-cover"><span class="bb-frame"><span class="bb-title">Holy<br>Bible</span></span></span>';
+    b.addEventListener('keydown', function (e) {
+      if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (window.JoyBible) JoyBible.open();
+    });
+    return b;
+  }
+
+  // The pail, the pile and the Bible belong to bucket.js, polaroids.js and
+  // bible.js; the box to the rainbow. None of them can be deleted from the desk.
   function isFixture(el) {
-    return el.classList.contains('keepsake') || el.classList.contains('pail') || el.classList.contains('pol-pile');
+    return el.classList.contains('keepsake') || el.classList.contains('pail') || el.classList.contains('pol-pile') || el.classList.contains('bible');
   }
 
   /* ---------- the bucket-list pail ----------
@@ -1724,6 +1752,9 @@
     else if (btn.classList.contains('pol-pile')) {
       if (window.JoyPolaroids) JoyPolaroids.open();
     }
+    else if (btn.classList.contains('bible')) {
+      if (window.JoyBible) JoyBible.open();
+    }
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
   }
@@ -2102,7 +2133,7 @@
     } else firstPaint();
 
     document.addEventListener('contextmenu', function (e) {
-      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env, .slip')) e.preventDefault();
+      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env, .slip, .verse')) e.preventDefault();
     });
     window.JoyDesk = {
       cards: function () { return CARDS; },
@@ -2114,10 +2145,11 @@
       refresh: refreshAdded,
       toast: toast,
       // Open what a notification was about: 'letter:<key>', 'card:<key>',
-      // 'topics', 'bucket' or 'polaroid:<id>'. Anything already open is left alone.
+      // 'topics', 'bucket', 'bible' or 'polaroid:<id>'. Anything already open is left alone.
       go: function (target) {
         if (target === 'topics') { if (window.JoyTopics) JoyTopics.open(); return; }
         if (target === 'bucket') { if (window.JoyBucket) JoyBucket.open('todo'); return; }
+        if (target === 'bible') { if (window.JoyBible) JoyBible.open(); return; }
         var pol = /^polaroid:(.+)$/.exec(target || '');
         if (pol) { if (window.JoyPolaroids) JoyPolaroids.show(pol[1]); return; }
         if (openState || letterState || rb) return;
