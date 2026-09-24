@@ -2212,6 +2212,17 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
   text-transform: uppercase;
   color: var(--rubric);
 }
+.verse-ref-go {
+  padding: 0; border: 0; background: none;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(155, 45, 32, 0.3);
+  text-underline-offset: 3px;
+}
+.verse-ref-go:hover { text-decoration-color: currentColor; }
+.verse-ref-go:focus-visible { outline: 1px solid var(--rubric); outline-offset: 2px; }
 .verse-text {
   margin: 0 0 10px;
   font: 400 20px/1.5 'EB Garamond', Georgia, serif;
@@ -2339,6 +2350,80 @@ button.pcal-cell:hover, button.pcal-cell:focus-visible { background: rgba(255, 2
   cursor: pointer;
 }
 .verse-add:disabled { opacity: 0.5; }
+
+/* a saved verse, in its chapter: one page laid over the open book */
+.bv-chap { position: fixed; inset: 0; z-index: 3; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); }
+.bv-chap[hidden] { display: none; }
+.bvc-scrim { position: absolute; inset: 0; background: rgba(20, 14, 8, 0.45); opacity: 0; transition: opacity 0.2s ease; }
+.bvc-page {
+  position: relative;
+  width: min(100%, 620px);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 44px 40px;
+  border-radius: 3px;
+  background-color: #fff;
+  background-image: var(--grain), linear-gradient(#faf5e7, #faf5e7);
+  background-blend-mode: multiply, normal;
+  box-shadow: inset 0 0 0 1px rgba(160, 120, 50, 0.25), 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  translate: 0 24px;
+  transition: opacity 0.2s ease, translate 0.3s cubic-bezier(.2, 1.05, .35, 1);
+}
+.bv-chap.open .bvc-scrim, .bv-chap.open .bvc-page { opacity: 1; }
+.bv-chap.open .bvc-page { translate: 0 0; }
+.bvc-head {
+  position: sticky; top: 0; z-index: 1;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  margin: 0 -44px 20px;
+  padding: 20px 44px 12px;
+  background-color: #fff;
+  background-image: var(--grain), linear-gradient(#faf5e7, #faf5e7);
+  background-blend-mode: multiply, normal;
+  border-bottom: 3px double rgba(155, 45, 32, 0.4);
+}
+.bvc-back {
+  justify-self: start;
+  padding: 4px 6px; margin-left: -6px;
+  border: 0; border-radius: 4px; background: none;
+  font: 700 11px/1 'Space Mono', monospace; letter-spacing: 0.06em;
+  color: var(--muted);
+  cursor: pointer;
+}
+.bvc-back:hover { color: var(--rubric); background: rgba(155, 45, 32, 0.08); }
+.bvc-back:focus { outline: none; }
+.bvc-back-short { display: none; }
+.bvc-back:focus-visible { outline: 1px solid var(--rubric); }
+.bvc-title {
+  margin: 0;
+  font: 500 17px/1.2 'EB Garamond', Georgia, serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--rubric);
+  text-align: center;
+}
+.bvc-tr { justify-self: end; font: 700 10px/1 'Space Mono', monospace; letter-spacing: 0.12em; color: var(--muted); }
+.bvc-verse {
+  margin: 0 -8px 4px;
+  padding: 3px 8px 4px;
+  border-radius: 3px;
+  font: 400 19px/1.55 'EB Garamond', Georgia, serif;
+  color: #2b2620;
+  white-space: pre-line;
+}
+.bvc-verse.on { background: rgba(217, 179, 95, 0.38); }
+.bvc-verse.on + .bvc-verse.on { margin-top: -4px; padding-top: 7px; border-top-left-radius: 0; border-top-right-radius: 0; }
+.bvc-verse.on:has(+ .bvc-verse.on) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.bvc-wait { margin: 30px 0; text-align: center; font: 400 11px/1.4 'Space Mono', monospace; color: var(--muted); }
+.bvc-wait.bad { color: #b8352b; }
+@media (max-width: 720px) {
+  .bvc-page { padding: 0 20px 28px; }
+  .bvc-head { margin: 0 -20px 16px; padding: 16px 20px 10px; }
+  .bvc-verse { font-size: 18px; }
+  .bvc-back-long { display: none; }
+  .bvc-back-short { display: inline; }
+}
 
 .bv-adders {                   /* stays in reach however many verses there are */
   flex: none;
