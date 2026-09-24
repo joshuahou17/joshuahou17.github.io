@@ -82,6 +82,17 @@
     return name + ' ' + c + ':' + from + (to > from ? '–' + to : '');
   }
 
+  // ...and back again: 'Psalm 23:1–3' -> {book: 19, chapter: 23, from: 1, to: 3}.
+  // Every saved reference was written by label(), so this is all it has to read.
+  function unlabel(ref) {
+    var m = /^(.+) (\d+):(\d+)(?:\u2013(\d+))?$/.exec(ref || '');
+    if (!m) return null;
+    var b = m[1] === 'Psalm' ? 19 : 0;
+    for (var i = 0; !b && i < BOOKS.length; i++) if (BOOKS[i][0] === m[1]) b = i + 1;
+    if (!b) return null;
+    return { book: b, chapter: +m[2], from: +m[3], to: m[4] ? +m[4] : +m[3] };
+  }
+
   /* ---------- reading a chapter ---------- */
 
   function fetchChapter(b, c) {
@@ -158,7 +169,17 @@
   function verseFor(v) {
     var a = el('article', 'verse author-' + who(v.author));
     a.dataset.id = v.id;
-    a.appendChild(el('h3', 'verse-ref', v.ref));
+    var h = el('h3', 'verse-ref');
+    var at = unlabel(v.ref);
+    if (at) {
+      // the reference opens the whole chapter, the verse lit up in it
+      var go = el('button', 'verse-ref-go', v.ref);
+      go.type = 'button';
+      go.setAttribute('aria-label', 'Read all of ' + (at.book === 19 ? 'Psalm ' : BOOKS[at.book - 1][0] + ' ') + at.chapter);
+      go.addEventListener('click', function (e) { e.stopPropagation(); readChapter(at, go); });
+      h.appendChild(go);
+    } else h.textContent = v.ref;
+    a.appendChild(h);
     a.appendChild(el('p', 'verse-text', v.text));
     var foot = el('div', 'verse-foot');
     foot.appendChild(el('span', 'who-chip author-' + who(v.author), NAMES[who(v.author)]));
@@ -376,6 +397,56 @@
     if (first) first.focus({ preventScroll: true });
   }
 
+  /* ---------- a saved verse, in its chapter ----------
+   * A single page laid over the open book: the whole chapter, the saved
+   * verses highlighted, scrolled so they're in the middle. Back (or Escape,
+   * or a tap outside the page) returns to the verses. */
+  var chap, chapText, chapTitle, chapFrom = null, chapSeq = 0;
+
+  function readChapter(at, from) {
+    var mine = ++chapSeq;
+    chapFrom = from || null;
+    chapTitle.textContent = at.book === 19 ? 'Psalm ' + at.chapter : BOOKS[at.book - 1][0] + ' ' + at.chapter;
+    chapText.textContent = '';
+    chapText.appendChild(el('p', 'bvc-wait', 'Opening\u2026'));
+    chap.hidden = false;
+    void chap.offsetWidth;
+    chap.classList.add('open');
+    chap.querySelector('.bvc-back').focus({ preventScroll: true });
+    var page = chap.querySelector('.bvc-page');
+    page.scrollTop = 0;
+    fetchChapter(at.book, at.chapter).then(function (all) {
+      if (mine !== chapSeq) return;
+      chapText.textContent = '';
+      var first = null;
+      all.forEach(function (v) {
+        var on = v.verse >= at.from && v.verse <= at.to;
+        var d = el('p', 'bvc-verse' + (on ? ' on' : ''));
+        d.appendChild(el('sup', 'vp-vn', String(v.verse)));
+        d.appendChild(document.createTextNode(v.text));
+        chapText.appendChild(d);
+        if (on && !first) first = d;
+      });
+      if (first) {
+        var pr = page.getBoundingClientRect(), fr = first.getBoundingClientRect();
+        page.scrollTop = Math.max(0, fr.top - pr.top - pr.height / 3);
+      }
+    }, function () {
+      if (mine !== chapSeq) return;
+      chapText.textContent = '';
+      chapText.appendChild(el('p', 'bvc-wait bad', 'Couldn\u2019t open ' + chapTitle.textContent + '. Check the connection and try again.'));
+    });
+  }
+
+  function closeChapter() {
+    if (!chap || chap.hidden) return false;
+    chapSeq++;
+    chap.classList.remove('open');
+    setTimeout(function () { if (!chap.classList.contains('open')) chap.hidden = true; }, 220);
+    if (chapFrom && document.contains(chapFrom)) chapFrom.focus({ preventScroll: true });
+    return true;
+  }
+
   /* ---------- the open book ---------- */
 
   function draw() {
@@ -432,6 +503,7 @@
     if (!isOpen) return;
     isOpen = false;
     if (window.JoyDesk) JoyDesk.hideMinus();
+    if (chap && !chap.hidden) { chapSeq++; chap.classList.remove('open'); chap.hidden = true; }
     aim();
     root.classList.remove('open');
     root.classList.add('closing');
@@ -467,10 +539,28 @@
           '<button class="adder adder--joyce" type="button" data-verse-add="joyce"><span aria-hidden="true">+</span> Joyce</button>' +
         '</div>' +
       '</div>' +
-      '<button class="viewer-btn viewer-close bv-close" type="button" aria-label="Close" data-bvclose>&times;</button>';
+      '<button class="viewer-btn viewer-close bv-close" type="button" aria-label="Close" data-bvclose>&times;</button>' +
+      '<div class="bv-chap" role="dialog" aria-modal="true" aria-labelledby="bvc-title" hidden>' +
+        '<div class="bvc-scrim" data-bvcclose></div>' +
+        '<article class="bvc-page">' +
+          '<header class="bvc-head">' +
+            '<button class="bvc-back" type="button" data-bvcclose aria-label="Back to the verses">&lsaquo; <span class="bvc-back-long">Verses we love</span><span class="bvc-back-short">Back</span></button>' +
+            '<h2 class="bvc-title" id="bvc-title"></h2>' +
+            '<span class="bvc-tr">NIV</span>' +
+          '</header>' +
+          '<div class="bvc-text"></div>' +
+        '</article>' +
+      '</div>';
     document.body.appendChild(root);
 
     book = root.querySelector('.bv-book');
+    chap = root.querySelector('.bv-chap');
+    chapText = chap.querySelector('.bvc-text');
+    chapTitle = chap.querySelector('.bvc-title');
+    chap.addEventListener('click', function (e) {
+      e.stopPropagation();                     // not a tap outside the book
+      if (e.target.closest('[data-bvcclose]')) closeChapter();
+    });
     list = root.querySelector('.bv-list');
     adders = root.querySelector('.bv-adders');
 
@@ -495,7 +585,7 @@
       if (c && !c.hidden) return;
       e.preventDefault();
       e.stopPropagation();
-      close(true);
+      if (!closeChapter()) close(true);           // the chapter first, then the book
     }, true);
 
     if (window.JoyStore) JoyStore.ready.then(paint);
