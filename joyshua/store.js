@@ -37,7 +37,7 @@
       });
   }
 
-  var added = { postcards: [], photos: [], letters: [], topics: [], polaroids: [] };   // rows added from the page
+  var added = { postcards: [], photos: [], letters: [], topics: [], polaroids: [], verses: [] };   // rows added from the page
 
   function soft(p) {
     return p.catch(function (err) { if (window.console) console.warn('[joyshua] couldn\u2019t load:', err.message); return null; });
@@ -52,7 +52,8 @@
       soft(get('joyshua_photos', 'select=*&order=created_at')),
       soft(get('joyshua_letters', 'select=*&order=created_at')),
       soft(get('joyshua_topics', 'select=*&order=created_at')),
-      soft(get('joyshua_polaroids', 'select=*&order=created_at'))
+      soft(get('joyshua_polaroids', 'select=*&order=created_at')),
+      soft(get('joyshua_verses', 'select=*&order=created_at'))
     ]).then(function (r) {
       // (whatever couldn't be fetched keeps what was there before)
       if (r[0]) r[0].forEach(function (row) { state[row.key] = row.value; });
@@ -61,6 +62,7 @@
       if (r[3]) added.letters = r[3];
       if (r[4]) added.topics = r[4];
       if (r[5]) added.polaroids = r[5];
+      if (r[6]) added.verses = r[6];
     });
   }
 
@@ -217,7 +219,7 @@
     },
 
     // Deleted from the page (for everyone)? Keys: 'card:', 'photo:', 'letter:',
-    // 'topic:', 'bucket:', 'polaroid:'.
+    // 'topic:', 'bucket:', 'polaroid:', 'verse:'.
     isGone: function (key) { var v = state['gone:' + key]; return !!(v && v.gone === true); },
 
     remove: function (key) {
@@ -254,6 +256,11 @@
         added.topics = added.topics.map(function (t) { return t.id === id ? r.topic : t; });
         return r.topic;
       });
+    },
+
+    // `ref` as tidied by bible.js ("Psalm 23:1\u20133"), `text` the words
+    addVerse: function (ref, text, author) {
+      return call('add-verse', { ref: ref, text: text, author: author }).then(function (r) { added.verses.push(r.verse); return r.verse; });
     },
 
     addLetter: function (letter) {

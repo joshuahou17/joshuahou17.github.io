@@ -1,6 +1,6 @@
 /* The + Josh / + Joyce buttons: write a letter, add photos to a postcard, add
  * a new postcard, put something in the bucket (bucket.js), add something to
- * talk about (topics.js) or take a polaroid (polaroids.js). Also opened by the grid's "+ add photos" tile.
+ * talk about (topics.js), take a polaroid (polaroids.js) or save a verse (bible.js). Also opened by the grid's "+ add photos" tile.
  *
  * Everything is saved through JoyStore; the desk (JoyDesk) is told once a save
  * has landed. The panel is tinted by who it's from -- grey for Josh, beige for
@@ -90,13 +90,13 @@
   function viewChoose() {
     body.appendChild(heading('Add something'));
     var grid = el('div', 'c-choices');
-    [['letter', 'A letter'], ['photos', 'Photos'], ['postcard', 'A postcard'], ['bucket', 'The bucket'], ['talk', 'To talk about'], ['polaroid', 'A polaroid']].forEach(function (c) {
+    [['letter', 'A letter'], ['photos', 'Photos'], ['postcard', 'A postcard'], ['bucket', 'The bucket'], ['talk', 'To talk about'], ['polaroid', 'A polaroid'], ['verse', 'A verse']].forEach(function (c) {
       var b = el('button', 'c-choice c-choice--' + c[0]);
       b.type = 'button';
       b.appendChild(el('span', 'c-choice-art'));
       b.appendChild(el('span', 'c-choice-name', c[1]));
       b.addEventListener('click', function () {
-        if (c[0] !== 'bucket' && c[0] !== 'talk' && c[0] !== 'polaroid') { show(c[0]); return; }
+        if (c[0] !== 'bucket' && c[0] !== 'talk' && c[0] !== 'polaroid' && c[0] !== 'verse') { show(c[0]); return; }
         // a bucket slip is written on the spill itself, a topic on the board
         // of things to talk about, and a polaroid is taken with the camera --
         // not in this panel
@@ -105,6 +105,7 @@
         if (c[0] === 'bucket' && window.JoyBucket) JoyBucket.open('todo', { write: w });
         if (c[0] === 'talk' && window.JoyTopics) JoyTopics.open({ write: w });
         if (c[0] === 'polaroid' && window.JoyPolaroids) JoyPolaroids.take(w);
+        if (c[0] === 'verse' && window.JoyBible) JoyBible.open({ write: w });
       });
       grid.appendChild(b);
     });
