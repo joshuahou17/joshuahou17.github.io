@@ -2,8 +2,10 @@
  *
  * A little stack sits under the joyshua logo showing the newest one; tapping it
  * opens the board. Each card carries whose it is and the day it was written, and
- * can be ticked once it's been talked about -- ticked cards leave the board for
- * a faded pile. The shuffle deals through the ones still waiting, one at a time.
+ * can be ticked once it's been talked about -- ticked cards move to the
+ * "talked about" tab (like the bucket list's "done"), marked with the day they
+ * were talked about. The shuffle deals through the ones still waiting, one at
+ * a time. A card can be as long as it needs to be.
  *
  * Saved through JoyStore (see supabase/functions/joyshua), so both of them see
  * the same board. Deleting reuses the desk's press-and-hold minus (JoyDesk).
@@ -13,7 +15,9 @@
 
   var NAMES = { josh: 'Josh', joyce: 'Joyce' };
 
-  var stackEl, boardEl, listEl, doneEl, doneWrap, oneEl, countEl;
+  var MAX = 10000;             // only a guard (the function's, and the table's)
+
+  var stackEl, boardEl, listEl, oneEl, tabOpen, tabDone, shuffleBtn, addersEl;
   var open = false, showingDone = false, single = null, holdTimer = 0, holdStart = null;
 
   // A steady number from an id, so a card lands the same way every time.
@@ -90,6 +94,7 @@
     var foot = el('div', 'topic-foot');
     foot.appendChild(el('span', 'who-chip author-' + (t.author === 'joyce' ? 'joyce' : 'josh'), NAMES[t.author] || 'Josh'));
     foot.appendChild(el('span', 'topic-date', dayOf(t.created_at)));
+    if (t.done_at) foot.appendChild(el('span', 'topic-date topic-date--done', 'talked ' + dayOf(t.done_at)));
     c.appendChild(foot);
 
     var tick = el('button', 'topic-tick');
@@ -149,8 +154,10 @@
   function writeCard(author) {
     var c = el('form', 'topic topic--new author-' + author);
     var area = el('textarea', 'topic-input');
-    area.maxLength = 280;
+    area.maxLength = MAX;
     area.rows = 3;
+    // grows with what's written, so a long one can be read back before it's added
+    area.addEventListener('input', function () { area.style.height = 'auto'; area.style.height = area.scrollHeight + 'px'; });
     var foot = el('div', 'topic-foot');
     foot.appendChild(el('span', 'who-chip author-' + author, NAMES[author]));
     foot.appendChild(el('span', 'topic-date', dayOf(new Date().toISOString())));
@@ -163,7 +170,8 @@
     c.appendChild(foot);
     c.addEventListener('submit', function (e) {
       e.preventDefault();
-      var text = area.value.replace(/\s+/g, ' ').trim();
+      // a long one keeps its paragraphs; runs of spaces and blank lines close up
+      var text = area.value.replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
       if (!text) { area.focus(); return; }
       add.disabled = area.disabled = true;
       JoyStore.addTopic(text, author).then(function () { draw(); }, function (err) {
@@ -192,17 +200,26 @@
       : 'Things to talk about');
 
     if (!open) return;
+    if (showingDone && !dones.length) showingDone = false;
     var me = owner();
     boardEl.querySelectorAll('[data-topic-add]').forEach(function (b) { b.hidden = !!me && b.dataset.topicAdd !== me; });
-    countEl.textContent = opens.length || '';
-    listEl.textContent = '';
-    opens.forEach(function (t) { listEl.appendChild(cardFor(t)); });
+    boardEl.classList.toggle('done-mode', showingDone);
+    tabOpen.setAttribute('aria-pressed', showingDone ? 'false' : 'true');
+    tabDone.setAttribute('aria-pressed', showingDone ? 'true' : 'false');
+    tabOpen.querySelector('.board-count').textContent = opens.length || '';
+    tabDone.querySelector('.board-count').textContent = dones.length;
+    tabDone.hidden = !dones.length;
+    shuffleBtn.hidden = showingDone;
+    addersEl.hidden = showingDone;
 
-    doneWrap.hidden = !dones.length;
-    doneWrap.classList.toggle('showing', showingDone);
-    doneWrap.querySelector('.done-count').textContent = dones.length;
-    doneEl.textContent = '';
-    if (showingDone) dones.forEach(function (t) { doneEl.appendChild(cardFor(t)); });
+    // keep a half-written card across a redraw (ticking one redraws the board)
+    var draft = listEl.querySelector('.topic--new');
+    if (draft && draft.querySelector('.topic-input').disabled) draft = null;
+    listEl.textContent = '';
+    if (draft && !showingDone) listEl.appendChild(draft);
+    // most recently talked about first
+    (showingDone ? dones.slice().sort(function (a, b) { return a.done_at < b.done_at ? 1 : -1; }) : opens)
+      .forEach(function (t) { listEl.appendChild(cardFor(t)); });
 
     if (single) {
       var still = opens.filter(function (t) { return t.id === single.id; })[0];
@@ -241,6 +258,7 @@
     boardEl.hidden = false;
     void boardEl.offsetWidth;
     boardEl.classList.add('open');
+    listEl.textContent = '';                 // a fresh board: nothing half-written from last time
     draw();
     var author = opts && (opts.write === 'josh' || opts.write === 'joyce') ? opts.write : null;
     if (author) {
@@ -296,7 +314,10 @@
       '<div class="board-scrim" data-board-close></div>' +
       '<div class="board-card">' +
         '<div class="board-top">' +
-          '<h2 class="board-title">to talk about <span class="board-count" id="board-count"></span></h2>' +
+          '<h2 class="board-tabs">' +
+            '<button class="board-tab" type="button" data-board-tab="open">to talk about <span class="board-count"></span></button>' +
+            '<button class="board-tab" type="button" data-board-tab="done">talked about <span class="board-count"></span></button>' +
+          '</h2>' +
           '<div class="board-tools">' +
             '<button class="board-btn" id="topic-shuffle" type="button" aria-label="Shuffle through the topics">' +
               '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.7l2.4 4.6c1.1 1.7 2.3 2.7 4.3 2.7H21"/><path d="M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M14.2 8.4c.9-.9 1.9-1.4 3.3-1.4H21"/><path d="M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>' +
@@ -310,23 +331,28 @@
           '<button class="adder adder--josh" type="button" data-topic-add="josh"><span aria-hidden="true">+</span> Josh</button>' +
           '<button class="adder adder--joyce" type="button" data-topic-add="joyce"><span aria-hidden="true">+</span> Joyce</button>' +
         '</div>' +
-        '<div class="board-done" hidden>' +
-          '<button class="done-toggle" type="button"><span class="done-count"></span> talked about</button>' +
-          '<div class="done-list"></div>' +
-        '</div>' +
       '</div>';
     document.body.appendChild(boardEl);
 
     listEl = boardEl.querySelector('.board-list');
-    doneEl = boardEl.querySelector('.done-list');
-    doneWrap = boardEl.querySelector('.board-done');
     oneEl = boardEl.querySelector('.board-one');
-    countEl = boardEl.querySelector('.board-count');
+    tabOpen = boardEl.querySelector('[data-board-tab="open"]');
+    tabDone = boardEl.querySelector('[data-board-tab="done"]');
+    shuffleBtn = boardEl.querySelector('#topic-shuffle');
+    addersEl = boardEl.querySelector('.board-adders');
 
     boardEl.addEventListener('click', function (e) {
       if (e.target.closest('[data-board-close]')) closeBoard();
     });
-    boardEl.querySelector('.done-toggle').addEventListener('click', function () { showingDone = !showingDone; draw(); });
+    function tab(done) {
+      if (showingDone === done) return;
+      showingDone = done;
+      if (single) { single = null; oneEl.hidden = true; boardEl.classList.remove('one'); }
+      draw();
+      listEl.scrollIntoView({ block: 'nearest' });
+    }
+    tabOpen.addEventListener('click', function () { tab(false); });
+    tabDone.addEventListener('click', function () { tab(true); });
     boardEl.querySelector('#topic-shuffle').addEventListener('click', function () {
       if (single) { nextSingle(); return; }
       nextSingle();
@@ -344,6 +370,8 @@
     boardEl.querySelectorAll('[data-topic-add]').forEach(function (b) {
       b.addEventListener('click', function () {
         if (single) { single = null; oneEl.hidden = true; boardEl.classList.remove('one'); }
+        var d = listEl.querySelector('.topic--new');
+        if (d) d.remove();
         var w = writeCard(b.dataset.topicAdd);
         listEl.insertBefore(w.card, listEl.firstChild);
         w.area.focus();

@@ -180,3 +180,9 @@ create index if not exists joyshua_verses_made on public.joyshua_verses (created
 alter table public.joyshua_verses enable row level security;
 drop policy if exists "joyshua read verses" on public.joyshua_verses;
 create policy "joyshua read verses" on public.joyshua_verses for select to anon, authenticated using (not hidden);
+
+-- Things to talk about can run as long as they need to (a bucket-list slip is
+-- still one line: the function keeps those to 280). The cap is only a guard,
+-- like a letter's. Added 2026-09-24.
+alter table public.joyshua_topics drop constraint if exists joyshua_topics_text_check;
+alter table public.joyshua_topics add constraint joyshua_topics_text_check check (char_length(text) between 1 and 10000);
