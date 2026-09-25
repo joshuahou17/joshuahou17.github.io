@@ -1241,7 +1241,7 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 /* ---------- things to talk about ----------
    A stack of index cards under the logo; tapping it opens the board. Cards are
    ruled paper with a red margin, in each person's colour, and carry the day
-   they were written. Ticked ones move to the faded pile at the bottom. */
+   they were written. Ticked ones move to the "talked about" tab. */
 
 :root {
   --index: #fbf8f0;
@@ -1351,7 +1351,21 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 }
 .board.open .board-card { opacity: 1; translate: 0 0; }
 .board-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.board-title { margin: 0; display: flex; align-items: center; gap: 8px; font: 700 34px/1 'Caveat', cursive; color: var(--pen); }
+.board-tabs { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.board-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 3px 12px 5px;
+  border: 0; border-radius: 999px;
+  background: transparent;
+  font: 700 30px/1 'Caveat', cursive;
+  color: rgba(39, 64, 122, 0.45);
+  cursor: pointer;
+}
+.board-tab[hidden] { display: none; }
+.board-tab:hover { color: rgba(39, 64, 122, 0.75); }
+.board-tab[aria-pressed="true"] { color: var(--pen); background: rgba(39, 64, 122, 0.09); }
+.board-tab:focus-visible { outline: 2px solid var(--pen); outline-offset: 1px; }
+.board-tab[data-board-tab="done"] .board-count { background: rgba(60, 45, 25, 0.22); color: var(--ink); }
 .board-count {
   min-width: 24px; height: 24px;
   display: grid; place-items: center;
@@ -1371,17 +1385,18 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   cursor: pointer;
 }
 .board-btn:hover { background: rgba(0, 0, 0, 0.07); }
+.board-btn[hidden], .board-adders[hidden] { display: none; }
 /* the cards are tossed on, not filed: each as big as what's written on it,
    tilted its own way, a little off true, the neighbours overlapping at the
    edges (clear of each other's ticks); the one you touch comes to the top */
-.board-list, .done-list {
+.board-list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
   padding: 10px 8px 14px;
 }
-.board-list .topic, .done-list .topic {
+.board-list .topic {
   flex: none;
   width: max-content;
   min-width: 150px;
@@ -1392,10 +1407,9 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   rotate: var(--tilt, 0deg);
   transition: translate 0.2s ease, scale 0.2s ease;
 }
-.board-list .topic:hover, .board-list .topic:focus-within,
-.done-list .topic:hover, .done-list .topic:focus-within { z-index: 2; scale: 1.03; }
+.board-list .topic:hover, .board-list .topic:focus-within { z-index: 2; scale: 1.03; }
 .board-list .topic--new { width: 270px; z-index: 3; }
-.board.one .board-list, .board.one .board-adders, .board.one .board-done { display: none; }
+.board.one .board-list, .board.one .board-adders { display: none; }
 .board-one { display: grid; place-items: center; padding: 10px 0 18px; }
 .board-adders { display: flex; gap: 8px; margin-top: 16px; }
 .board-adders .adder { height: 40px; font-size: 22px; }
@@ -1434,9 +1448,10 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
 /* the other person's card, until it's been talked about */
 .topic--secret .topic-text { filter: blur(6px); -webkit-user-select: none; user-select: none; }
 .topic-stack.secret .stack-text { filter: blur(3px); }
-.topic--done { opacity: 0.6; }
-.topic--done .topic-text { text-decoration: line-through; text-decoration-color: rgba(60, 45, 25, 0.5); }
-.topic--big { width: min(86vw, 460px); padding: 26px 40px 22px 26px; rotate: -1deg; }
+/* in the "talked about" tab: readable, just a touch quieter, and dated */
+.topic--done .topic-text { color: rgba(46, 43, 38, 0.8); }
+.topic-date--done { color: #4b7a4e; }
+.topic--big { width: min(86vw, 460px); max-height: 70vh; overflow-y: auto; padding: 26px 40px 22px 26px; rotate: -1deg; }
 .topic--big .topic-text { font-size: 32px; line-height: 34px; }
 .topic--new .topic-input {
   width: 100%;
@@ -1459,32 +1474,12 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   cursor: pointer;
 }
 
-.board-done { margin-top: 18px; border-top: 1px solid rgba(60, 45, 25, 0.15); padding-top: 12px; }
-.board-done[hidden] { display: none; }
-.done-toggle {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 4px;
-  border: 0; background: none;
-  color: var(--muted);
-  font: 700 10.5px/1 'Space Mono', monospace;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  cursor: pointer;
-}
-.done-count {
-  min-width: 20px; height: 20px;
-  display: grid; place-items: center;
-  border-radius: 999px;
-  background: rgba(60, 45, 25, 0.18);
-  color: var(--ink);
-}
-.done-list { margin-top: 4px; }
-.board-done:not(.showing) .done-list { display: none; }
 
 @media (max-width: 640px) {
   .stack-text { font-size: 13px; line-height: 13px; }
   .board-card { padding: 12px 14px 16px; }
-  .board-list, .done-list { padding: 8px 2px 12px; }
-  .board-list .topic, .done-list .topic {
+  .board-list { padding: 8px 2px 12px; }
+  .board-list .topic {
     min-width: 104px; max-width: 88%;
     margin: 0 -4px;
     padding: 12px 42px 10px 18px;
@@ -1492,7 +1487,19 @@ select.c-input { font: 700 20px/1.2 'Caveat', cursive; }
   }
   .topic-tick { top: 8px; right: 8px; }
   .board-list .topic--new { width: 100%; max-width: 100%; }
-  .topic-text { font-size: 21px; line-height: 22px; }
+  /* smaller handwriting, so a long one fits; the ruled lines close up to match */
+  .topic { background-image:
+    var(--grain),
+    linear-gradient(to right, transparent 13px, var(--index-margin) 13px, var(--index-margin) 14px, transparent 14px),
+    repeating-linear-gradient(to bottom, transparent 0 17px, var(--index-rule) 17px 18px),
+    linear-gradient(var(--index), var(--index)); }
+  .topic-text, .topic--new .topic-input { font-size: 17px; line-height: 18px; }
+  .topic--big .topic-text { font-size: 24px; line-height: 27px; }
+  .board-tab { font-size: 19px; gap: 5px; padding: 3px 6px 5px; }
+  .board-top { gap: 4px; }
+  .board-tools { gap: 0; }
+  .board-btn { width: 34px; height: 34px; }
+  .board-tab .board-count { min-width: 20px; height: 20px; font-size: 10px; }
 }
 
 /* ---------- the bucket list: a galvanised pail of folded slips ----------

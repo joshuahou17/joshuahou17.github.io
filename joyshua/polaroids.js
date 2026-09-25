@@ -3,8 +3,10 @@
  *
  * It arrives blank. The first time the other person opens it, it develops in
  * front of them over about a minute -- faster if they shake the phone (or, on
- * a computer, shake the polaroid about with the pointer). Once it's developed
- * it stays that way on every device. Whose device this is comes from the
+ * a computer, shake the polaroid about with the pointer). Opening it once is
+ * enough: it's saved as developed straight away, so closing it early never
+ * means opening it again to wait out the rest. From then on it's developed on
+ * every device. Whose device this is comes from the
  * notifications bell (JoyNotify.owner); a device that hasn't said sees every
  * polaroid developed, the same rule the topics board uses.
  *
@@ -380,6 +382,7 @@
 
   function hide() {
     if (!view || view.hidden) return;
+    if (running) progress[running.p.id] = 1;    // closed before it finished: it's developed all the same
     running = null;
     view.classList.remove('open');
     setTimeout(function () { if (!view.classList.contains('open')) { view.hidden = true; viewSlot.textContent = ''; } }, 250);
@@ -388,6 +391,7 @@
   }
 
   function develop(p, pol) {
+    developed(p);                               // saved now, not when the picture's finished clearing
     running = { p: p, el: pol, last: performance.now() };
     boost = 0;
     var me = running;
@@ -399,13 +403,13 @@
       boost = 0;
       progress[p.id] = d;
       setDev(pol, d);
-      if (d >= 1) { running = null; developed(p); return; }
+      if (d >= 1) { running = null; return; }
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
 
-  // Finished: from now on it's developed for everyone. If saving fails it's
+  // Opened: from now on it's developed for everyone. If saving fails it's
   // still developed on this visit, and simply develops again next time.
   function developed(p) {
     JoyStore.developPolaroid(p.id).then(function () { paint(); if (spread) draw(); }, function () {});

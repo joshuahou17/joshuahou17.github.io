@@ -354,7 +354,8 @@ Deno.serve(async (req) => {
       // one off once it's been talked about (or done).
       case "add-topic": {
         const kind = body.kind === "bucket" ? "bucket" : "topic";
-        const row = { text: text(body.text, 280, { multiline: true, required: true }), author: author(body.author), kind };
+        // a topic can say as much as it needs to; a bucket slip is one line
+        const row = { text: text(body.text, kind === "bucket" ? 280 : 10000, { multiline: true, required: true }), author: author(body.author), kind };
         await log(sb, visitor, action, row.text.slice(0, 60), null, row);
         const { data, error } = await sb.from("joyshua_topics").insert(row).select().single();
         if (error) throw new Error(error.message);
