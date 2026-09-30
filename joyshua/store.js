@@ -37,7 +37,7 @@
       });
   }
 
-  var added = { postcards: [], photos: [], letters: [], topics: [], polaroids: [], verses: [] };   // rows added from the page
+  var added = { postcards: [], photos: [], letters: [], topics: [], polaroids: [], verses: [], stickies: [], strokes: [] };   // rows added from the page
 
   function soft(p) {
     return p.catch(function (err) { if (window.console) console.warn('[joyshua] couldn\u2019t load:', err.message); return null; });
@@ -53,7 +53,9 @@
       soft(get('joyshua_letters', 'select=*&order=created_at')),
       soft(get('joyshua_topics', 'select=*&order=created_at')),
       soft(get('joyshua_polaroids', 'select=*&order=created_at')),
-      soft(get('joyshua_verses', 'select=*&order=created_at'))
+      soft(get('joyshua_verses', 'select=*&order=created_at')),
+      soft(get('joyshua_stickies', 'select=*&order=created_at')),
+      soft(get('joyshua_strokes', STROKES))
     ]).then(function (r) {
       // (whatever couldn't be fetched keeps what was there before)
       if (r[0]) r[0].forEach(function (row) { state[row.key] = row.value; });
@@ -63,8 +65,13 @@
       if (r[4]) added.topics = r[4];
       if (r[5]) added.polaroids = r[5];
       if (r[6]) added.verses = r[6];
+      if (r[7]) added.stickies = r[7];
+      if (r[8]) added.strokes = r[8];
     });
   }
+
+  // what's on the whiteboard now: every stroke not rubbed out, oldest first
+  var STROKES = 'select=id,author,color,size,points,created_at&erased_at=is.null&order=created_at';
 
   var ready = load();
 
@@ -296,6 +303,49 @@
       return call('develop-polaroid', { id: id }).then(function (r) {
         added.polaroids = added.polaroids.map(function (p) { return p.id === id ? r.polaroid : p; });
         return r.polaroid;
+      });
+    },
+
+    // A sticky note, stuck on the desk at world spot x, y.
+    addSticky: function (text, color, author, x, y) {
+      return call('add-sticky', { text: text, color: color, author: author, x: x, y: y }).then(function (r) { added.stickies.push(r.sticky); return r.sticky; });
+    },
+
+    // Peel stickies off the desk into the pad (`collected`), or stick them back.
+    // Applied at once, rolled back if the save fails.
+    collectStickies: function (ids, collected) {
+      var before = {};
+      var at = collected ? new Date().toISOString() : null;
+      added.stickies.forEach(function (s) { if (ids.indexOf(s.id) >= 0) { before[s.id] = s.collected_at; s.collected_at = at; } });
+      return call('set-stickies', { ids: ids, collected: !!collected }).then(
+        function (r) {
+          r.stickies.forEach(function (row) { added.stickies.forEach(function (s) { if (s.id === row.id) s.collected_at = row.collected_at; }); });
+        },
+        function (err) {
+          added.stickies.forEach(function (s) { if (s.id in before) s.collected_at = before[s.id]; });
+          throw err;
+        });
+    },
+
+    // The whiteboard. `strokes` are {color, size, points}; resolves to the saved rows.
+    addStrokes: function (author, strokes) {
+      return call('add-strokes', { author: author, strokes: strokes }).then(function (r) { return r.strokes; });
+    },
+
+    // `ids`, or 'all' to wipe the board
+    eraseStrokes: function (ids) {
+      return call('erase-strokes', ids === 'all' ? { all: true } : { ids: ids }).then(function (r) { return r.erased; });
+    },
+
+    // What's on the board right now, fetched fresh: the ids first (small), then
+    // only the strokes this page doesn't have yet.
+    fetchStrokes: function (have) {
+      return get('joyshua_strokes', 'select=id&erased_at=is.null&order=created_at').then(function (rows) {
+        var ids = rows.map(function (r) { return r.id; });
+        var missing = ids.filter(function (id) { return !have[id]; });
+        if (!missing.length) return { ids: ids, rows: [] };
+        var q = missing.length > 150 ? STROKES : STROKES + '&id=in.(' + missing.join(',') + ')';
+        return get('joyshua_strokes', q).then(function (fresh) { return { ids: ids, rows: fresh }; });
       });
     },
 

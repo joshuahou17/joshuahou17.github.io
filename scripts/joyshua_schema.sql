@@ -186,3 +186,44 @@ create policy "joyshua read verses" on public.joyshua_verses for select to anon,
 -- like a letter's. Added 2026-09-24.
 alter table public.joyshua_topics drop constraint if exists joyshua_topics_text_check;
 alter table public.joyshua_topics add constraint joyshua_topics_text_check check (char_length(text) between 1 and 10000);
+
+-- Sticky notes: a few words stuck on the desk. `x`, `y` are the desk spot the
+-- writer stuck it on (each browser can drag it elsewhere, like everything on
+-- the desk). Peeled off the desk into the sticky pad, `collected_at` is set;
+-- stuck back on, it's cleared. Added 2026-09-30.
+create table if not exists public.joyshua_stickies (
+  id            uuid primary key default gen_random_uuid(),
+  text          text not null check (char_length(text) between 1 and 300),
+  color         text not null default 'yellow' check (color in ('yellow', 'pink', 'blue', 'green')),
+  author        text not null check (author in ('josh', 'joyce')),
+  x             real not null default 0,
+  y             real not null default 0,
+  created_at    timestamptz not null default now(),
+  collected_at  timestamptz,              -- null while it's on the desk
+  hidden        boolean not null default false
+);
+create index if not exists joyshua_stickies_made on public.joyshua_stickies (created_at);
+
+alter table public.joyshua_stickies enable row level security;
+drop policy if exists "joyshua read stickies" on public.joyshua_stickies;
+create policy "joyshua read stickies" on public.joyshua_stickies for select to anon, authenticated using (not hidden);
+
+-- The whiteboard: one shared board, one row per marker stroke. `points` is the
+-- stroke's path as a flat [x, y, x, y, ...] list on a 1000 x 750 board.
+-- Erasing (a stroke, or wiping the whole board) sets `erased_at`; nothing is
+-- deleted, so a wiped drawing can be brought back. Added 2026-09-30.
+create table if not exists public.joyshua_strokes (
+  id          uuid primary key default gen_random_uuid(),
+  author      text not null check (author in ('josh', 'joyce')),
+  color       text not null check (color in ('black', 'red', 'blue', 'green')),
+  size        smallint not null check (size between 1 and 60),
+  points      smallint[] not null check (array_length(points, 1) between 2 and 4000),
+  created_at  timestamptz not null default now(),
+  erased_at   timestamptz,
+  hidden      boolean not null default false
+);
+create index if not exists joyshua_strokes_live on public.joyshua_strokes (created_at) where erased_at is null;
+
+alter table public.joyshua_strokes enable row level security;
+drop policy if exists "joyshua read strokes" on public.joyshua_strokes;
+create policy "joyshua read strokes" on public.joyshua_strokes for select to anon, authenticated using (not hidden);
