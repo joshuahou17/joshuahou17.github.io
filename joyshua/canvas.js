@@ -26,6 +26,9 @@
   var PW = 262, PH = 272;     // the bucket-list pail
   var LW = 280, LH = 312;     // the pile of polaroids
   var VW = 250, VH = 330;     // the Bible
+  var SW = 190, SH = 190;     // a sticky note
+  var NW = 230, NH = 230;     // the sticky pad
+  var WW = 420, WH = 350;     // the whiteboard, marker tray and all
 
   var SEED = 20260921;
   var TAP_SLOP = 6;           // px of travel before a press becomes a drag
@@ -51,6 +54,14 @@
       t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
+  }
+
+  // Every date on the page reads 9/2/26. Postcards.js gives a local time
+  // ('2026-05-29T23:52'), an uploaded photo an ISO one; both parse as the day
+  // it was where the picture was taken, give or take the time zone.
+  function dayOf(iso) {
+    var d = iso ? new Date(iso) : null;
+    return !d || isNaN(d) ? '' : d.getMonth() + 1 + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(2);
   }
 
   function clampZ(z) { return Math.max(Z_MIN, Math.min(Z_MAX, z)); }
@@ -97,7 +108,7 @@
     // The envelopes share a row with the keepsake box (on a phone they all carry
     // on down the column). Letters already in the box don't take a spot.
     var m = LETTERS.length, slot = 0;
-    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 4;
+    var slots = LETTERS.filter(function (L, j) { return !L.gone && !isBoxed(j); }).length + 6;
     function spot(w, h) {
       var er = rows + (portrait ? slot : 0), ec = portrait ? 0 : slot, eIn = portrait ? 1 : slots;
       slot++;
@@ -130,6 +141,15 @@
     var vs = spot(VW, VH);
     put(makeBible(), vs.x, vs.y + 10, 3, 'bible', 0, VW, VH, 'bible');
     if (window.JoyBible) JoyBible.paint();
+    var ns = spot(NW, NH);
+    put(makePad(), ns.x, ns.y + 10, -4, 'pad', 0, NW, NH, 'sticky-pad');
+    padItem = placed[placed.length - 1];
+    var ws = spot(WW, WH);
+    put(makeWhiteboard(), ws.x, ws.y, 1.5, 'whiteboard', 0, WW, WH, 'whiteboard');
+    if (window.JoyWhiteboard) JoyWhiteboard.paint();
+    stickyIds = {};
+    stickies().forEach(function (st) { putSticky(saved, st); });
+    paintPad();
     fitAll(world);
   }
 
@@ -325,7 +345,8 @@
   // The pail, the pile and the Bible belong to bucket.js, polaroids.js and
   // bible.js; the box to the rainbow. None of them can be deleted from the desk.
   function isFixture(el) {
-    return el.classList.contains('keepsake') || el.classList.contains('pail') || el.classList.contains('pol-pile') || el.classList.contains('bible');
+    return el.classList.contains('keepsake') || el.classList.contains('pail') || el.classList.contains('pol-pile') || el.classList.contains('bible') ||
+      el.classList.contains('sticky-pad') || el.classList.contains('whiteboard');
   }
 
   /* ---------- the bucket-list pail ----------
@@ -383,6 +404,178 @@
       if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
       e.preventDefault();
       if (window.JoyBucket) JoyBucket.open('todo');
+    });
+    return b;
+  }
+
+  /* ---------- sticky notes ----------
+   * A sticky is a desk item like a postcard: dragged about (its spot kept per
+   * browser), pressed and held to delete. It starts where its writer stuck it.
+   * Dragged onto the sticky pad it's peeled off the desk and collected there
+   * (for everyone); stickies.js owns the pad's board of every sticky, sorted
+   * and filed, and the writing of new ones. Collected stickies stay in
+   * `placed`, stowed like a letter in the box, so every index stays valid. */
+  var padItem = null, stickyIds = {};
+
+  function stickies() {
+    var S = window.JoyStore;
+    if (!S || !S.added.stickies) return [];
+    return S.added.stickies.filter(function (st) { return !st.hidden && !S.isGone('sticky:' + st.id); });
+  }
+
+  // A steady number from an id, so a sticky lands at the same tilt every time.
+  function hashOf(str) {
+    var h = 2166136261;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0) / 4294967296;
+  }
+
+  function makeSticky(st) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'card sticky sticky--' + (st.color || 'yellow');
+    b.dataset.sticky = st.id;
+    var who = st.author === 'joyce' ? 'Joyce' : 'Josh';
+    b.setAttribute('aria-label', 'Sticky note from ' + who + ': ' + st.text);
+    var body = document.createElement('span');
+    body.className = 'card-body st-body';
+    var t = document.createElement('span');
+    t.className = 'st-text';
+    t.dataset.max = 34;
+    t.dataset.min = 12;
+    t.textContent = st.text;
+    var foot = document.createElement('span');
+    foot.className = 'st-foot';
+    foot.textContent = who + ' \u00b7 ' + dayOf(st.created_at);
+    body.appendChild(t);
+    body.appendChild(foot);
+    b.appendChild(body);
+    return b;
+  }
+
+  function putSticky(saved, st) {
+    if (stickyIds[st.id]) return stickyIds[st.id];
+    var rot = (hashOf(st.id) - 0.5) * 10;
+    var p = putItem(saved, makeSticky(st), st.x - SW / 2, st.y - SH / 2, rot, 'sticky', st.id, SW, SH, 'sticky:' + st.id);
+    stickyIds[st.id] = p;
+    stowed(p, !!st.collected_at);
+    return p;
+  }
+
+  // Bring the desk in line with the stickies JoyStore has: new ones stuck on,
+  // collected ones stowed, deleted ones gone.
+  function syncStickies() {
+    var saved = loadSpots(), seen = {}, last = null;
+    stickies().forEach(function (st) {
+      seen[st.id] = true;
+      var fresh = !stickyIds[st.id];
+      var p = putSticky(saved, st);
+      if (fresh) last = p;
+      if (p.inBox !== !!st.collected_at) stowed(p, !!st.collected_at);
+    });
+    Object.keys(stickyIds).forEach(function (id) {
+      var p = stickyIds[id];
+      if (!seen[id] && !p.gone) { p.gone = true; p.el.hidden = true; }
+    });
+    if (last) { fitAll(last.el); arrive(last); }
+    paintPad();
+    render();
+    return last;
+  }
+
+  function arrive(p) {
+    p.el.style.zIndex = ++zTop;
+    p.el.classList.add('arrived');
+    setTimeout(function () { p.el.classList.remove('arrived'); }, 900);
+  }
+
+  /* The sticky pad: a square pad of notes with the newest collected one on
+   * top (or a blank sheet), and the count of what's filed in it. */
+  function makePad() {
+    var b = document.createElement('div');
+    b.className = 'card sticky-pad';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.innerHTML =
+      '<span class="sp-shadow"></span>' +
+      '<span class="sp-sheet sp-sheet--3"></span><span class="sp-sheet sp-sheet--2"></span>' +
+      '<span class="sp-sheet sp-sheet--1"><span class="sp-text"></span></span>' +
+      '<span class="sp-count"></span>';
+    b.addEventListener('keydown', function (e) {
+      if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (window.JoyStickies) JoyStickies.open();
+    });
+    return b;
+  }
+
+  function paintPad() {
+    if (!padItem) return;
+    var all = stickies();
+    var filed = all.filter(function (st) { return st.collected_at; })
+      .sort(function (a, b) { return a.collected_at < b.collected_at ? 1 : -1; });
+    var el = padItem.el, top = filed[0];
+    el.setAttribute('aria-label', 'Sticky notes: ' + all.length + ' in all, ' + filed.length + ' collected. Press to see them all.');
+    var sheet = el.querySelector('.sp-sheet--1');
+    sheet.className = 'sp-sheet sp-sheet--1 sticky--' + (top ? top.color || 'yellow' : 'yellow');
+    el.querySelector('.sp-text').textContent = top ? top.text : '';
+    el.querySelector('.sp-count').textContent = all.length || '';
+    el.classList.toggle('empty', !filed.length);
+  }
+
+  function overPad(clientX, clientY) {
+    if (!padItem) return false;
+    var r = padItem.el.getBoundingClientRect();
+    return clientX > r.left && clientX < r.right && clientY > r.top - 20 && clientY < r.bottom;
+  }
+
+  function collectSticky(p) {
+    stowed(p, true);
+    p.moved = false;
+    saveSpots();
+    var el = padItem.el;
+    el.classList.remove('drop-target', 'gulp');
+    void el.offsetWidth;
+    el.classList.add('gulp');
+    if (!window.JoyStore) return;
+    var done = JoyStore.collectStickies([p.idx], true);
+    paintPad();
+    done.then(function () { toast('collected'); paintPad(); if (window.JoyStickies) JoyStickies.draw(); },
+      function (err) { toast(err.message, true); stowed(p, false); paintPad(); });
+  }
+
+  function deleteStickyWhat(p) {
+    return {
+      name: 'this sticky note',
+      title: 'Delete this sticky note?',
+      detail: 'This removes it for everyone.',
+      run: function () {
+        poof(p);
+        return JoyStore.remove('sticky:' + p.idx).then(
+          function () { paintPad(); if (window.JoyStickies) JoyStickies.draw(); },
+          function (err) { p.gone = false; p.el.hidden = false; render(); throw err; });
+      }
+    };
+  }
+
+  /* ---------- the whiteboard ----------
+   * A whiteboard in an aluminium frame, markers on the tray. whiteboard.js
+   * draws what's on it (a small copy of the shared board) and owns what
+   * happens when it's tapped. */
+  function makeWhiteboard() {
+    var b = document.createElement('div');
+    b.className = 'card whiteboard';
+    b.tabIndex = 0;
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-label', 'The whiteboard');
+    b.innerHTML =
+      '<span class="wb-shadow"></span>' +
+      '<span class="wb-frame"><span class="wb-surface"><canvas class="wb-mini" width="600" height="450"></canvas></span></span>' +
+      '<span class="wb-tray"><i class="wb-pen wb-pen--black"></i><i class="wb-pen wb-pen--red"></i><i class="wb-pen wb-pen--blue"></i><i class="wb-rag"></i></span>';
+    b.addEventListener('keydown', function (e) {
+      if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (window.JoyWhiteboard) JoyWhiteboard.open();
     });
     return b;
   }
@@ -627,7 +820,7 @@
   }
 
   function fitAll(root) {
-    Array.prototype.forEach.call((root || document).querySelectorAll('.env-label, .kb-tab'), fitLabel);
+    Array.prototype.forEach.call((root || document).querySelectorAll('.env-label, .kb-tab, .st-text'), fitLabel);
   }
 
   function letterKey(j) { return 'letter:' + (LETTERS[j].key || LETTERS[j].label); }
@@ -729,7 +922,8 @@
     if (openState && openState.grid) buildSheet();
     var last = dropNew(fresh);
     renderBox();
-    return last;
+    var st = syncStickies();
+    return last || st;
   }
 
   /* Shuffle: everything on the desk (postcards, loose envelopes, the box) is
@@ -1288,7 +1482,7 @@
         } else if (!isFixture(pr.card)) {
           var item = placed[+pr.card.dataset.p];
           pr.longPress = true;
-          showMinus(pr.card, item.kind === 'card' ? deleteCardWhat(item) : deleteLetterWhat(item.idx));
+          showMinus(pr.card, item.kind === 'card' ? deleteCardWhat(item) : item.kind === 'sticky' ? deleteStickyWhat(item) : deleteLetterWhat(item.idx));
         }
       });
     } else {
@@ -1348,6 +1542,10 @@
         press.overBox = overBox(e.clientX, e.clientY);
         boxItem.el.classList.toggle('drop-target', press.overBox);
       }
+      if (press.held.kind === 'sticky' && padItem) {
+        press.overPad = overPad(e.clientX, e.clientY);
+        padItem.el.classList.toggle('drop-target', press.overPad);
+      }
       return;
     }
     if (press.moved) {
@@ -1365,8 +1563,10 @@
     if (!press || !press.held) return;
     press.held.el.classList.remove('held');
     if (press.held.kind === 'letter' && press.overBox) putInBox(press.held);
+    else if (press.held.kind === 'sticky' && press.overPad) collectSticky(press.held);
     else saveSpots();
     if (boxItem) boxItem.el.classList.remove('drop-target');
+    if (padItem) padItem.el.classList.remove('drop-target');
     render();
   }
 
@@ -1459,7 +1659,7 @@
 
   // ---------- the viewer ----------
 
-  var vWho;
+  var vWho, vDate;
   var viewer, vCard, vPhoto, vImg, vTitle, vCount, vPrev, vNext, vClose, vBanner, recenter;
   var vGridBtn, vSheet, vSheetTitle, vSheetGrid;
   var openState = null;       // {ci, i, btn, grid}
@@ -1544,6 +1744,10 @@
     vWho.textContent = who === 'joyce' ? 'Joyce' : 'Josh';
     vWho.className = 'who-chip author-' + who;
     vWho.setAttribute('aria-label', 'Added by ' + vWho.textContent);
+    // when it was taken, stamped in the corner like a film camera's date
+    vDate.textContent = dayOf(p.taken);
+    vDate.dateTime = p.taken || '';
+    vDate.setAttribute('aria-label', p.taken ? 'Taken ' + vDate.textContent : '');
 
     if (n > 1) { var pre = new Image(); pre.src = c.photos[(i + 1) % n].src; }
   }
@@ -1755,6 +1959,15 @@
     else if (btn.classList.contains('bible')) {
       if (window.JoyBible) JoyBible.open();
     }
+    else if (btn.classList.contains('sticky-pad')) {
+      if (window.JoyStickies) JoyStickies.open();
+    }
+    else if (btn.classList.contains('whiteboard')) {
+      if (window.JoyWhiteboard) JoyWhiteboard.open();
+    }
+    else if (btn.classList.contains('sticky')) {
+      if (window.JoyStickies) JoyStickies.show(btn.dataset.sticky, btn);
+    }
     else if (btn.classList.contains('envelope')) openLetter(btn);
     else openCard(btn);
   }
@@ -1838,6 +2051,14 @@
       chip.setAttribute('aria-hidden', 'true');
       chip.textContent = who === 'joyce' ? 'Joyce' : 'Josh';
       b.appendChild(chip);
+      if (p.taken) {
+        var stamp = document.createElement('span');
+        stamp.className = 'photo-date photo-date--small';
+        stamp.setAttribute('aria-hidden', 'true');
+        stamp.textContent = dayOf(p.taken);
+        b.appendChild(stamp);
+        b.setAttribute('aria-label', b.getAttribute('aria-label') + ', taken ' + stamp.textContent);
+      }
       vSheetGrid.appendChild(b);
     });
     var add = document.createElement('button');
@@ -2079,6 +2300,7 @@
     vTitle = document.getElementById('viewer-title');
     vCount = document.getElementById('viewer-count');
     vWho = document.getElementById('viewer-who');
+    vDate = document.getElementById('viewer-date');
     vPrev = document.getElementById('viewer-prev');
     vNext = document.getElementById('viewer-next');
     vBanner = document.getElementById('viewer-banner');
@@ -2133,7 +2355,7 @@
     } else firstPaint();
 
     document.addEventListener('contextmenu', function (e) {
-      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env, .slip, .verse')) e.preventDefault();
+      if (e.target.closest && e.target.closest('.card, .viewer-photo, .sheet-thumb, .rb-env, .banner, .kb-env, .slip, .verse, .note')) e.preventDefault();
     });
     window.JoyDesk = {
       cards: function () { return CARDS; },
@@ -2144,10 +2366,35 @@
       confirm: askConfirm,
       refresh: refreshAdded,
       toast: toast,
+      // stickies.js and whiteboard.js
+      syncStickies: syncStickies,
+      dayOf: dayOf,
+      // the desk spot in the middle of the screen, where a new sticky goes
+      centre: function () {
+        return { x: Math.round(cam.x + window.innerWidth / 2 / cam.z), y: Math.round(cam.y + window.innerHeight / 2 / cam.z) };
+      },
+      // glide over to a sticky on the desk and give it a nudge
+      findSticky: function (id) {
+        var p = stickyIds[id];
+        if (!p || p.gone || p.inBox) return false;
+        glideTo({ x: p.x + SW / 2 - window.innerWidth / 2 / Math.max(cam.z, 0.8), y: p.y + SH / 2 - window.innerHeight / 2 / Math.max(cam.z, 0.8), z: Math.max(cam.z, 0.8) });
+        setTimeout(function () { arrive(p); }, 450);
+        return true;
+      },
+      whiteboard: function () { return placed.filter(function (p) { return p.kind === 'whiteboard'; })[0] || null; },
       // Open what a notification was about: 'letter:<key>', 'card:<key>',
-      // 'topics', 'bucket', 'bible' or 'polaroid:<id>'. Anything already open is left alone.
+      // 'topics', 'bucket', 'bible', 'whiteboard', 'stickies', 'sticky:<id>'
+      // or 'polaroid:<id>'. Anything already open is left alone.
       go: function (target) {
         if (target === 'topics') { if (window.JoyTopics) JoyTopics.open(); return; }
+        if (target === 'whiteboard') { if (window.JoyWhiteboard) JoyWhiteboard.open(); return; }
+        if (target === 'stickies') { if (window.JoyStickies) JoyStickies.open(); return; }
+        var sti = /^sticky:(.+)$/.exec(target || '');
+        if (sti) {
+          syncStickies();
+          if (!(stickyIds[sti[1]] && !stickyIds[sti[1]].inBox && JoyDesk.findSticky(sti[1])) && window.JoyStickies) JoyStickies.open();
+          return;
+        }
         if (target === 'bucket') { if (window.JoyBucket) JoyBucket.open('todo'); return; }
         if (target === 'bible') { if (window.JoyBible) JoyBible.open(); return; }
         var pol = /^polaroid:(.+)$/.exec(target || '');

@@ -190,6 +190,8 @@
         if (window.JoyBucket) JoyBucket.paint();
         if (window.JoyPolaroids) JoyPolaroids.paint();
         if (window.JoyBible) JoyBible.paint();
+        if (window.JoyStickies) JoyStickies.draw();
+        if (window.JoyWhiteboard) JoyWhiteboard.paint();
       }
       // let the desk finish its first layout before opening anything on it
       setTimeout(function () { JoyDesk.go(go); }, fresh ? 400 : 0);

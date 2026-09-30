@@ -41,6 +41,10 @@ const AUTHORS = ["josh", "joyce"];
 const NAMES: Record<string, string> = { josh: "Josh", joyce: "Joyce" };
 const DEVICES_PER_PERSON = 10;      // the oldest sign-ups past this are dropped
 const RECENT_MIN = 10;              // a notification counts what's been added this long
+const STICKY_COLORS = ["yellow", "pink", "blue", "green"];
+const MARKERS = ["black", "red", "blue", "green"];
+const BOARD_W = 1000, BOARD_H = 750;  // the whiteboard's own units
+const STROKES_PER_SAVE = 60;
 
 // Only the browsers' own push services -- the endpoint is fetched, so it can't
 // be allowed to point anywhere else.
@@ -93,6 +97,26 @@ function takenAt(v: unknown): string | null {
   if (!isFinite(t)) return null;
   if (t < Date.parse("1990-01-01") || t > Date.now() + 864e5) return null;
   return new Date(t).toISOString();
+}
+
+function uuid(v: unknown): string {
+  if (typeof v !== "string" || !/^[0-9a-f-]{36}$/.test(v)) throw new Bad("bad id");
+  return v;
+}
+
+// One marker stroke: its colour, width and path, a flat [x, y, x, y, ...] on
+// the board (a little past its edges is fine -- a line can run off it).
+function stroke(v: unknown, who: string) {
+  const s = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
+  if (typeof s.color !== "string" || !MARKERS.includes(s.color)) throw new Bad("unknown marker");
+  const pts = Array.isArray(s.points) ? s.points : [];
+  if (pts.length < 2 || pts.length > 4000 || pts.length % 2) throw new Bad("bad stroke");
+  const points = pts.map((n, i) => {
+    const lim = i % 2 ? BOARD_H : BOARD_W;
+    if (typeof n !== "number" || !isFinite(n)) throw new Bad("bad stroke");
+    return Math.round(Math.max(-50, Math.min(lim + 50, n)));
+  });
+  return { author: who, color: s.color, size: int(s.size, 1, 60), points };
 }
 
 function author(v: unknown): string {
@@ -179,7 +203,7 @@ async function setState(sb: SupabaseClient, visitor: string, action: string, key
 
 /* ---------- notifications ---------- */
 
-type Kind = "letter" | "photo" | "postcard" | "topic" | "bucket" | "polaroid" | "verse";
+type Kind = "letter" | "photo" | "postcard" | "topic" | "bucket" | "polaroid" | "verse" | "sticky" | "drawing";
 
 // Deliberately vague: who, and what kind of thing -- never its words.
 function message(name: string, kind: Kind, n: number): string {
@@ -192,6 +216,8 @@ function message(name: string, kind: Kind, n: number): string {
     case "bucket":   return many ? `${name} added ${n} things to the bucket list` : `${name} added to the bucket list`;
     case "polaroid": return many ? `${name} sent you ${n} polaroids 📷` : `${name} sent you a polaroid 📷`;
     case "verse":    return many ? `${name} saved ${n} verses 📖` : `${name} saved a verse 📖`;
+    case "sticky":   return many ? `${name} left you ${n} sticky notes` : `${name} left you a sticky note`;
+    case "drawing":  return `${name} is drawing on the whiteboard ✏️`;
   }
 }
 
@@ -199,7 +225,7 @@ function message(name: string, kind: Kind, n: number): string {
 // notification carries a tag, and a new one with the same tag quietly replaces
 // the last, so a burst of additions reads as one running total.
 async function recentCount(sb: SupabaseClient, who: string, kind: Kind): Promise<number> {
-  const table = { letter: "joyshua_letters", photo: "joyshua_photos", postcard: "joyshua_postcards", topic: "joyshua_topics", bucket: "joyshua_topics", polaroid: "joyshua_polaroids", verse: "joyshua_verses" }[kind];
+  const table = { letter: "joyshua_letters", photo: "joyshua_photos", postcard: "joyshua_postcards", topic: "joyshua_topics", bucket: "joyshua_topics", polaroid: "joyshua_polaroids", verse: "joyshua_verses", sticky: "joyshua_stickies", drawing: "joyshua_strokes" }[kind];
   let q = sb.from(table).select("id", { count: "exact", head: true })
     .eq("author", who).gte("created_at", new Date(Date.now() - RECENT_MIN * 60e3).toISOString());
   if (kind === "topic" || kind === "bucket") q = q.eq("kind", kind);
@@ -209,7 +235,7 @@ async function recentCount(sb: SupabaseClient, who: string, kind: Kind): Promise
 
 // Tell the other person's devices. `go` is where tapping it takes them
 // (sw.js hands it to the page): 'letter:<id>', 'card:<key>', 'topics', 'bucket',
-// 'polaroid:<id>', 'bible'.
+// 'polaroid:<id>', 'bible', 'sticky:<id>', 'whiteboard'.
 async function notifyOther(sb: SupabaseClient, who: string, kind: Kind, go: string) {
   const publicKey = Deno.env.get("VAPID_PUBLIC_KEY"), privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!publicKey || !privateKey) return;
@@ -277,7 +303,7 @@ Deno.serve(async (req) => {
       // it's marked gone (and logged), so it can always be brought back.
       case "remove": {
         const key = typeof body.key === "string" ? body.key : "";
-        if (!/^(card|photo|letter|topic|bucket|polaroid|verse):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
+        if (!/^(card|photo|letter|topic|bucket|polaroid|verse|sticky):[^\u0000-\u001f]{1,300}$/.test(key)) throw new Bad("bad key");
         return json(await setState(sb, visitor, action, "gone:" + key, { gone: body.gone !== false }));
       }
 
@@ -440,6 +466,72 @@ Deno.serve(async (req) => {
         const { data, error } = await sb.from("joyshua_polaroids").select().eq("id", id).single();
         if (error) throw new Error(error.message);
         return json({ polaroid: data });
+      }
+
+      // A sticky note, stuck on the desk where its writer was looking.
+      case "add-sticky": {
+        const row = {
+          text: text(body.text, 300, { multiline: true, required: true }),
+          color: typeof body.color === "string" && STICKY_COLORS.includes(body.color) ? body.color : "yellow",
+          author: author(body.author),
+          x: num(body.x, -100000, 100000),
+          y: num(body.y, -100000, 100000),
+        };
+        await log(sb, visitor, action, row.text.slice(0, 60), null, row);
+        const { data, error } = await sb.from("joyshua_stickies").insert(row).select().single();
+        if (error) throw new Error(error.message);
+        later(notifyOther(sb, row.author, "sticky", "sticky:" + data.id));
+        return json({ sticky: data });
+      }
+
+      // Peel stickies off the desk into the pad (collected), or stick them back.
+      case "set-stickies": {
+        const ids = (Array.isArray(body.ids) ? body.ids : []).map(uuid);
+        if (!ids.length || ids.length > 200) throw new Bad("1 to 200 stickies");
+        const collected = body.collected === true;
+        await log(sb, visitor, action, null, null, { ids, collected });
+        const { data, error } = await sb.from("joyshua_stickies")
+          .update({ collected_at: collected ? new Date().toISOString() : null }).in("id", ids).select();
+        if (error) throw new Error(error.message);
+        return json({ stickies: data });
+      }
+
+      // Marker strokes on the whiteboard, saved a handful at a time. The other
+      // person hears about it once when someone starts drawing, not per stroke.
+      case "add-strokes": {
+        const who = author(body.author);
+        const list = Array.isArray(body.strokes) ? body.strokes : [];
+        if (!list.length || list.length > STROKES_PER_SAVE) throw new Bad(`1 to ${STROKES_PER_SAVE} strokes`);
+        const rows = list.map((s) => stroke(s, who));
+        const since = new Date(Date.now() - RECENT_MIN * 60e3).toISOString();
+        const { count: lately } = await sb.from("joyshua_strokes").select("id", { count: "exact", head: true })
+          .eq("author", who).gte("created_at", since);
+        await log(sb, visitor, action, who, null, { strokes: rows.length });
+        const { data, error } = await sb.from("joyshua_strokes").insert(rows).select();
+        if (error) throw new Error(error.message);
+        if (!lately) later(notifyOther(sb, who, "drawing", "whiteboard"));
+        return json({ strokes: data });
+      }
+
+      // Rub strokes out -- some (`ids`), or wipe the whole board (`all`).
+      // They're only marked erased, so a wiped drawing can be brought back.
+      case "erase-strokes": {
+        let ids: string[];
+        const cutoff = new Date().toISOString();       // wiping takes what's on the board now, not a stroke that lands mid-wipe
+        if (body.all === true) {
+          const { data: live } = await sb.from("joyshua_strokes").select("id").is("erased_at", null).lte("created_at", cutoff).limit(20000);
+          ids = (live ?? []).map((r: { id: string }) => r.id);
+        } else {
+          ids = (Array.isArray(body.ids) ? body.ids : []).map(uuid);
+          if (!ids.length || ids.length > 500) throw new Bad("1 to 500 strokes");
+        }
+        if (!ids.length) return json({ erased: [] });
+        await log(sb, visitor, action, body.all === true ? "all" : null, null, { erased: ids });
+        let q = sb.from("joyshua_strokes").update({ erased_at: new Date().toISOString() }).is("erased_at", null);
+        q = body.all === true ? q.lte("created_at", cutoff) : q.in("id", ids);
+        const { data, error } = await q.select("id");
+        if (error) throw new Error(error.message);
+        return json({ erased: (data ?? []).map((r: { id: string }) => r.id) });
       }
 
       // The key a browser needs to sign up for notifications. Null until the
