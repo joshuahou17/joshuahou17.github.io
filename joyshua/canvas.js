@@ -497,10 +497,10 @@
     b.tabIndex = 0;
     b.setAttribute('role', 'button');
     b.innerHTML =
-      '<span class="sp-shadow"></span>' +
-      '<span class="sp-sheet sp-sheet--3"></span><span class="sp-sheet sp-sheet--2"></span>' +
-      '<span class="sp-sheet sp-sheet--1"><span class="sp-text"></span></span>' +
-      '<span class="sp-count"></span>';
+      '<span class="pd-shadow"></span>' +
+      '<span class="pd-sheet pd-sheet--3"></span><span class="pd-sheet pd-sheet--2"></span>' +
+      '<span class="pd-sheet pd-sheet--1"><span class="pd-text"></span></span>' +
+      '<span class="pd-count"></span>';
     b.addEventListener('keydown', function (e) {
       if (e.target !== b || (e.key !== 'Enter' && e.key !== ' ')) return;
       e.preventDefault();
@@ -516,10 +516,10 @@
       .sort(function (a, b) { return a.collected_at < b.collected_at ? 1 : -1; });
     var el = padItem.el, top = filed[0];
     el.setAttribute('aria-label', 'Sticky notes: ' + all.length + ' in all, ' + filed.length + ' collected. Press to see them all.');
-    var sheet = el.querySelector('.sp-sheet--1');
-    sheet.className = 'sp-sheet sp-sheet--1 sticky--' + (top ? top.color || 'yellow' : 'yellow');
-    el.querySelector('.sp-text').textContent = top ? top.text : '';
-    el.querySelector('.sp-count').textContent = all.length || '';
+    var sheet = el.querySelector('.pd-sheet--1');
+    sheet.className = 'pd-sheet pd-sheet--1 sticky--' + (top ? top.color || 'yellow' : 'yellow');
+    el.querySelector('.pd-text').textContent = top ? top.text : '';
+    el.querySelector('.pd-count').textContent = all.length || '';
     el.classList.toggle('empty', !filed.length);
   }
 

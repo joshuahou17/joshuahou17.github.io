@@ -2643,15 +2643,15 @@ body { -webkit-touch-callout: none; }
 .card.sticky-pad { width: 230px; height: 230px; overflow: visible; }
 .sticky-pad > span { position: absolute; display: block; }
 .sticky-pad:focus-visible { outline: none; }
-.sticky-pad:focus-visible .sp-sheet--1 { outline: 3px solid var(--pen); outline-offset: 4px; }
-.sp-shadow {
+.sticky-pad:focus-visible .pd-sheet--1 { outline: 3px solid var(--pen); outline-offset: 4px; }
+.pd-shadow {
   left: 4px; top: 196px; width: 226px; height: 40px;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(40, 30, 15, 0.4), transparent);
   filter: blur(5px);
   pointer-events: none;
 }
-.sp-sheet {
+.pd-sheet {
   left: 12px; top: 12px; width: 200px; height: 200px;
   background-color: #fff;
   background-image: var(--grain), linear-gradient(var(--note, #fbe98a), var(--note, #fbe98a));
@@ -2659,16 +2659,16 @@ body { -webkit-touch-callout: none; }
   box-shadow: 0 1px 1px rgba(60, 45, 25, 0.2);
 }
 /* the edges of the block: many sheets, a few colours */
-.sp-sheet--3 { translate: -5px 9px; rotate: -5deg; --note: #c4e2f5; box-shadow: 0 1px 0 #b2d3e8, 0 2px 0 #f9c9d5, 0 3px 0 #f0dd7c, 0 4px 0 #d3ecb5, 0 5px 0 #e6d375, 0 8px 12px -6px rgba(40, 30, 15, 0.45); }
-.sp-sheet--2 { translate: 7px 6px; rotate: 4.5deg; --note: #d3ecb5; --note-edge: #a9d17f; }
-.sp-sheet--1 {
+.pd-sheet--3 { translate: -5px 9px; rotate: -5deg; --note: #c4e2f5; box-shadow: 0 1px 0 #b2d3e8, 0 2px 0 #f9c9d5, 0 3px 0 #f0dd7c, 0 4px 0 #d3ecb5, 0 5px 0 #e6d375, 0 8px 12px -6px rgba(40, 30, 15, 0.45); }
+.pd-sheet--2 { translate: 7px 6px; rotate: 4.5deg; --note: #d3ecb5; --note-edge: #a9d17f; }
+.pd-sheet--1 {
   padding: 24px 18px 16px;
   rotate: -1deg;
   background-image: var(--grain), linear-gradient(to bottom, var(--note-edge, #e9cf55) 0, var(--note, #fbe98a) 22px, var(--note, #fbe98a));
   transition: translate 0.25s cubic-bezier(.2, 1.4, .4, 1), rotate 0.25s ease;
 }
-.sticky-pad:hover .sp-sheet--1 { translate: -3px -6px; rotate: -3deg; }
-.sp-text {
+.sticky-pad:hover .pd-sheet--1 { translate: -3px -6px; rotate: -3deg; }
+.pd-text {
   display: -webkit-box;
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
@@ -2677,7 +2677,7 @@ body { -webkit-touch-callout: none; }
   color: #2e2b26;
   overflow-wrap: break-word;
 }
-.sp-count {
+.pd-count {
   right: 2px; top: 0;
   min-width: 30px; height: 30px; padding: 0 8px;
   display: grid; place-items: center;
@@ -2686,10 +2686,10 @@ body { -webkit-touch-callout: none; }
   font: 700 12px/1 'Space Mono', monospace;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-.sp-count:empty { display: none; }
+.pd-count:empty { display: none; }
 .sticky-pad.drop-target { filter: drop-shadow(0 0 18px rgba(255, 205, 120, 0.9)); }
-.sticky-pad.drop-target .sp-sheet--1 { translate: 0 6px; }
-.sticky-pad.gulp .sp-sheet--1 { animation: gulp 0.5s cubic-bezier(.3, 1.6, .5, 1); }
+.sticky-pad.drop-target .pd-sheet--1 { translate: 0 6px; }
+.sticky-pad.gulp .pd-sheet--1 { animation: gulp 0.5s cubic-bezier(.3, 1.6, .5, 1); }
 
 /* the board of every sticky, filed by day */
 .notes-filter { display: flex; gap: 6px; margin: -4px 0 8px 4px; }
