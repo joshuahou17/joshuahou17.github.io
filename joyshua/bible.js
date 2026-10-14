@@ -8,7 +8,9 @@
  * words of what's picked fill in underneath from the NIV (the translation
  * the Bible-reading plan uses), still editable before it's saved.
  *
- * The words come from bolls.life, which serves the NIV with open CORS. Only
+ * The words come from an NIV-in-JSON repo on GitHub (aruljohn/Bible-niv),
+ * fetched a whole book at a time from raw.githubusercontent.com (open
+ * CORS). (bolls.life used to serve the NIV until Biblica made it stop.) Only
  * reading goes there; what's saved is a row in joyshua_verses (JoyStore).
  * The desk (canvas.js) owns the Bible's place; this fills in the bookmarks and
  * owns the open book. Deleting reuses the desk's press-and-hold minus.
@@ -17,7 +19,8 @@
   'use strict';
 
   var NAMES = { josh: 'Josh', joyce: 'Joyce' };
-  var TEXT_API = 'https://bolls.life/get-text/NIV/';
+  // Pinned to a commit so the text can't change underneath us.
+  var TEXT_API = 'https://raw.githubusercontent.com/aruljohn/Bible-niv/98a461edc7befa7c4f8c376ac981def26f0fddf8/';
   var MAX_WORDS = 2000;       // the column's cap (joyshua_schema.sql)
 
   // The 66 books in order (their number is the index + 1), and how many
@@ -43,6 +46,7 @@
   var root, book, list, adders;
   var isOpen = false, openedAt = 0;
   var holdTimer = 0, holdStart = null;
+  var books = {};             // book number -> Promise of the book's JSON
   var chapters = {};          // 'book/chapter' -> Promise of [{verse, text}], cleaned
 
   function el(tag, cls, text) {
@@ -95,21 +99,35 @@
 
   /* ---------- reading a chapter ---------- */
 
+  // The repo names its files after the books, bar one.
+  function fetchBook(b) {
+    if (!books[b]) {
+      var file = b === 22 ? 'Song Of Solomon' : BOOKS[b - 1][0];
+      books[b] = fetch(TEXT_API + encodeURIComponent(file) + '.json')
+        .then(function (r) { if (!r.ok) throw new Error('lookup ' + r.status); return r.json(); })
+        .catch(function (err) { delete books[b]; throw err; });
+    }
+    return books[b];
+  }
+
   function fetchChapter(b, c) {
     var key = b + '/' + c;
     if (!chapters[key]) {
-      chapters[key] = fetch(TEXT_API + b + '/' + c + '/')
-        .then(function (r) { if (!r.ok) throw new Error('lookup ' + r.status); return r.json(); })
-        .then(function (all) {
+      chapters[key] = fetchBook(b)
+        .then(function (whole) {
+          var ch = (whole.chapters || []).filter(function (x) { return +x.chapter === c; })[0];
+          var all = ch && ch.verses;
           if (!all || !all.length) throw new Error('empty chapter');
-          return all.map(function (v) { return { verse: v.verse, text: clean(v.text) }; });
+          return all.map(function (v) { return { verse: +v.verse, text: clean(v.text) }; });
         })
         .catch(function (err) { delete chapters[key]; throw err; });
     }
     return chapters[key];
   }
 
-  /* The NIV's poetry comes with its line breaks as <br/>, and a section
+  /* (The JSON source is plain one-line verses, so this is mostly a no-op now;
+   * it's kept for any text that still comes with markup.)
+   * The NIV's poetry can come with its line breaks as <br/>, and a section
    * heading ("Doxology", "Psalm 42", "For the director of music...") sits on
    * its own line before the verse it starts. Those aren't the verse, so
    * leading lines are dropped while they look like headings: a psalm's
@@ -124,6 +142,7 @@
 
   function clean(text) {
     var lines = String(text).replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')
+      .replace(/`/g, '\u2019')              // the JSON writes every apostrophe as a backtick
       .split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
     while (lines.length > 1 && heading(lines[0], lines[1])) lines.shift();
     return lines.join('\n');
